@@ -6,6 +6,72 @@
   <title>DUO STYLE | Catálogo Damas</title>
   <link rel="stylesheet" href="css/styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    /* Scroll horizontal para categorías en móviles */
+    .categorias {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      padding: 10px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .categoria {
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+      text-align: center;
+    }
+
+    .categoria img {
+      max-width: 60px;
+      margin-bottom: 8px;
+    }
+
+    @media (min-width: 769px) {
+      .categorias {
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-x: visible;
+      }
+    }
+
+    /* Estilo de submenús */
+    .submenu {
+      display: none;
+      position: absolute;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 10px 0;
+      list-style: none;
+      z-index: 1000;
+    }
+
+    .nav-links li {
+      position: relative;
+    }
+
+    .nav-links li.open > .submenu {
+      display: block;
+    }
+
+    .submenu li {
+      padding: 5px 20px;
+    }
+
+    .submenu li a {
+      text-decoration: none;
+      color: #000;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .submenu {
+        position: static;
+        box-shadow: none;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -35,7 +101,7 @@
             <a href="#">Marcas ▾</a>
             <ul class="submenu">
               <li><a href="pandora.html">Pandora</a></li>
-              <!-- Agrega más marcas aquí duplicando la línea ↓ -->
+              <!-- Más marcas aquí -->
               <!-- <li><a href="tiffany.html">Tiffany</a></li> -->
             </ul>
           </li>
@@ -51,7 +117,7 @@
     <div class="slider-container">
       <button class="slider-btn prev">←</button>
       <div class="slider-track">
-        <!-- Producto de ejemplo -->
+        <!-- Producto -->
         <div class="producto-card"
           data-nombre="Anillo Estrella"
           data-descripcion="Anillo delicado con estrella en plata 925, ideal para regalo especial."
@@ -82,7 +148,7 @@
   <section id="promociones" class="promociones-section seccion-animada">
     <div class="separador"></div>
     <h2>Promociones</h2>
-    <!-- Agrega aquí productos promocionales -->
+    <!-- Agrega productos -->
   </section>
 
   <!-- 🧭 Categorías -->
@@ -90,32 +156,25 @@
     <h2>Explora por Categoría</h2>
     <div class="categorias">
       <a href="anillos.html" class="categoria">
-        <img src="assets/img/icono-anillos.png" alt="Anillos" style="width:50px"><br>
-        Anillos
+        <img src="assets/img/icono-anillos.png" alt="Anillos"><br>Anillos
       </a>
       <a href="collares.html" class="categoria">
-        <img src="assets/img/icono-collares.png" alt="Collares" style="width:50px"><br>
-        Collares
+        <img src="assets/img/icono-collares.png" alt="Collares"><br>Collares
       </a>
       <a href="aretes.html" class="categoria">
-        <img src="assets/img/icono-aretes.png" alt="Aretes" style="width:50px"><br>
-        Aretes
+        <img src="assets/img/icono-aretes.png" alt="Aretes"><br>Aretes
       </a>
       <a href="manillas.html" class="categoria">
-        <img src="assets/img/icono-manillas.png" alt="Manillas" style="width:50px"><br>
-        Manillas
+        <img src="assets/img/icono-manillas.png" alt="Manillas"><br>Manillas
       </a>
       <a href="relojes.html" class="categoria">
-        <img src="assets/img/icono-relojes.png" alt="Relojes" style="width:50px"><br>
-        Relojes
+        <img src="assets/img/icono-relojes.png" alt="Relojes"><br>Relojes
       </a>
       <a href="conjuntos.html" class="categoria">
-        <img src="assets/img/icono-conjuntos.png" alt="Conjuntos" style="width:50px"><br>
-        Conjuntos
+        <img src="assets/img/icono-conjuntos.png" alt="Conjuntos"><br>Conjuntos
       </a>
       <a href="pandora.html" class="categoria">
-        <img src="assets/img/icono-pandora.png" alt="Pandora" style="width:50px"><br>
-        Marcas
+        <img src="assets/img/icono-pandora.png" alt="Pandora"><br>Marcas
       </a>
     </div>
   </section>
@@ -154,66 +213,53 @@
     </div>
   </div>
 
-  <!-- 📜 Script principal -->
+  <!-- Scripts -->
   <script src="js/script.js"></script>
-
-  <!-- 🎬 Animación scroll -->
   <script>
+    // Scroll reveal animaciones
     const seccionesAnimadas = document.querySelectorAll('.seccion-animada');
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
+        if (entry.isIntersecting) entry.target.classList.add('visible');
       });
     }, { threshold: 0.15 });
+
     seccionesAnimadas.forEach(sec => {
       sec.classList.add('oculto');
       observer.observe(sec);
     });
+
+    // Menú hamburguesa + submenús
+    document.addEventListener("DOMContentLoaded", function () {
+      const hamburguesa = document.getElementById("hamburguesa");
+      const navLinks = document.getElementById("nav-links");
+
+      hamburguesa.addEventListener("click", () => {
+        navLinks.classList.toggle("show");
+      });
+
+      navLinks.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", () => {
+          navLinks.classList.remove("show");
+        });
+      });
+
+      const submenuParents = navLinks.querySelectorAll("li > a");
+      submenuParents.forEach(link => {
+        link.addEventListener("click", function (e) {
+          const parent = this.parentElement;
+          const submenu = parent.querySelector(".submenu");
+          if (submenu && window.innerWidth <= 768) {
+            e.preventDefault();
+            parent.classList.toggle("open");
+            navLinks.querySelectorAll("li").forEach(li => {
+              if (li !== parent) li.classList.remove("open");
+            });
+          }
+        });
+      });
+    });
   </script>
-
-  <!-- 🍔 Hamburguesa -->
-  <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const hamburguesa = document.getElementById("hamburguesa");
-    const navLinks = document.getElementById("nav-links");
-
-    // ✅ Menú hamburguesa
-    hamburguesa.addEventListener("click", function () {
-      navLinks.classList.toggle("show");
-    });
-
-    // ✅ Cierra menú al hacer clic en un enlace
-    navLinks.querySelectorAll("a").forEach(link => {
-      link.addEventListener("click", () => {
-        navLinks.classList.remove("show");
-      });
-    });
-
-    // ✅ Submenús en móviles
-    const submenuParents = navLinks.querySelectorAll("li > a");
-
-    submenuParents.forEach(link => {
-      link.addEventListener("click", function (e) {
-        const parent = this.parentElement;
-        const submenu = parent.querySelector(".submenu");
-
-        if (submenu && window.innerWidth <= 768) {
-          e.preventDefault(); // Evita que el <a href="#"> navegue
-          parent.classList.toggle("open");
-
-          // Cierra otros submenús abiertos
-          navLinks.querySelectorAll("li").forEach(li => {
-            if (li !== parent) {
-              li.classList.remove("open");
-            }
-          });
-        }
-      });
-    });
-  });
-</script>
 
 </body>
 </html>

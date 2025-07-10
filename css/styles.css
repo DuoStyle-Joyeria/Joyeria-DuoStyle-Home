@@ -646,6 +646,68 @@ body {
     font-size: 1.6rem;
   }
 
+.categorias-section {
+  padding: 60px 20px;
+  background-color: #fff;
+  text-align: center;
+}
+
+.categorias-section h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #C1A14A;
+}
+
+.categorias-scroll {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.categorias-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.categorias-scroll::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+.categoria-card {
+  flex: 0 0 auto;
+  width: 140px;
+  text-align: center;
+  text-decoration: none;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+}
+
+.categoria-card:hover {
+  transform: translateY(-4px);
+}
+
+.categoria-card img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.categoria-card span {
+  display: block;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+
   .categoria {
     padding: 14px 24px;
     font-size: 0.95rem;
@@ -739,4 +801,48 @@ body {
     border: none;
     padding-left: 15px;
   }
+}
+
+/* Ajustes de las categorías */
+/* ====================== */
+/* CATEGORÍAS EN GRID RESPONSIVE */
+/* ====================== */
+.categorias {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 16px;
+  justify-items: center;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.categoria {
+  background: #fff;
+  border: 2px solid #C1A14A;
+  color: #C1A14A;
+  border-radius: 20px;
+  padding: 12px 8px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  width: 100px;
+}
+
+.categoria:hover {
+  background: #C1A14A;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.categoria img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  margin-bottom: 6px;
 }
