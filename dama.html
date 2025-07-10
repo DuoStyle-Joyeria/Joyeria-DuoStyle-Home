@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DUO STYLE | Catálogo Dama</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    .filtros-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 30px 0;
+    }
+    .filtros-container select,
+    .filtros-container input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      min-width: 160px;
+      font-size: 0.95rem;
+    }
+    .categoria-section {
+      padding: 60px 20px;
+    }
+    .categoria-section h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      color: #C1A14A;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .productos-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado -->
+  <header class="main-header">
+    <div class="header-inner">
+      <div class="logo">
+        <img src="assets/img/logo-joyeria duou style.jpeg" alt="DUO STYLE">
+      </div>
+      <nav class="nav-container">
+        <div class="hamburguesa" id="hamburguesa">☰</div>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="dama.html" class="active">Catálogo Dama</a></li>
+          <li><a href="caballero.html">Catálogo Caballero</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Título principal -->
+  <section class="catalogo-section seccion-animada">
+    <h2>Catálogo Dama</h2>
+
+    <!-- Filtros -->
+    <div class="filtros-container">
+      <select id="filtro-categoria">
+        <option value="">Todas las categorías</option>
+        <option value="anillos">Anillos</option>
+        <option value="collares">Collares</option>
+        <option value="pulseras">Pulseras</option>
+        <option value="relojes">Relojes</option>
+        <option value="aretes">Aretes</option>
+        <option value="conjuntos">Conjuntos</option>
+        <option value="tendencias">Tendencias</option>
+        <option value="promociones">Promociones</option>
+      </select>
+
+      <select id="filtro-marca">
+        <option value="">Todas las marcas</option>
+        <option value="pandora">Pandora</option>
+        <option value="otras">Otras</option>
+      </select>
+
+      <input type="text" id="buscador" placeholder="Buscar producto...">
+    </div>
+  </section>
+
+  <!-- Sección de productos (reutilizable) -->
+  <section class="categoria-section seccion-animada" data-categoria="anillos" data-marca="pandora">
+    <h3>Anillos - Pandora (Promesa)</h3>
+    <div class="productos-grid">
+      <!-- Copiar y pegar más tarjetas aquí -->
+      <div class="producto-card"
+           data-nombre="Anillo Promesa Pandora"
+           data-descripcion="Anillo de promesa en plata ley 925 con garantía de por vida."
+           data-precio="250000"
+           data-precio-anterior="1080000"
+           data-categoria="anillos"
+           data-marca="pandora">
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa.JPG" alt="Anillo Promesa Pandora">
+        <h3>Anillo Promesa Pandora</h3>
+        <p>Plata 925 • Oro Rosa</p>
+        <div class="precio">
+          <span class="precio-actual">$250.000</span>
+          <span class="precio-anterior">$1´080.000</span>
+        </div>
+        <button class="btn-wsp-producto"
+                data-nombre="Anillo Promesa Pandora"
+                data-img="assets/img/anillo pandora - corazon blanco - oro rosa.JPG">
+          Comprar por WhatsApp
+        </button>
+        <div class="galeria-imagenes" style="display: none;">
+          <img src="assets/img/anillo pandora - corazon blanco - oro rosa.JPG" alt="1">
+          <img src="assets/img/anillo pandora - corazon blanco - oro rosa 02.png" alt="2">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Repite más secciones así -->
+  <!-- Usa data-categoria y data-marca para cada una -->
+  <!-- data-categoria="pulseras" data-marca="otras" -->
+
+  <!-- Contacto -->
+  <section id="contacto" class="contacto-section seccion-animada">
+    <h2>¿Tienes dudas?</h2>
+    <p>Escríbenos directamente, estamos para ayudarte.</p>
+    <button class="btn-wsp-producto"
+            data-nombre="Consulta general"
+            data-img="assets/img/logo-duostyle.png">
+      Hablar por WhatsApp
+    </button>
+  </section>
+
+  <!-- WhatsApp flotante -->
+  <a href="https://wa.me/573156279342?text=Hola%2C%20me%20interesa%20un%20producto%20de%20DUO%20STYLE." 
+     class="wsp-float" target="_blank" aria-label="WhatsApp">💬</a>
+
+  <!-- Modal galería -->
+  <div class="modal" id="modal-producto">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <div class="modal-galeria">
+        <button class="modal-galeria-btn prev">←</button>
+        <div class="modal-galeria-track" id="modal-galeria-track"></div>
+        <button class="modal-galeria-btn next">→</button>
+      </div>
+      <div id="modal-contador"></div>
+      <div class="modal-info">
+        <h3 id="modal-nombre">Nombre del Producto</h3>
+        <p id="modal-descripcion">Aquí aparecerá la descripción detallada.</p>
+        <div class="modal-precios"></div>
+        <button id="modal-whatsapp" class="btn-wsp-producto">Comprar por WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS principal -->
+  <script src="js/script.js"></script>
+
+  <!-- Buscador y filtro -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const categoriaSelect = document.getElementById("filtro-categoria");
+      const marcaSelect = document.getElementById("filtro-marca");
+      const buscadorInput = document.getElementById("buscador");
+
+      function filtrarProductos() {
+        const categoria = categoriaSelect.value;
+        const marca = marcaSelect.value;
+        const busqueda = buscadorInput.value.toLowerCase();
+
+        document.querySelectorAll(".producto-card").forEach(card => {
+          const nombre = card.dataset.nombre.toLowerCase();
+          const cat = card.dataset.categoria;
+          const marcaProd = card.dataset.marca;
+
+          const coincideCategoria = !categoria || cat === categoria;
+          const coincideMarca = !marca || marcaProd === marca;
+          const coincideBusqueda = !busqueda || nombre.includes(busqueda);
+
+          if (coincideCategoria && coincideMarca && coincideBusqueda) {
+            card.style.display = "block";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      }
+
+      categoriaSelect.addEventListener("change", filtrarProductos);
+      marcaSelect.addEventListener("change", filtrarProductos);
+      buscadorInput.addEventListener("input", filtrarProductos);
+    });
+  </script>
+
+</body>
+</html>
