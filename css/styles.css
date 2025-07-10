@@ -516,3 +516,87 @@ body {
   text-align: center;
   margin: 15px 0;
 }
+
+
+/* ====================== */
+/* AJUSTES EXTRA PARA MÓVILES */
+/* ====================== */
+@media screen and (max-width: 480px) {
+  .hero-section {
+    height: 60vh;
+  }
+
+  .hero-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+  }
+
+  .btn-wsp-producto,
+  .btn-contacto {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .catalogo-section,
+  .destacados-section,
+  .promociones-section,
+  .contacto-section {
+    padding: 40px 15px;
+  }
+
+  .catalogo-section h2,
+  .destacados-section h2,
+  .promociones-section h2,
+  .contacto-section h2 {
+    font-size: 1.6rem;
+  }
+
+  .categoria {
+    padding: 14px 24px;
+    font-size: 0.95rem;
+  }
+
+  .producto-card img {
+    height: 220px;
+  }
+
+  .producto-card {
+    padding: 16px;
+  }
+
+  .precio {
+    font-size: 0.95rem;
+  }
+
+  .precio-actual {
+    font-size: 1rem;
+  }
+
+  .precio-anterior {
+    font-size: 0.9rem;
+  }
+
+  .modal-content {
+    padding: 15px;
+  }
+
+  .modal-galeria-track img,
+  .modal-galeria-track video {
+    max-height: 220px;
+  }
+
+  .slider-btn {
+    font-size: 18px;
+    padding: 8px;
+  }
+
+  .wsp-float {
+    bottom: 15px;
+    right: 15px;
+    padding: 12px;
+    font-size: 20px;
+  }
+}
