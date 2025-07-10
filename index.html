@@ -12,16 +12,24 @@
 
   <!-- ✅ Encabezado -->
   <header class="main-header">
+  <div class="header-inner">
     <div class="logo">
       <img src="assets/img/logo-joyeria duou style.jpeg" alt="DUO STYLE">
     </div>
-    <nav class="nav-links">
-      <a href="#inicio">Inicio</a>
-      <a href="#catalogo">Catálogo</a>
-      <a href="#promociones">Promociones</a>
-      <a href="#contacto">Contacto</a>
+    <nav class="nav-container">
+      <div class="hamburguesa" id="hamburguesa">
+        ☰
+      </div>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#catalogo">Catálogo</a></li>
+        <li><a href="#promociones">Promociones</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
     </nav>
-  </header>
+  </div>
+</header>
+
 
   <!-- 🎥 Hero -->
   <section id="inicio" class="hero-section seccion-animada">
@@ -292,6 +300,27 @@
       observer.observe(sec);
     });
   </script>
+
+
+         <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const hamburguesa = document.getElementById("hamburguesa");
+    const navLinks = document.getElementById("nav-links");
+
+    hamburguesa.addEventListener("click", function () {
+      navLinks.classList.toggle("show");
+    });
+
+    // Opcional: cerrar menú al hacer clic en una opción
+    navLinks.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", () => {
+        navLinks.classList.remove("show");
+      });
+    });
+  });
+</script>
+
+      
 
 </body>
 </html>
