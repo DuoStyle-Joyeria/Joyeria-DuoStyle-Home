@@ -7,33 +7,43 @@
   <link rel="stylesheet" href="css/styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
   <style>
-    /* Scroll horizontal para categorías en móviles */
-    .categorias {
-      display: flex;
-      overflow-x: auto;
+    /* Scroll horizontal para categorías en móviles (REEMPLAZADO) */
+    .categorias-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
       gap: 20px;
-      padding: 10px;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
+      padding: 10px 20px;
+      justify-items: center;
     }
 
-    .categoria {
-      flex: 0 0 auto;
-      scroll-snap-align: center;
+    .categoria-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      border: 1px solid #a97b45;
+      border-radius: 12px;
+      padding: 10px;
+      background-color: #fff;
+      color: #a97b45;
+      width: 90px;
+      transition: transform 0.2s ease;
+    }
+
+    .categoria-grid img {
+      max-width: 50px;
+      height: 50px;
+      object-fit: contain;
+      margin-bottom: 5px;
+    }
+
+    .categoria-grid span {
+      font-size: 13px;
       text-align: center;
     }
 
-    .categoria img {
-      max-width: 60px;
-      margin-bottom: 8px;
-    }
-
-    @media (min-width: 769px) {
-      .categorias {
-        flex-wrap: wrap;
-        justify-content: center;
-        overflow-x: visible;
-      }
+    .categoria-grid:hover {
+      transform: scale(1.05);
     }
 
     /* Estilo de submenús */
@@ -101,8 +111,6 @@
             <a href="#">Marcas ▾</a>
             <ul class="submenu">
               <li><a href="pandora.html">Pandora</a></li>
-              <!-- Más marcas aquí -->
-              <!-- <li><a href="tiffany.html">Tiffany</a></li> -->
             </ul>
           </li>
           <li><a href="#contacto">Contáctanos</a></li>
@@ -117,7 +125,6 @@
     <div class="slider-container">
       <button class="slider-btn prev">←</button>
       <div class="slider-track">
-        <!-- Producto -->
         <div class="producto-card"
           data-nombre="Anillo Estrella"
           data-descripcion="Anillo delicado con estrella en plata 925, ideal para regalo especial."
@@ -148,33 +155,39 @@
   <section id="promociones" class="promociones-section seccion-animada">
     <div class="separador"></div>
     <h2>Promociones</h2>
-    <!-- Agrega productos -->
   </section>
 
   <!-- 🧭 Categorías -->
   <section class="catalogo-section seccion-animada">
     <h2>Explora por Categoría</h2>
-    <div class="categorias">
-      <a href="anillos.html" class="categoria">
-        <img src="assets/img/icono-anillos.png" alt="Anillos"><br>Anillos
+    <div class="categorias-grid">
+      <a href="anillos.html" class="categoria-grid">
+        <img src="assets/img/icono-anillos.png" alt="Anillos">
+        <span>Anillos</span>
       </a>
-      <a href="collares.html" class="categoria">
-        <img src="assets/img/icono-collares.png" alt="Collares"><br>Collares
+      <a href="collares.html" class="categoria-grid">
+        <img src="assets/img/icono-collares.png" alt="Collares">
+        <span>Collares</span>
       </a>
-      <a href="aretes.html" class="categoria">
-        <img src="assets/img/icono-aretes.png" alt="Aretes"><br>Aretes
+      <a href="aretes.html" class="categoria-grid">
+        <img src="assets/img/icono-aretes.png" alt="Aretes">
+        <span>Aretes</span>
       </a>
-      <a href="manillas.html" class="categoria">
-        <img src="assets/img/icono-manillas.png" alt="Manillas"><br>Manillas
+      <a href="manillas.html" class="categoria-grid">
+        <img src="assets/img/icono-manillas.png" alt="Manillas">
+        <span>Manillas</span>
       </a>
-      <a href="relojes.html" class="categoria">
-        <img src="assets/img/icono-relojes.png" alt="Relojes"><br>Relojes
+      <a href="relojes.html" class="categoria-grid">
+        <img src="assets/img/icono-relojes.png" alt="Relojes">
+        <span>Relojes</span>
       </a>
-      <a href="conjuntos.html" class="categoria">
-        <img src="assets/img/icono-conjuntos.png" alt="Conjuntos"><br>Conjuntos
+      <a href="conjuntos.html" class="categoria-grid">
+        <img src="assets/img/icono-conjuntos.png" alt="Conjuntos">
+        <span>Conjuntos</span>
       </a>
-      <a href="pandora.html" class="categoria">
-        <img src="assets/img/icono-pandora.png" alt="Pandora"><br>Marcas
+      <a href="pandora.html" class="categoria-grid">
+        <img src="assets/img/icono-pandora.png" alt="Pandora">
+        <span>Marcas</span>
       </a>
     </div>
   </section>
@@ -216,7 +229,6 @@
   <!-- Scripts -->
   <script src="js/script.js"></script>
   <script>
-    // Scroll reveal animaciones
     const seccionesAnimadas = document.querySelectorAll('.seccion-animada');
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -229,7 +241,6 @@
       observer.observe(sec);
     });
 
-    // Menú hamburguesa + submenús
     document.addEventListener("DOMContentLoaded", function () {
       const hamburguesa = document.getElementById("hamburguesa");
       const navLinks = document.getElementById("nav-links");
