@@ -838,15 +838,34 @@ body {
 
 
 /* En móviles - se abre con clase 'open' */
-@media (max-width: 480px) {
-  .nav-links li.open > .submenu {
-    display: block;
-    position: relative;
-    box-shadow: none;
-    border: none;
-    padding-left: 15px;
+@media screen and (max-width: 480px) {
+  .slider-container {
+    padding: 0 10px;
+  }
+
+  .slider-track {
+    gap: 10px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .producto-card {
+    min-width: 47%;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    padding: 12px;
+  }
+
+  .producto-card img {
+    height: 160px;
+    object-fit: cover;
+  }
+
+  .slider-btn {
+    display: none; /* oculta botones en móvil si prefieres */
   }
 }
+
+
 
 
 
