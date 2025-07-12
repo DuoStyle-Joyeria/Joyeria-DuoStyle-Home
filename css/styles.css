@@ -839,31 +839,29 @@ body {
 
 /* En móviles - se abre con clase 'open' */
 @media screen and (max-width: 480px) {
-  .slider-container {
-    padding: 0 10px;
-  }
-
-  .slider-track {
-    gap: 10px;
-    scroll-snap-type: x mandatory;
-  }
-
   .producto-card {
     min-width: 47%;
     flex: 0 0 auto;
     scroll-snap-align: start;
-    padding: 12px;
   }
 
   .producto-card img {
-    height: 160px;
+    width: 100%;
+    height: 180px;
     object-fit: cover;
+    border-radius: 10px;
+    display: block;
   }
 
-  .slider-btn {
-    display: none; /* oculta botones en móvil si prefieres */
+  .slider-track {
+    scroll-snap-type: x mandatory;
+  }
+
+  .slider-container {
+    padding: 0 10px;
   }
 }
+
 
 
 
