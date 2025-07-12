@@ -850,6 +850,44 @@ body {
 }
 
 
+  .producto-card {
+    min-width: 80%;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .producto-card img {
+    width: 100%;
+    height: auto;
+    max-height: 240px;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+  }
+
+  .slider-track {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 10px;
+    scroll-padding-left: 15px;
+  }
+
+  .slider-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .slider-container {
+    overflow: hidden;
+    padding: 0 15px;
+  }
+
+
+
 
 
 
