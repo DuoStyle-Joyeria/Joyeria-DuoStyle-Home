@@ -843,11 +843,15 @@ body {
     min-width: 80%;
     flex: 0 0 auto;
     scroll-snap-align: start;
+    padding: 16px;
+    box-sizing: border-box;
   }
 
   .producto-card img {
     width: 100%;
-    aspect-ratio: 3/4; /* Forzamos que todas las imágenes tengan esta relación */
+    height: auto;
+    max-height: 240px;
+    aspect-ratio: 3 / 4;
     object-fit: cover;
     border-radius: 10px;
     display: block;
@@ -859,6 +863,7 @@ body {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     padding-bottom: 10px;
+    scroll-padding-left: 15px;
   }
 
   .slider-track::-webkit-scrollbar {
@@ -870,6 +875,7 @@ body {
     padding: 0 15px;
   }
 }
+
 
 
 
