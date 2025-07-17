@@ -229,5 +229,37 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   });
+});
 
+
+// 🔽 Mostrar más productos al hacer clic en "Ver más"
+document.querySelectorAll('.btn-ver-mas').forEach(boton => {
+  boton.addEventListener('click', () => {
+    const seccionId = boton.dataset.seccion;
+    const seccion = document.getElementById(seccionId);
+    if (!seccion) return;
+
+    const productos = seccion.querySelectorAll('.producto-card');
+    const ocultos = Array.from(productos).filter(card => card.style.display === 'none');
+
+    // Mostrar 3 más cada clic
+    ocultos.slice(0, 3).forEach(card => {
+      card.style.display = 'flex'; // ✅ CAMBIO AQUI
+    });
+
+    // Ocultar botón si ya no quedan más productos ocultos
+    if (ocultos.length <= 3) {
+      boton.style.display = 'none';
+    }
+  });
+});
+
+// 👁️ Inicialmente mostrar solo los primeros 6 productos por sección
+window.addEventListener('load', () => {
+  document.querySelectorAll('.catalogo-section').forEach(seccion => {
+    const productos = seccion.querySelectorAll('.producto-card');
+    productos.forEach((card, index) => {
+      card.style.display = index < 6 ? 'flex' : 'none'; // ✅ CAMBIO AQUI
+    });
+  });
 });

@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DUO STYLE | Catálogo Anillos</title>
+  <link rel="stylesheet" href="css/catalogo-base.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
+  <style>
+    /* Grid 3x3 */
+    .grid-productos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    @media(max-width:768px){
+      .grid-productos{
+        grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      }
+    }
+    @media(max-width:480px){
+      .grid-productos{
+        grid-template-columns:1fr;
+      }
+    }
+    /* Botón ver más centrado y con margen */
+    .btn-ver-mas {
+      margin: 20px auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER ... igual que antes -->
+<header class="main-header">
+    <div class="header-inner">
+      <div class="logo"><img src="assets/img/logo-joyeria duou style.jpeg" alt="DUO STYLE"></div>
+      <nav class="nav-container">
+        <div class="hamburguesa" id="hamburguesa">☰</div>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="#nuevas">Brilla con lo Nuevo</a></li>
+          <li>
+            <a href="#">Catálogo ▾</a>
+            <ul class="submenu">
+              <li><a href="#catalogo-general">Catálogo Anillos</a></li>
+              <li><a href="#plata">Anillos Plata</a></li>
+              <li><a href="#oro">Anillos Oro</a></li>
+              <li><a href="#pandora">Anillos Pandora</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#">Marcas ▾</a>
+            <ul class="submenu">
+              <li><a href="#pandora">Pandora</a></li>
+            </ul>
+          </li>
+          <li><a href="#promociones">Promociones</a></li>
+          <li><a href="#contacto">Contáctanos</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- DESTACADOS -->
+  <section id="nuevas" class="destacados-section seccion-animada">
+    <h2>Brilla con lo Nuevo</h2>
+    <div class="slider-container">
+      <button class="slider-btn prev">←</button>
+      <div class="slider-track">
+        
+
+           <!-- ✅ Producto 1 -->
+        <div class="producto-card"
+              data-nombre="Anillo Corazón Blanco - Pandora"
+
+         data-descripcion="Este aniño de promesa Pandora, enchapado en oro rosa, está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="250000"
+             data-precio-anterior="1080000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - corazon blanco - oro rosa.JPG" alt="Anillo corazón blanco - Pandora" />
+          <h3>Anillo Corazón Blanco </h3>
+          <p>Oro Rosa • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$250.000</span>
+            <span class="precio-anterior">$1´080.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Corazón Blanco - Oro Rosa - Pandora"
+                  data-img="ANILLO PANDORA - CORAZON BLANCO CON ENCHAPE EN ORO ROSA">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa 02.png" alt="2" />
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa 04.JPG" alt="4" />
+          </div>
+        </div>
+
+        <!-- ✅ Producto 2 -->
+        <div class="producto-card"
+             data-nombre="Anillo Corazón Verde - Pandora"
+             data-descripcion="Este aniño de promesa Pandora con corazón verde brillante. está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"
+             data-precio="170000"
+             data-precio-anterior="863000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - corazon verde.JPG" alt="Anillo corazón verde" />
+          <h3>Anillo Corazón Verde</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$863.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Corazón Verde - Pandora"
+                  data-img="ANILLO PANDORA - CORAZON VERDE">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+          <img src="assets/img/anillo pandora - corazon verde.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - corazon verde 02.jpg" alt="2" />
+        <img src="assets/img/anillo pandora - corazon verde 03.JPG" alt="3" />
+          </div>
+        </div>
+
+           
+         <!-- ✅ Producto 3 -->
+        <div class="producto-card"
+              data-nombre="Anillo Corazón Rosado - Pandora"
+
+         data-descripcion="Este aniño de promesa Pandora, enchapado en oro rosa, está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="250000"
+             data-precio-anterior="1080000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - corazon rosado - oro rosa.JPG" alt="Anillo corazón ROSADO Pandora" />
+          <h3>Anillo Corazón Rosado</h3>
+          <p>Oro Rosa • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$250.000</span>
+            <span class="precio-anterior">$1´080.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Corazón Rosado - Oro Rosa - Pandora"
+                  data-img="ANILLO PANDORA - CORAZON ROSADO CON ENCHAPE EN ORO ROSA">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa 02.png" alt="2" />
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa 04.JPG" alt="4" />
+          </div>
+        </div>
+         
+
+        <!-- ✅ Producto 4 -->
+        <div class="producto-card"
+              data-nombre="Anillo De La Bella y La Bestia - Pandora"
+
+         data-descripcion="Inspírate con la magia de La Bella y la Bestia con este anillo en plata, decorado con una rosa de circonitas rojas y detalles encantados. Un homenaje al amor único que añade elegancia y fantasía a tu estilo., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="170000"
+             data-precio-anterior="801000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - princesa bella.JPG" alt="Anillo de la Bella y la Bestia - Pandora" />
+          <h3>Anillo De La Bella y la Bestia</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$801.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo De La Bella y la Bestia - Pandora"
+                  data-img="ANILLO PANDORA - De La Bella y la Bestia">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - princesa bella.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - princesa bella 02.png" alt="2" />
+        <img src="assets/img/anillo pandora - princesa bella 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - princesa bella 04.jpg" alt="4" />
+          </div>
+        </div>
+
+        <!-- ✅ Producto 5 -->
+        <div class="producto-card"
+              data-nombre="Anillo De Blanca Nieves - Pandora"
+
+         data-descripcion="Esta diseño en plata de primera ley se presenta con un lazo esmaltado en color rojo con una gema brillante en el centro. Combina varios para crear un look con energía de princesa inspirado en la amabilidad y el optimismo de Blancanieves de Disney., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="170000"
+             data-precio-anterior="732000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - princesa blanca nieves.JPG" alt="Anillo de Blanca Nieves- Pandora" />
+          <h3>Anillo De Blanca Nieves</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$732.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Blanca Nieves - Pandora"
+                  data-img="ANILLO PANDORA - Blanca nieves">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+         <img src="assets/img/anillo pandora - princesa blanca nieves 02.jpg" alt="1" />
+        <img src="assets/img/anillo pandora - princesa blanca nieves.JPG" alt="2" />
+         <img src="assets/img/anillo pandora - princesa blanca nieves 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - princesa blanca nieves 04.JPG" alt="4" />
+          </div>
+        </div>
+
+        
+        <!-- ✅ Producto 6 -->
+        <div class="producto-card"
+              data-nombre="Anillo Evangeline - Pandora"
+
+         data-descripcion="Déjate guiar por la luz de Evangeline con esta joya inspirada en La Princesa y el Sapo. Con destellos que evocan el brillo de la luciérnaga más romántica del pantano, esta pieza captura la esperanza, el amor y la magia de los sueños que brillan en el cielo. Ideal para quienes creen en el poder de la luz interior., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="170000"
+             data-precio-anterior="863000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - evangeline.JPG" alt="Anillo de Evangeline - Pandora" />
+          <h3>Anillo De Evangeline</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$863.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo De Evangeline - Pandora"
+                  data-img="ANILLO PANDORA - Evangeline">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - evangeline.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - evangeline 02.jpg" alt="2" />
+        <img src="assets/img/anillo pandora - evangeline 03.png" alt="3" />
+        <img src="assets/img/anillo pandora - evangeline 04.JPG" alt="4" />
+          </div>
+        </div>
+
+
+
+      </div>
+      <button class="slider-btn next">→</button>
+    </div>
+  </section>
+  
+
+  <!-- CATÁLOGO GENERAL -->
+  <section id="catalogo-general" class="catalogo-section seccion-animada">
+    <h2>Catálogo General de Anillos</h2>
+    <div class="grid-productos">
+      <!-- 6 productos ejemplo -->
+      
+      <!-- ✅ Producto 1 -->
+        <div class="producto-card"
+              data-nombre="Anillo Corazón Blanco - Pandora"
+
+         data-descripcion="Este aniño de promesa Pandora, enchapado en oro rosa, está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="250000"
+             data-precio-anterior="1080000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - corazon blanco - oro rosa.JPG" alt="Anillo corazón blanco - Pandora" />
+          <h3>Anillo Corazón Blanco </h3>
+          <p>Oro Rosa • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$250.000</span>
+            <span class="precio-anterior">$1´080.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Corazón Blanco - Oro Rosa - Pandora"
+                  data-img="ANILLO PANDORA - CORAZON BLANCO CON ENCHAPE EN ORO ROSA">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa 02.png" alt="2" />
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa 04.JPG" alt="4" />
+          </div>
+        </div>
+
+        <!-- ✅ Producto 2 -->
+        <div class="producto-card"
+             data-nombre="Anillo Corazón Verde - Pandora"
+             data-descripcion="Este aniño de promesa Pandora con corazón verde brillante. está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"
+             data-precio="170000"
+             data-precio-anterior="863000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - corazon verde.JPG" alt="Anillo corazón verde" />
+          <h3>Anillo Corazón Verde</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$863.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Corazón Verde - Pandora"
+                  data-img="ANILLO PANDORA - CORAZON VERDE">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+          <img src="assets/img/anillo pandora - corazon verde.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - corazon verde 02.jpg" alt="2" />
+        <img src="assets/img/anillo pandora - corazon verde 03.JPG" alt="3" />
+          </div>
+        </div>
+
+           
+         <!-- ✅ Producto 3 -->
+        <div class="producto-card"
+              data-nombre="Anillo Corazón Rosado - Pandora"
+
+         data-descripcion="Este aniño de promesa Pandora, enchapado en oro rosa, está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="250000"
+             data-precio-anterior="1080000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - corazon rosado - oro rosa.JPG" alt="Anillo corazón ROSADO Pandora" />
+          <h3>Anillo Corazón Rosado</h3>
+          <p>Oro Rosa • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$250.000</span>
+            <span class="precio-anterior">$1´080.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Corazón Rosado - Oro Rosa - Pandora"
+                  data-img="ANILLO PANDORA - CORAZON ROSADO CON ENCHAPE EN ORO ROSA">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa 02.png" alt="2" />
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa 04.JPG" alt="4" />
+          </div>
+        </div>
+         
+
+        <!-- ✅ Producto 4 -->
+        <div class="producto-card"
+              data-nombre="Anillo De La Bella y La Bestia - Pandora"
+
+         data-descripcion="Inspírate con la magia de La Bella y la Bestia con este anillo en plata, decorado con una rosa de circonitas rojas y detalles encantados. Un homenaje al amor único que añade elegancia y fantasía a tu estilo., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="170000"
+             data-precio-anterior="801000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - princesa bella.JPG" alt="Anillo de la Bella y la Bestia - Pandora" />
+          <h3>Anillo De La Bella y la Bestia</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$801.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo De La Bella y la Bestia - Pandora"
+                  data-img="ANILLO PANDORA - De La Bella y la Bestia">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - princesa bella.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - princesa bella 02.png" alt="2" />
+        <img src="assets/img/anillo pandora - princesa bella 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - princesa bella 04.jpg" alt="4" />
+          </div>
+        </div>
+
+        <!-- ✅ Producto 5 -->
+        <div class="producto-card"
+              data-nombre="Anillo De Blanca Nieves - Pandora"
+
+         data-descripcion="Esta diseño en plata de primera ley se presenta con un lazo esmaltado en color rojo con una gema brillante en el centro. Combina varios para crear un look con energía de princesa inspirado en la amabilidad y el optimismo de Blancanieves de Disney., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="170000"
+             data-precio-anterior="732000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - princesa blanca nieves.JPG" alt="Anillo de Blanca Nieves- Pandora" />
+          <h3>Anillo De Blanca Nieves</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$732.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Blanca Nieves - Pandora"
+                  data-img="ANILLO PANDORA - Blanca nieves">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+         <img src="assets/img/anillo pandora - princesa blanca nieves 02.jpg" alt="1" />
+        <img src="assets/img/anillo pandora - princesa blanca nieves.JPG" alt="2" />
+         <img src="assets/img/anillo pandora - princesa blanca nieves 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - princesa blanca nieves 04.JPG" alt="4" />
+          </div>
+        </div>
+
+        
+        <!-- ✅ Producto 6 -->
+        <div class="producto-card"
+              data-nombre="Anillo Evangeline - Pandora"
+
+         data-descripcion="Déjate guiar por la luz de Evangeline con esta joya inspirada en La Princesa y el Sapo. Con destellos que evocan el brillo de la luciérnaga más romántica del pantano, esta pieza captura la esperanza, el amor y la magia de los sueños que brillan en el cielo. Ideal para quienes creen en el poder de la luz interior., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="170000"
+             data-precio-anterior="863000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - evangeline.JPG" alt="Anillo de Evangeline - Pandora" />
+          <h3>Anillo De Evangeline</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$863.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo De Evangeline - Pandora"
+                  data-img="ANILLO PANDORA - Evangeline">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - evangeline.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - evangeline 02.jpg" alt="2" />
+        <img src="assets/img/anillo pandora - evangeline 03.png" alt="3" />
+        <img src="assets/img/anillo pandora - evangeline 04.JPG" alt="4" />
+          </div>
+        </div>
+
+
+
+        <!-- ✅ Producto 1 -->
+        <div class="producto-card"
+              data-nombre="Anillo Corazón Blanco - Pandora"
+
+         data-descripcion="Este aniño de promesa Pandora, enchapado en oro rosa, está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="250000"
+             data-precio-anterior="1080000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - corazon blanco - oro rosa.JPG" alt="Anillo corazón blanco - Pandora" />
+          <h3>Anillo Corazón Blanco </h3>
+          <p>Oro Rosa • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$250.000</span>
+            <span class="precio-anterior">$1´080.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Corazón Blanco - Oro Rosa - Pandora"
+                  data-img="ANILLO PANDORA - CORAZON BLANCO CON ENCHAPE EN ORO ROSA">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa 02.png" alt="2" />
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - corazon blanco - oro rosa 04.JPG" alt="4" />
+          </div>
+        </div>
+
+        <!-- ✅ Producto 2 -->
+        <div class="producto-card"
+             data-nombre="Anillo Corazón Verde - Pandora"
+             data-descripcion="Este aniño de promesa Pandora con corazón verde brillante. está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"
+             data-precio="170000"
+             data-precio-anterior="863000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - corazon verde.JPG" alt="Anillo corazón verde" />
+          <h3>Anillo Corazón Verde</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$863.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Corazón Verde - Pandora"
+                  data-img="ANILLO PANDORA - CORAZON VERDE">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+          <img src="assets/img/anillo pandora - corazon verde.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - corazon verde 02.jpg" alt="2" />
+        <img src="assets/img/anillo pandora - corazon verde 03.JPG" alt="3" />
+          </div>
+        </div>
+
+           
+         <!-- ✅ Producto 3 -->
+        <div class="producto-card"
+              data-nombre="Anillo Corazón Rosado - Pandora"
+
+         data-descripcion="Este aniño de promesa Pandora, enchapado en oro rosa, está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="250000"
+             data-precio-anterior="1080000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - corazon rosado - oro rosa.JPG" alt="Anillo corazón ROSADO Pandora" />
+          <h3>Anillo Corazón Rosado</h3>
+          <p>Oro Rosa • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$250.000</span>
+            <span class="precio-anterior">$1´080.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Corazón Rosado - Oro Rosa - Pandora"
+                  data-img="ANILLO PANDORA - CORAZON ROSADO CON ENCHAPE EN ORO ROSA">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa 02.png" alt="2" />
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - corazon rosado - oro rosa 04.JPG" alt="4" />
+          </div>
+        </div>
+         
+
+        <!-- ✅ Producto 4 -->
+        <div class="producto-card"
+              data-nombre="Anillo De La Bella y La Bestia - Pandora"
+
+         data-descripcion="Inspírate con la magia de La Bella y la Bestia con este anillo en plata, decorado con una rosa de circonitas rojas y detalles encantados. Un homenaje al amor único que añade elegancia y fantasía a tu estilo., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="170000"
+             data-precio-anterior="801000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - princesa bella.JPG" alt="Anillo de la Bella y la Bestia - Pandora" />
+          <h3>Anillo De La Bella y la Bestia</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$801.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo De La Bella y la Bestia - Pandora"
+                  data-img="ANILLO PANDORA - De La Bella y la Bestia">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - princesa bella.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - princesa bella 02.png" alt="2" />
+        <img src="assets/img/anillo pandora - princesa bella 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - princesa bella 04.jpg" alt="4" />
+          </div>
+        </div>
+
+        <!-- ✅ Producto 5 -->
+        <div class="producto-card"
+              data-nombre="Anillo De Blanca Nieves - Pandora"
+
+         data-descripcion="Esta diseño en plata de primera ley se presenta con un lazo esmaltado en color rojo con una gema brillante en el centro. Combina varios para crear un look con energía de princesa inspirado en la amabilidad y el optimismo de Blancanieves de Disney., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="170000"
+             data-precio-anterior="732000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - princesa blanca nieves.JPG" alt="Anillo de Blanca Nieves- Pandora" />
+          <h3>Anillo De Blanca Nieves</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$732.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo Blanca Nieves - Pandora"
+                  data-img="ANILLO PANDORA - Blanca nieves">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+         <img src="assets/img/anillo pandora - princesa blanca nieves 02.jpg" alt="1" />
+        <img src="assets/img/anillo pandora - princesa blanca nieves.JPG" alt="2" />
+         <img src="assets/img/anillo pandora - princesa blanca nieves 03.JPG" alt="3" />
+        <img src="assets/img/anillo pandora - princesa blanca nieves 04.JPG" alt="4" />
+          </div>
+        </div>
+
+        
+        <!-- ✅ Producto 6 -->
+        <div class="producto-card"
+              data-nombre="Anillo Evangeline - Pandora"
+
+         data-descripcion="Déjate guiar por la luz de Evangeline con esta joya inspirada en La Princesa y el Sapo. Con destellos que evocan el brillo de la luciérnaga más romántica del pantano, esta pieza captura la esperanza, el amor y la magia de los sueños que brillan en el cielo. Ideal para quienes creen en el poder de la luz interior., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨"           
+             data-precio="170000"
+             data-precio-anterior="863000"
+             style="cursor: pointer;">
+          <img src="assets/img/anillo pandora - evangeline.JPG" alt="Anillo de Evangeline - Pandora" />
+          <h3>Anillo De Evangeline</h3>
+          <p>Plata 925 • Tallas 4-9</p>
+          <div class="precio">
+            <span class="precio-actual">$170.000</span>
+            <span class="precio-anterior">$863.000</span>
+          </div>
+          <button class="btn-wsp-producto"
+                  data-nombre="Anillo De Evangeline - Pandora"
+                  data-img="ANILLO PANDORA - Evangeline">
+            Comprar por WhatsApp
+          </button>
+          <div class="galeria-imagenes" style="display: none;">
+            
+        <img src="assets/img/anillo pandora - evangeline.JPG" alt="1" />
+        <img src="assets/img/anillo pandora - evangeline 02.jpg" alt="2" />
+        <img src="assets/img/anillo pandora - evangeline 03.png" alt="3" />
+        <img src="assets/img/anillo pandora - evangeline 04.JPG" alt="4" />
+          </div>
+        </div>
+
+  
+      
+    <button class="btn-ver-mas" data-seccion="catalogo-general">Ver más</button>
+  </section>
+
+  <!-- PLATA -->
+<section id="plata" class="catalogo-section seccion-animada">
+  <h2>Anillos en Plata</h2>
+
+  <div class="grid-productos">
+    <!-- Producto 1 -->
+    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
+      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
+      <h3>Anillo Corazón Rosa</h3>
+      <p>Oro Rosa • Tallas 5–9</p>
+      <div class="precio">
+        <span class="precio-actual">$220.000</span>
+        <span class="precio-anterior">$480.000</span>
+      </div>
+      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
+      <div class="galeria-imagenes" style="display:none">
+        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
+      </div>
+    </div>
+
+    <!-- Producto 2 -->
+    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
+      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
+      <h3>Anillo Corazón Rosa</h3>
+      <p>Oro Rosa • Tallas 5–9</p>
+      <div class="precio">
+        <span class="precio-actual">$220.000</span>
+        <span class="precio-anterior">$480.000</span>
+      </div>
+      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
+      <div class="galeria-imagenes" style="display:none">
+        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
+      </div>
+    </div>
+
+    <!-- Producto 3 -->
+    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
+      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
+      <h3>Anillo Corazón Rosa</h3>
+      <p>Oro Rosa • Tallas 5–9</p>
+      <div class="precio">
+        <span class="precio-actual">$220.000</span>
+        <span class="precio-anterior">$480.000</span>
+      </div>
+      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
+      <div class="galeria-imagenes" style="display:none">
+        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
+      </div>
+    </div>
+
+    <!-- Producto 4 -->
+    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
+      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
+      <h3>Anillo Corazón Rosa</h3>
+      <p>Oro Rosa • Tallas 5–9</p>
+      <div class="precio">
+        <span class="precio-actual">$220.000</span>
+        <span class="precio-anterior">$480.000</span>
+      </div>
+      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
+      <div class="galeria-imagenes" style="display:none">
+        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-ver-mas" data-seccion="plata">Ver más</button>
+</section>
+
+
+  <!-- ORO -->
+  <section id="oro" class="catalogo-section seccion-animada">
+    <h2>Anillos en Oro</h2>
+    <div class="grid-productos">
+      <div class="producto-card" ...>…</div>
+      <div class="producto-card" ...>…</div>
+      <div class="producto-card" ...>…</div>
+    </div>
+    <button class="btn-ver-mas" data-seccion="oro">Ver más</button>
+  </section>
+
+  <!-- PANDORA -->
+  <section id="pandora" class="catalogo-section seccion-animada">
+    <h2>Anillos Pandora</h2>
+    <div class="grid-productos">
+      <div class="producto-card" ...>…</div>
+      <div class="producto-card" ...>…</div>
+      <div class="producto-card" ...>…</div>
+    </div>
+    <button class="btn-ver-mas" data-seccion="pandora">Ver más</button>
+  </section>
+
+ <!-- PROMOCIONES -->
+  <section id="promociones" class="promociones-section seccion-animada">
+    <div class="separador"></div>
+    <h2>Promociones</h2>
+    <div class="promo-container">
+      <div class="promo-card"><img src="assets/img/promos/promo-anillo-plata.jpg" alt="Promo Plata"/><p>Anillo Plata -40%</p></div>
+      <div class="promo-card"><img src="assets/img/promos/promo-anillo-oro.jpg" alt="Promo Oro"/><p>Anillo Oro -Envío Gratis</p></div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section id="contacto" class="contacto-section seccion-animada">
+    <h2>¿Tienes dudas?</h2>
+    <p>Escríbenos, estamos para ayudarte.</p>
+    <button class="btn-wsp-producto" data-nombre="Consulta general" data-img="assets/img/logo-duostyle.png">Hablar por WhatsApp</button>
+  </section>
+
+  <!-- WhatsApp flotante -->
+  <a href="https://wa.me/573156279342?text=Hola%2C%20me%20interesa%20un%20producto%20de%20DUO%20STYLE." class="wsp-float" target="_blank">💬</a>
+
+  <!-- MODAL GALERÍA -->
+  <div class="modal" id="modal-producto">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <div class="modal-galeria">
+        <button class="modal-galeria-btn prev">←</button>
+        <div class="modal-galeria-track" id="modal-galeria-track"></div>
+        <button class="modal-galeria-btn next">→</button>
+      </div>
+      <div id="modal-contador"></div>
+      <div class="modal-info">
+        <h3 id="modal-nombre"></h3>
+        <p id="modal-descripcion"></p>
+        <div class="modal-precios"></div>
+        <button id="modal-whatsapp" class="btn-wsp-producto">WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => e.isIntersecting && e.target.classList.add("visible"));
+      }, { threshold: 0.15 });
+      document.querySelectorAll(".seccion-animada").forEach(s => {
+        s.classList.add("oculto");
+        observer.observe(s);
+      });
+
+      // Nav hamburguesa + submenú táctil
+      const navLinks = document.getElementById("nav-links");
+      document.getElementById("hamburguesa").onclick = () => navLinks.classList.toggle("show");
+      navLinks.querySelectorAll("a").forEach(a => a.onclick = () => navLinks.classList.remove("show"));
+
+      navLinks.querySelectorAll("li > a").forEach(link => {
+        link.onclick = (e) => {
+          const sub = link.nextElementSibling;
+          if(sub && window.innerWidth<=768) {
+            e.preventDefault();
+            link.parentElement.classList.toggle("open");
+          }
+        };
+      });
+
+      // Carruseles
+      document.querySelectorAll(".slider-container").forEach(c => {
+        const t = c.querySelector(".slider-track");
+        c.querySelector(".prev").onclick = () => t.scrollBy({left:-300,behavior:"smooth"});
+        c.querySelector(".next").onclick = () => t.scrollBy({left:300,behavior:"smooth"});
+      });
+
+      // Modal
+      const modal = document.getElementById("modal-producto");
+      const track = document.getElementById("modal-galeria-track");
+      const nombreEl = document.getElementById("modal-nombre");
+      const descrEl = document.getElementById("modal-descripcion");
+      const preciosEl = document.querySelector(".modal-precios");
+      const btnWhats = document.getElementById("modal-whatsapp");
+      const closeBtn = modal.querySelector(".modal-close");
+      const prevBtn = modal.querySelector(".modal-galeria-btn.prev");
+      const nextBtn = modal.querySelector(".modal-galeria-btn.next");
+      let imgs = [], idx = 0;
+
+      document.querySelectorAll(".producto-card").forEach(card=> {
+        card.onclick = () => {
+          const gal = card.querySelectorAll(".galeria-imagenes img, .galeria-imagenes video");
+          if(!gal.length) return;
+          imgs = Array.from(gal);
+          idx = 0;
+          nombreEl.textContent = card.dataset.nombre;
+          descrEl.textContent = card.dataset.descripcion;
+          preciosEl.innerHTML = `<span class="precio-actual">$${parseInt(card.dataset.precio).toLocaleString('es-CO')}</span><span class="precio-anterior">$${parseInt(card.dataset.precioAnterior).toLocaleString('es-CO')}</span>`;
+          btnWhats.dataset.nombre = card.dataset.nombre;
+          show(idx);
+          modal.style.display = "flex";
+        };
+      });
+
+      function show(i){
+        const el = imgs[i].cloneNode();
+        track.innerHTML = "";
+        track.appendChild(el);
+        document.getElementById("modal-contador").textContent = `${i+1} / ${imgs.length}`;
+      }
+
+      prevBtn.onclick = () => { if(idx>0){ idx--; show(idx);} };
+      nextBtn.onclick = () => { if(idx<imgs.length-1){ idx++; show(idx);} };
+      closeBtn.onclick = () => modal.style.display = "none";
+      window.onclick = e => { if(e.target===modal) modal.style.display="none"; };
+
+      // WhatsApp buttons
+      document.querySelectorAll(".btn-wsp-producto").forEach(b => {
+        b.onclick = e => {
+          e.stopPropagation();
+          const n = b.dataset.nombre;
+          const img = b.dataset.img;
+          const mensaje = `Hola, me interesa este producto: *${n}* 📸 ${img}`;
+          window.open(`https://wa.me/573156279342?text=${encodeURIComponent(mensaje)}`, "_blank");
+        };
+      });
+
+      // Ver más
+      document.querySelectorAll(".btn-ver-mas").forEach(b => {
+        b.onclick = () => {
+          const sec = document.getElementById(b.dataset.seccion);
+          const cards = Array.from(sec.querySelectorAll(".producto-card"));
+          const ocultos = cards.filter(c=> c.style.display==="none");
+          ocultos.slice(0,3).forEach(c=>c.style.display="block");
+          if(ocultos.length <=3) b.style.display="none";
+        };
+      });
+
+      // Ocultar extras
+      window.onload = () => {
+        document.querySelectorAll(".catalogo-section").forEach(sec=>{
+          sec.querySelectorAll(".producto-card").forEach((c,i)=> {
+            c.style.display = i < 6 ? "block" : "none";
+          });
+        });
+      };
+    });
+  </script>
+</body>
+</html>
