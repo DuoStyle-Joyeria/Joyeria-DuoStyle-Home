@@ -129,6 +129,16 @@ body {
   display: none;
 }
 
+.producto-card {
+  min-width: 280px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+ 
+ 
+}
 
 .producto-card:hover {
   transform: translateY(-4px);
