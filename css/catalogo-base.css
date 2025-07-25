@@ -297,7 +297,7 @@ body {
 
 @media (max-width: 600px) {
   .grid-productos {
-    grid-template-columns: 1fr; /* 1 columna en móviles */
+    grid-template-columns: 2fr; /* 1 columna en móviles */
   }
 }
 
