@@ -1,3 +1,4 @@
+
 /* ====================== */
 /* BASE Y TIPOGRAFÍA */
 /* ====================== */
@@ -25,7 +26,6 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
   }
   .nav-links.show { display: flex; }
 }
-
 .nav-links li { position: relative; }
 .nav-links .submenu {
   display: none; position: absolute; top: 100%; left: 0;
@@ -121,11 +121,11 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
 .slider-btn.prev { left: 10px; } .slider-btn.next { right: 10px; }
 
 /* ====================== */
-/* CATÁLOGO (GRID) */
+/* CATÁLOGO (GRID) - SIEMPRE 3 COLUMNAS */
 /* ====================== */
 .grid-productos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px 24px;
   padding: 40px 20px;
 }
@@ -248,6 +248,7 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
 /* ====================== */
 /* RESPONSIVE MOBILE */
 /* ====================== */
+
 @media(max-width:480px){
   .slider-btn { font-size:18px; padding:8px; }
   .wsp-float { bottom:15px; right:15px; padding:12px; font-size:20px; }
