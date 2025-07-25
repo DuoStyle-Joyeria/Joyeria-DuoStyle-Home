@@ -7,15 +7,11 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
 /* ====================== */
 /* HEADER & NAV */
 /* ====================== */
-.main-header { padding: 10px 20px; background: #fff; border-bottom: 1px solid #ddd; position: relative; z-index: 10000; }
+.main-header { padding: 10px 20px; background: #fff; border-bottom: 1px solid #ddd; z-index: 9999; position: relative; }
 .header-inner { display: flex; justify-content: space-between; align-items: center; }
 .logo img { height: 50px; display: block; }
-.nav-container { position: relative; }
-.nav-links {
-  display: flex; gap: 20px; list-style: none;
-  position: relative;
-  z-index: 9999;
-}
+.nav-container { position: relative; z-index: 9999; }
+.nav-links { display: flex; gap: 20px; list-style: none; }
 .nav-links a { text-decoration: none; color: #000; font-weight: bold; }
 .hamburguesa { display: none; font-size: 28px; cursor: pointer; padding: 10px; }
 
@@ -25,11 +21,11 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
     position: absolute; top: 70px; right: 20px;
     background: #fff; flex-direction: column; border: 1px solid #ccc;
     padding: 10px; display: none; width: 160px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    z-index: 9999;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 9999;
   }
   .nav-links.show { display: flex; }
 }
+
 .nav-links li { position: relative; }
 .nav-links .submenu {
   display: none; position: absolute; top: 100%; left: 0;
@@ -55,6 +51,10 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
 }
 .btn-wsp-producto:hover, .btn-contacto:hover, .btn-ver-mas:hover {
   transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.btn-ver-mas {
+  margin-top: 40px;
+  display: inline-block;
 }
 
 /* ====================== */
@@ -125,7 +125,7 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
 .slider-btn.prev { left: 10px; } .slider-btn.next { right: 10px; }
 
 /* ====================== */
-/* CATÁLOGO (GRID 3x3 FIJO) */
+/* CATÁLOGO (GRID) */
 /* ====================== */
 .grid-productos {
   display: grid;
@@ -145,6 +145,7 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  min-height: 420px;
 }
 .grid-productos .producto-card:hover {
   transform: translateY(-4px);
@@ -155,6 +156,17 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
   border-radius: 10px;
   margin-bottom: 16px;
   width: 100%;
+}
+
+@media(max-width: 768px) {
+  .grid-productos {
+    grid-template-columns: repeat(3, 1fr);
+    overflow-x: auto;
+  }
+
+  .grid-productos .producto-card {
+    min-width: 95%;
+  }
 }
 
 /* ====================== */
@@ -222,89 +234,4 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
   padding: 0 10px;
 }
 
-/* ====================== */
-/* MODAL + GALERÍA */
-/* ====================== */
-.modal { position:fixed; top:0; left:0; width:100vw; height:100vh;
-  background:rgba(0,0,0,.75); display:none; align-items:center; justify-content:center;
-  padding:20px; z-index:9999; }
-.modal-content { background:#fff; border-radius:12px; padding:20px; max-width:800px; width:100%;
-  max-height:90vh; overflow:auto; position:relative; box-shadow:0 6px 20px rgba(0,0,0,.3); }
-.modal-close { position:absolute; top:15px; right:20px; font-size:28px; color:#C1A14A; cursor:pointer; }
-.modal-galeria { position:relative; min-height:320px; margin-bottom:10px; display:flex;
-  align-items:center; justify-content:center; }
-.modal-galeria-track { display:flex; align-items:center; justify-content:center; max-width:100%; }
-.modal-galeria-track img, .modal-galeria-track video {
-  max-height:300px; border-radius:10px; object-fit:contain; width:auto; max-width:100%; }
-.modal-galeria-btn { position:absolute; top:50%; transform:translateY(-50%);
-  background:#C1A14A; color:#fff; border:none; font-size:22px; padding:10px 14px;
-  border-radius:50%; cursor:pointer; z-index:10; }
-.modal-galeria-btn.prev { left:-10px; } .modal-galeria-btn.next { right:-10px; }
-#modal-contador { text-align:center; margin-top:14px; font-size:14px; color:#888; }
-
-/* ====================== */
-/* PRECIO */
-/* ====================== */
-.precio { margin-top:10px; font-size:1rem; font-weight:600; color:#1A1A1A; }
-.precio-actual { color:#C1A14A; font-weight:bold; font-size:1.1rem; margin-right:10px; }
-.precio-anterior { text-decoration:line-through; color:#999; font-size:.95rem; }
-
-/* ====================== */
-/* RESPONSIVE FIX */
-/* ====================== */
-.grid-productos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px 24px;
-  padding: 40px 20px;
-}
-
-
-/* ✅ Forzar 3 columnas para catálogo en todas las resoluciones */
-.grid-catalogo {
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(100px, 1fr)) !important;
-  gap: 32px 24px;
-  padding: 40px 20px;
-}
-
-/* ✅ Ajustes específicos para los productos dentro de catálogo */
-.grid-catalogo .producto-card {
-  display: flex !important;
-  flex-direction: column;
-  justify-content: space-between;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 15px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  transition: transform 0.3s ease;
-  height: 100%;
-}
-
-
-/* ✅ Mejora visual para catálogo 3x3 */
-.grid-catalogo .producto-card {
-  height: auto !important;
-  padding: 16px;
-  border-radius: 12px;
-}
-
-.grid-catalogo .producto-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 12px;
-}
-
-.grid-catalogo .precio {
-  margin-top: 8px;
-}
-
-.grid-catalogo .btn-wsp-producto {
-  margin-top: 12px;
-  padding: 10px 20px;
-}
-
+/* =================
