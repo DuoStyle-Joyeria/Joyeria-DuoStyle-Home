@@ -301,6 +301,20 @@ body {
   padding: 40px 20px;
 }
 
+/* ✅ Ajustes específicos para los productos dentro de catálogo */
+.grid-catalogo .producto-card {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+  height: 100%;
+}
 
 /* ✅ Corrección visual para el catálogo grid */
 .grid-productos {
@@ -431,99 +445,4 @@ body {
   text-decoration: line-through;
   color: #999;
   font-size: 0.95rem;
-}
-
-
-
-/* ============================ */
-/* 🎯 ESTÉTICA MEJORADA - MÓVIL */
-/* ============================ */
-@media (max-width: 768px) {
-  .grid-productos .producto-card {
-    padding: 12px;
-    border-radius: 10px;
-  }
-
-  .grid-productos .producto-card img {
-    height: 200px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 10px;
-  }
-
-  .grid-productos .producto-card h3 {
-    font-size: 1rem;
-    margin-bottom: 4px;
-  }
-
-  .grid-productos .producto-card p {
-    font-size: 0.85rem;
-    color: #555;
-    margin-bottom: 6px;
-  }
-
-  .grid-productos .precio-actual {
-    font-size: 1rem;
-  }
-
-  .grid-productos .precio-anterior {
-    font-size: 0.85rem;
-  }
-
-  .grid-productos .btn-wsp-producto {
-    font-size: 0.85rem;
-    padding: 10px 20px;
-    border-radius: 22px;
-  }
-}
-
-/* ================================ */
-/* 💻 ESTÉTICA MEJORADA - COMPUTADOR */
-/* ================================ */
-@media (min-width: 1025px) {
-  .grid-productos {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 28px 20px;
-  }
-
-  .grid-productos .producto-card {
-    padding: 18px;
-    border-radius: 14px;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .grid-productos .producto-card img {
-    height: 220px;
-    object-fit: cover;
-    border-radius: 12px;
-    margin-bottom: 10px;
-  }
-
-  .grid-productos .producto-card h3 {
-    font-size: 1.1rem;
-    margin-bottom: 6px;
-  }
-
-  .grid-productos .producto-card p {
-    font-size: 0.95rem;
-    color: #444;
-    margin-bottom: 8px;
-  }
-
-  .grid-productos .precio-actual {
-    font-size: 1.1rem;
-  }
-
-  .grid-productos .precio-anterior {
-    font-size: 0.95rem;
-  }
-
-  .grid-productos .btn-wsp-producto {
-    font-size: 0.9rem;
-    padding: 10px 22px;
-    border-radius: 24px;
-  }
 }
