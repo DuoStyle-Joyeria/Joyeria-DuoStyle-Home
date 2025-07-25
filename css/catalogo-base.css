@@ -254,9 +254,32 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
 /* ====================== */
 .grid-productos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px 24px;
   padding: 40px 20px;
 }
 
+
+/* ✅ Forzar 3 columnas para catálogo en todas las resoluciones */
+.grid-catalogo {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 32px 24px;
+  padding: 40px 20px;
+}
+
+/* ✅ Ajustes específicos para los productos dentro de catálogo */
+.grid-catalogo .producto-card {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+  height: 100%;
+}
 
