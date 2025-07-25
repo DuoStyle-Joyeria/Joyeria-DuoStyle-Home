@@ -285,12 +285,21 @@ body {
 /* ====================== */
 /* RESPONSIVE FIX */
 /* ====================== */
+.grid-productos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px 24px;
+  padding: 40px 20px;
+}
 
 
 /* ✅ Forzar 3 columnas para catálogo en todas las resoluciones */
-
-
-/* ✅ Ajustes específicos para los productos dentro de catálogo */
+.grid-catalogo {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(100px, 1fr)) !important;
+  gap: 32px 24px;
+  padding: 40px 20px;
+}
 
 
 /* ✅ Corrección visual para el catálogo grid */
