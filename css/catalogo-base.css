@@ -252,20 +252,11 @@ body { font-family: 'Open Sans', sans-serif; background: #F9F6F2; color: #1A1A1A
 /* ====================== */
 /* RESPONSIVE FIX */
 /* ====================== */
-@media(max-width:1024px){
-  .grid-productos {
-    grid-template-columns: repeat(3, 1fr);
-  }
+.grid-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px 24px;
+  padding: 40px 20px;
 }
-@media(max-width:768px){
-  .grid-productos {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-@media(max-width:480px){
-  .grid-productos {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .slider-btn { font-size:18px; padding:8px; }
-  .wsp-float { bottom:15px; right:15px; padding:12px; font-size:20px; }
-}
+
+
