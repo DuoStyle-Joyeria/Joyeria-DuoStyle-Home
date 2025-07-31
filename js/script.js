@@ -1,119 +1,73 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("modal-producto");
   const modalTrack = document.getElementById("modal-galeria-track");
   const modalNombre = document.getElementById("modal-nombre");
   const modalDescripcion = document.getElementById("modal-descripcion");
-  const modalWspBtn = document.getElementById("modal-whatsapp");
   const modalPrecios = document.querySelector(".modal-precios");
+  const modalWspBtn = document.getElementById("modal-whatsapp");
   const prevBtn = document.querySelector(".modal-galeria-btn.prev");
   const nextBtn = document.querySelector(".modal-galeria-btn.next");
 
   let imagenes = [];
   let indiceActual = 0;
 
-  // 💬 WhatsApp
-  document.querySelectorAll(".btn-wsp-producto").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const numero = "573156"; // actualiza esto
-      const nombre = btn.dataset.nombre;
-      const imagen = btn.dataset.img;
-      const url = `${window.location.origin}/${imagen}`;
-      const mensaje = `Hola, me interesa este producto de DUO STYLE:%0A🛍️ *${nombre}*%0A📸 Imagen: ${url}`;
-      window.open(`https://wa.me/${numero}?text=${mensaje}`, "_blank");
-    });
-  });
-
-  // 🖼️ Mostrar Modal al hacer clic
+  // 🟢 MODAL - Mostrar detalle del producto
   document.querySelectorAll(".producto-card").forEach(card => {
-    const boton = card.querySelector(".btn-wsp-producto");
-    if (boton) boton.addEventListener("click", e => e.stopPropagation());
-
     card.addEventListener("click", () => {
-      const nombre = card.dataset.nombre;
-      const descripcion = card.dataset.descripcion;
-      const precio = card.dataset.precio;
-      const precioAnterior = card.dataset.precioAnterior;
-      const galeria = card.querySelectorAll(".galeria-imagenes img, .galeria-imagenes video");
-
+      const galeria = card.querySelectorAll(".galeria-imagenes img, video");
       if (!galeria.length) return;
 
-      modalNombre.textContent = nombre || '';
-      modalDescripcion.textContent = descripcion || '';
       imagenes = Array.from(galeria);
       indiceActual = 0;
 
-      mostrarImagen(indiceActual);
-
+      modalNombre.textContent = card.dataset.nombre || '';
+      modalDescripcion.textContent = card.dataset.descripcion || '';
       modalPrecios.innerHTML = `
-        <div class="precio-modal">
-          <span class="precio-actual">$${formatearPrecio(precio)}</span>
-          <span class="precio-anterior">$${formatearPrecio(precioAnterior)}</span>
-        </div>
+        <span class="precio-actual">$${formatear(card.dataset.precio)}</span>
+        <span class="precio-anterior">$${formatear(card.dataset.precioAnterior)}</span>
       `;
 
-      prevBtn.style.display = imagenes.length > 1 ? "block" : "none";
-      nextBtn.style.display = imagenes.length > 1 ? "block" : "none";
-
-      // ✅ Mostrar el modal flotante correctamente
+      mostrarImagen(indiceActual);
       modal.style.display = "flex";
-      modal.classList.add("activo");
     });
   });
 
-  // Mostrar imagen o video
-  function mostrarImagen(index) {
-    if (!imagenes[index]) return;
-
-    const src = imagenes[index].getAttribute("src");
+  // Mostrar imagen/video en modal
+  function mostrarImagen(i) {
+    const src = imagenes[i]?.src;
+    if (!src) return;
     const ext = src.split(".").pop().toLowerCase();
-    const esVideo = ["mp4", "webm", "ogg"].includes(ext);
+    const isVideo = ["mp4", "webm", "ogg"].includes(ext);
 
-    modalTrack.innerHTML = `
-      <div style="text-align:center; padding: 20px; color:#888;">Cargando...</div>
-    `;
+    modalTrack.innerHTML = "";
 
-    if (esVideo) {
+    if (isVideo) {
       const video = document.createElement("video");
       video.src = src;
       video.controls = true;
-      video.setAttribute("playsinline", true);
       video.style.maxHeight = "300px";
       video.style.borderRadius = "10px";
-
-      video.onloadeddata = () => {
-        modalTrack.innerHTML = '';
-        modalTrack.appendChild(video);
-        actualizarWhatsApp(src);
-        mostrarContador();
-      };
-
-      video.onerror = () => {
-        modalTrack.innerHTML = `<p style="color:red;text-align:center;">⚠️ Error cargando video.</p>`;
-      };
+      modalTrack.appendChild(video);
     } else {
       const img = document.createElement("img");
       img.src = src;
       img.style.maxHeight = "300px";
       img.style.objectFit = "contain";
       img.style.borderRadius = "10px";
-
-      img.onload = () => {
-        modalTrack.innerHTML = '';
-        modalTrack.appendChild(img);
-        actualizarWhatsApp(src);
-        mostrarContador();
-      };
-
-      img.onerror = () => {
-        modalTrack.innerHTML = `<p style="color:red;text-align:center;">⚠️ Error cargando imagen.</p>`;
-      };
+      modalTrack.appendChild(img);
     }
+
+    actualizarWhatsApp(src);
+    mostrarContador();
   }
 
-  function actualizarWhatsApp(src) {
+  function formatear(valor) {
+    return valor ? parseInt(valor).toLocaleString("es-CO") : "—";
+  }
+
+  function actualizarWhatsApp(imgUrl) {
     modalWspBtn.dataset.nombre = modalNombre.textContent;
-    modalWspBtn.dataset.img = src;
+    modalWspBtn.dataset.img = imgUrl;
   }
 
   function mostrarContador() {
@@ -130,9 +84,12 @@ document.addEventListener("DOMContentLoaded", function () {
     contador.textContent = `${indiceActual + 1} / ${imagenes.length}`;
   }
 
-  function formatearPrecio(valor) {
-    return valor ? parseInt(valor).toLocaleString("es-CO") : "—";
-  }
+  prevBtn.addEventListener("click", () => {
+    if (indiceActual > 0) {
+      indiceActual--;
+      mostrarImagen(indiceActual);
+    }
+  });
 
   nextBtn.addEventListener("click", () => {
     if (indiceActual < imagenes.length - 1) {
@@ -141,61 +98,76 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  prevBtn.addEventListener("click", () => {
-    if (indiceActual > 0) {
-      indiceActual--;
-      mostrarImagen(indiceActual);
-    }
+  // Cerrar modal
+  modal.querySelector(".modal-close").addEventListener("click", () => {
+    modal.style.display = "none";
+    modalTrack.innerHTML = "";
+    document.getElementById("modal-contador")?.remove();
   });
 
-  function cerrarModal() {
-    modal.style.display = "none";
-    modal.classList.remove("activo");
-    modalTrack.innerHTML = "";
-    modalPrecios.innerHTML = "";
-    const contador = document.getElementById("modal-contador");
-    if (contador) contador.remove();
-  }
-
   window.addEventListener("click", (e) => {
-    if (e.target === modal) cerrarModal();
+    if (e.target === modal) modal.style.display = "none";
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") cerrarModal();
+    if (e.key === "Escape") modal.style.display = "none";
   });
 
-  // Swipe
-  let startX = 0;
-  modalTrack.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
+  // 🟡 WhatsApp desde botón
+  document.querySelectorAll(".btn-wsp-producto").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const nombre = btn.dataset.nombre || "Producto";
+      const img = btn.dataset.img || "";
+      const mensaje = `Hola, me interesa este producto de DUO STYLE:\n🛍️ *${nombre}*\n📸 ${img}`;
+      window.open(`https://wa.me/573209074830?text=${encodeURIComponent(mensaje)}`, "_blank");
+    });
   });
 
-  modalTrack.addEventListener("touchend", (e) => {
-    const endX = e.changedTouches[0].clientX;
-    const diff = startX - endX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0 && indiceActual < imagenes.length - 1) indiceActual++;
-      else if (diff < 0 && indiceActual > 0) indiceActual--;
-      mostrarImagen(indiceActual);
-    }
-  });
-
-  // Carruseles
+  // 🔁 Carrusel (sección nuevas)
   document.querySelectorAll(".slider-container").forEach(container => {
     const track = container.querySelector(".slider-track");
-    const btnPrev = container.querySelector(".slider-btn.prev");
-    const btnNext = container.querySelector(".slider-btn.next");
+    const prev = container.querySelector(".slider-btn.prev");
+    const next = container.querySelector(".slider-btn.next");
 
-    btnPrev?.addEventListener("click", () => {
+    prev?.addEventListener("click", () => {
       track.scrollBy({ left: -300, behavior: "smooth" });
     });
-
-    btnNext?.addEventListener("click", () => {
+    next?.addEventListener("click", () => {
       track.scrollBy({ left: 300, behavior: "smooth" });
     });
   });
 
-}
+  // 🟣 Paginador independiente por sección
+  const productosPorPagina = 9;
 
+  document.querySelectorAll(".grid-productos").forEach(grid => {
+    const productos = Array.from(grid.querySelectorAll(".producto-card"));
+    if (productos.length === 0) return;
 
+    let paginador = document.createElement("div");
+    paginador.className = "paginador";
+    grid.after(paginador);
+
+    const totalPaginas = Math.ceil(productos.length / productosPorPagina);
+    let paginaActual = 1;
+
+    function mostrarPagina(pagina) {
+      productos.forEach((producto, index) => {
+        const mostrar = index >= (pagina - 1) * productosPorPagina && index < pagina * productosPorPagina;
+        producto.style.display = mostrar ? "flex" : "none";
+      });
+
+      paginador.innerHTML = "";
+      for (let i = 1; i <= totalPaginas; i++) {
+        const boton = document.createElement("button");
+        boton.textContent = i;
+        boton.className = "pagina-btn" + (i === pagina ? " activo" : "");
+        boton.addEventListener("click", () => mostrarPagina(i));
+        paginador.appendChild(boton);
+      }
+    }
+
+    mostrarPagina(paginaActual);
+  });
+});

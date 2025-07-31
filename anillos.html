@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DUO STYLE | Catálogo Anillos</title>
-  <link rel="stylesheet" href="css/catalogo-base.css">
+  <link rel="stylesheet" href="css/anillos.css">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
   
   <style>
@@ -300,7 +300,6 @@
         <img src="assets/img/anillo pandora - evangeline 04.JPG" alt="4" />
           </div>
         </div>
-
       </div>
       <button class="slider-btn next">→</button>
     </div>
@@ -310,10 +309,13 @@
   
 
   <!-- CATÁLOGO GENERAL -->
-  <section id="catalogo-general" class="catalogo-section seccion-animada">
-    <h2>Catálogo General de Anillos</h2>
-    <div class="grid-productos grid-catalogo">     
-      <!-- ✅ Producto 1 -->
+ <section id="catalogo-general" class="catalogo-section seccion-animada" data-section="catalogo-general">
+  <h2>Catálogo General de Anillos</h2>
+  <div class="grid-productos">
+    <!-- Todos los productos de esta sección -->
+    
+
+     <!-- ✅ Producto 1 -->
         <div class="producto-card"
               data-nombre="Anillo Corazón Blanco - Pandora"
 
@@ -661,198 +663,233 @@
           </div>
         </div>
 
-  
-      
-    <button class="btn-ver-mas" data-seccion="catalogo-general">Ver mas</button>
+
+    
+    <!-- 🔁 Duplica más producto-cards aquí -->
+  </div>
+
+</section>
+
+
+  <!-- ✨ SECCIÓN DESTACADA - CARRUSEL -->
+  <section id="nuevas" class="destacados-section seccion-animada">
+    <h2>Brilla con lo Nuevo</h2>
+    <div class="slider-container">
+      <button class="slider-btn prev">←</button>
+      <div class="slider-track">
+        <!-- PRODUCTOS CARRUSEL -->
+        <div class="producto-card" data-nombre="Anillo Corazón" data-descripcion="..." data-precio="250000" data-precio-anterior="750000">
+          <img src="assets/img/anillo1.jpg" alt="Anillo 1"/>
+          <h3>Anillo Corazón</h3>
+          <p>Plata 925 • Tallas 5-8</p>
+          <div class="precio">
+            <span class="precio-actual">$250.000</span>
+            <span class="precio-anterior">$750.000</span>
+          </div>
+          <button class="btn-wsp-producto" data-nombre="Anillo Corazón" data-img="assets/img/anillo1.jpg">Comprar por WhatsApp</button>
+          <div class="galeria-imagenes" style="display: none;">
+            <img src="assets/img/anillo1.jpg" />
+            <img src="assets/img/anillo1-2.jpg" />
+          </div>
+        </div>
+        <!-- Más productos... -->
+      </div>
+      <button class="slider-btn next">→</button>
+    </div>
   </section>
 
-  <!-- PLATA -->
-<section id="catalogo-general" class="catalogo-section seccion-animada">
+  <!-- 🟡 SECCIÓN 1: CATÁLOGO GENERAL -->
+  <section id="catalogo-general" class="catalogo-section seccion-animada">
     <h2>Catálogo General de Anillos</h2>
-    <div class="grid-productos grid-catalogo"> 
+    <div class="grid-productos">
+      <!-- Copia tus productos aquí (mínimo 10 para probar paginador) -->
+      <!-- Usa el mismo formato que en el carrusel pero sin flechas -->
+    </div>
+  </section>
 
-  <div class="grid-productos">
-    <!-- Producto 1 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
+  <!-- 🟠 SECCIÓN 2: ANILLOS EN PLATA -->
+  <section id="plata" class="catalogo-section seccion-animada">
+    <h2>Anillos en Plata</h2>
+    <div class="grid-productos">
+      <!-- Productos en plata -->
     </div>
+  </section>
 
+  <!-- 🟣 SECCIÓN 3: ANILLOS EN ORO -->
+  <section id="oro" class="catalogo-section seccion-animada">
+    <h2>Anillos en Oro</h2>
+    <div class="grid-productos">
+      <!-- Productos en oro -->
+    </div>
+  </section>
 
-     <!-- Producto 1 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
+  <!-- 🟤 SECCIÓN 4: PANDORA -->
+  <section id="pandora" class="catalogo-section seccion-animada">
+    <h2>Anillos Pandora</h2>
+    <div class="grid-productos">
+      <!-- Productos Pandora -->
     </div>
+  </section>
 
-     <!-- Producto 1 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
+<section class="catalogo-section">
+  <h2>Catálogo General de Anillos</h2>
+
+  <div class="grid-productos" data-seccion="catalogo-general">
+    <div class="producto-card"> <!-- Producto 1 -->
+      <img src="assets/img/anillo1.jpg" alt="Anillo 1" />
+      <h3>Anillo 1</h3>
+      <p>Descripción breve</p>
     </div>
-     <!-- Producto 1 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
-    </div>
-     <!-- Producto 1 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
-    </div>
-     <!-- Producto 1 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
+    <div class="producto-card"> <!-- Producto 2 -->
+      <img src="assets/img/anillo2.jpg" alt="Anillo 2" />
+      <h3>Anillo 2</h3>
+      <p>Descripción breve</p>
     </div>
 
-     <!-- Producto 1 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
+
+    <div class="producto-card"> <!-- Producto 1 -->
+      <img src="assets/img/anillo1.jpg" alt="Anillo 1" />
+      <h3>Anillo 1</h3>
+      <p>Descripción breve</p>
     </div>
-     <!-- Producto 1 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
+    <div class="producto-card"> <!-- Producto 2 -->
+      <img src="assets/img/anillo2.jpg" alt="Anillo 2" />
+      <h3>Anillo 2</h3>
+      <p>Descripción breve</p>
     </div>
-     <!-- Producto 1 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
+
+
+
+
+    <div class="producto-card"> <!-- Producto 1 -->
+      <img src="assets/img/anillo1.jpg" alt="Anillo 1" />
+      <h3>Anillo 1</h3>
+      <p>Descripción breve</p>
+    </div>
+    <div class="producto-card"> <!-- Producto 2 -->
+      <img src="assets/img/anillo2.jpg" alt="Anillo 2" />
+      <h3>Anillo 2</h3>
+      <p>Descripción breve</p>
+    </div>
+
+
+    <div class="producto-card"> <!-- Producto 1 -->
+      <img src="assets/img/anillo1.jpg" alt="Anillo 1" />
+      <h3>Anillo 1</h3>
+      <p>Descripción breve</p>
+    </div>
+    <div class="producto-card"> <!-- Producto 2 -->
+      <img src="assets/img/anillo2.jpg" alt="Anillo 2" />
+      <h3>Anillo 2</h3>
+      <p>Descripción breve</p>
+    </div>
+
+
+
+    <div class="producto-card"> <!-- Producto 1 -->
+      <img src="assets/img/anillo1.jpg" alt="Anillo 1" />
+      <h3>Anillo 1</h3>
+      <p>Descripción breve</p>
+    </div>
+    <div class="producto-card"> <!-- Producto 2 -->
+      <img src="assets/img/anillo2.jpg" alt="Anillo 2" />
+      <h3>Anillo 2</h3>
+      <p>Descripción breve</p>
+    </div>
+
+
+
+    <div class="producto-card"> <!-- Producto 1 -->
+      <img src="assets/img/anillo1.jpg" alt="Anillo 1" />
+      <h3>Anillo 1</h3>
+      <p>Descripción breve</p>
+    </div>
+    <div class="producto-card"> <!-- Producto 2 -->
+      <img src="assets/img/anillo2.jpg" alt="Anillo 2" />
+      <h3>Anillo 2</h3>
+      <p>Descripción breve</p>
+    </div>
+
+
+
+
+    <div class="producto-card"> <!-- Producto 1 -->
+      <img src="assets/img/anillo1.jpg" alt="Anillo 1" />
+      <h3>Anillo 1</h3>
+      <p>Descripción breve</p>
+    </div>
+    <div class="producto-card"> <!-- Producto 2 -->
+      <img src="assets/img/anillo2.jpg" alt="Anillo 2" />
+      <h3>Anillo 2</h3>
+      <p>Descripción breve</p>
     </div>
     
-    <!-- Producto 2 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
-    </div>
 
-    <!-- Producto 3 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
-    </div>
 
-    <!-- Producto 4 -->
-    <div class="producto-card" data-nombre="Anillo Corazón Rosa" data-descripcion="Corazón rosado, enchapado en oro rosa." data-precio="220000" data-precio-anterior="480000">
-      <img src="assets/img/anillo-corazon-rosa.jpg" alt="Anillo Corazón Rosa"/>
-      <h3>Anillo Corazón Rosa</h3>
-      <p>Oro Rosa • Tallas 5–9</p>
-      <div class="precio">
-        <span class="precio-actual">$220.000</span>
-        <span class="precio-anterior">$480.000</span>
-      </div>
-      <button class="btn-wsp-producto" data-nombre="Anillo Corazón Rosa" data-img="assets/img/anillo-corazon-rosa.jpg">WhatsApp</button>
-      <div class="galeria-imagenes" style="display:none">
-        <img src="assets/img/anillo-corazon-rosa.jpg" alt="1"/>
-      </div>
-    </div>
+    
+    <!-- ➕ Agrega aquí más producto-card (mínimo 10 para probar paginador) -->
   </div>
 
-  </div>
-
-  <button class="btn-ver-mas" data-seccion="catalogo-general">Ver más</button>
+  <div class="paginador" data-seccion="catalogo-general"></div>
 </section>
+
+<section class="catalogo-section">
+  <h2>Anillos en Plata</h2>
+
+  <div class="grid-productos" data-seccion="anillos-plata">
+    <div class="producto-card"> <!-- Producto 1 -->
+      <img src="assets/img/plata1.jpg" alt="Anillo Plata 1" />
+      <h3>Plata 1</h3>
+      <p>Descripción breve</p>
+    </div>
+    <div class="producto-card"> <!-- Producto 2 -->
+      <img src="assets/img/plata2.jpg" alt="Anillo Plata 2" />
+      <h3>Plata 2</h3>
+      <p>Descripción breve</p>
+    </div>
+    <!-- ➕ Más productos -->
+  </div>
+
+  <div class="paginador" data-seccion="anillos-plata"></div>
+</section>
+
+<section class="catalogo-section">
+  <h2>Anillos en Oro</h2>
+
+  <div class="grid-productos" data-seccion="anillos-oro">
+    <div class="producto-card">
+      <img src="assets/img/oro1.jpg" alt="Anillo Oro 1" />
+      <h3>Oro 1</h3>
+      <p>Descripción breve</p>
+    </div>
+    <div class="producto-card">
+      <img src="assets/img/oro2.jpg" alt="Anillo Oro 2" />
+      <h3>Oro 2</h3>
+      <p>Descripción breve</p>
+    </div>
+    <!-- ➕ Más productos -->
+  </div>
+
+  <div class="paginador" data-seccion="anillos-oro"></div>
+</section>
+
+
+
+
+
+
+<section id="pandora" class="catalogo-section seccion-animada">
+  <h2>Anillos Pandora</h2>
+  <div class="grid-productos grid-pandora">
+    <div class="producto-card visible" ...>…</div>
+    <div class="producto-card" ...>…</div>
+    <div class="producto-card" ...>…</div>
+    <div class="producto-card" ...>…</div>
+    <div class="producto-card" ...>…</div>
+  </div>
+  <button class="btn-ver-mas" data-seccion="pandora">Ver más</button>
+</section>
+
 
 
   <!-- ORO -->
@@ -866,6 +903,27 @@
     <button class="btn-ver-mas" data-seccion="oro">Ver más</button>
   </section>
 
+
+
+   <div class="grid-productos">
+      <div class="producto-card" ...>…</div>
+      <div class="producto-card" ...>…</div>
+      <div class="producto-card" ...>…</div>
+    </div>
+    <button class="btn-ver-mas" data-seccion="oro">Ver más</button>
+  </section>
+
+
+   <div class="grid-productos">
+      <div class="producto-card" ...>…</div>
+      <div class="producto-card" ...>…</div>
+      <div class="producto-card" ...>…</div>
+    </div>
+    <button class="btn-ver-mas" data-seccion="oro">Ver más</button>
+  </section>
+
+  
+
   <!-- PANDORA -->
   <section id="pandora" class="catalogo-section seccion-animada">
     <h2>Anillos Pandora</h2>
@@ -876,6 +934,23 @@
     </div>
     <button class="btn-ver-mas" data-seccion="pandora">Ver más</button>
   </section>
+
+
+
+
+<section id="nombre-seccion" class="catalogo-section seccion-animada">
+  <h2>Título de la sección</h2>
+  <div class="grid-productos">
+    <!-- Producto 1 (con clase visible si quieres que se muestre al cargar) -->
+    <div class="producto-card visible" ...>…</div>
+    <div class="producto-card" ...>…</div>
+    ...
+  </div>
+  <button class="btn-ver-mas" data-seccion="nombre-seccion">Ver más</button>
+</section>
+
+
+
 
  <!-- PROMOCIONES -->
   <section id="promociones" class="promociones-section seccion-animada">
@@ -998,68 +1073,15 @@
           window.open(`https://wa.me/573209074830?text=${encodeURIComponent(mensaje)}`, "_blank");
         };
       });
-
-      // Ver más
-      document.querySelectorAll(".btn-ver-mas").forEach(b => {
-        b.onclick = () => {
-          const sec = document.getElementById(b.dataset.seccion);
-          const cards = Array.from(sec.querySelectorAll(".producto-card"));
-          const ocultos = cards.filter(c=> c.style.display==="none");
-          ocultos.slice(0,3).forEach(c=>c.style.display="block");
-          if(ocultos.length <=3) b.style.display="none";
-        };
-      });
-
-      // Ocultar extras
-      window.onload = () => {
-        document.querySelectorAll(".catalogo-section").forEach(sec=>{
-          sec.querySelectorAll(".producto-card").forEach((c,i)=> {
-            c.style.display = i < 6 ? "block" : "none";
-          });
-        });
-      };
-    });
-  </script>
+    })
+     
 
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const CANTIDAD_POR_CLICK = 6;
-
-  document.querySelectorAll(".btn-ver-mas").forEach(boton => {
-    const idSeccion = boton.dataset.seccion;
-    const seccion = document.getElementById(idSeccion);
-    const productos = seccion.querySelectorAll(".producto-card");
-    let mostrados = 0;
-
-    const mostrarInicial = () => {
-      for (let i = 0; i < CANTIDAD_POR_CLICK; i++) {
-        if (productos[mostrados]) {
-          productos[mostrados].classList.add("visible");
-          mostrados++;
-        }
-      }
-      if (mostrados >= productos.length) {
-        boton.style.display = "none";
-      }
-    };
-
-    mostrarInicial(); // Mostrar los primeros al cargar
-
-    boton.addEventListener("click", () => {
-      for (let i = 0; i < CANTIDAD_POR_CLICK; i++) {
-        if (productos[mostrados]) {
-          productos[mostrados].classList.add("visible");
-          mostrados++;
-        }
-      }
-      if (mostrados >= productos.length) {
-        boton.style.display = "none";
-      }
-    });
-  });
-});
+     
 </script>
+
+ <script src="js/script.js"></script>
+
 
 </body>
 </html>
