@@ -17,14 +17,15 @@
     }
     @media(max-width:768px){
       .grid-productos{
-        grid-template-columns:repeat(auto-fit,minmax(180px,2fr));
+        grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
       }
     }
-    @media(max-width:180px){
-      .grid-productos{
-        grid-template-columns:2fr;
-      }
-    }
+   @media (max-width: 480px) {
+  .grid-productos {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
     /* Botón ver más centrado y con margen */
     .btn-ver-mas {
       margin: 20px auto;

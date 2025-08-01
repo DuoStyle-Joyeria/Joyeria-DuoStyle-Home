@@ -836,9 +836,9 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .grid-productos {
-    grid-template-columns: repeat(2, 2fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .producto-card img {
