@@ -16,14 +16,11 @@
       gap: 20px;
       padding: 20px;
     }
-    @media(max-width:768px){
-      .grid-productos{
-        grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-      }
-    }
+    
 
 
-@media (max-width: 900px) {
+
+@media (max-width: 767px) {
   .producto-card {
     padding: 20px;
     border-radius: 14px;
@@ -67,7 +64,14 @@
     font-size: 0.85rem;
     border-radius: 25px;
   }
+}
 
+
+    
+   @media (max-width: 900px) {
+  .grid-productos {
+    grid-template-columns: repeat(2, 2fr);
+  }
 }  </style>
 
 
