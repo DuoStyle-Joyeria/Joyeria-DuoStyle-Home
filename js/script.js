@@ -139,35 +139,45 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // 🟣 Paginador independiente por sección
-  const productosPorPagina = 9;
+const productosPorPagina = 9;
 
-  document.querySelectorAll(".grid-productos").forEach(grid => {
-    const productos = Array.from(grid.querySelectorAll(".producto-card"));
-    if (productos.length === 0) return;
+document.querySelectorAll(".grid-productos").forEach(grid => {
+  const productos = Array.from(grid.querySelectorAll(".producto-card"));
+  if (productos.length === 0) return;
 
-    let paginador = document.createElement("div");
-    paginador.className = "paginador";
-    grid.after(paginador);
+  let paginador = document.createElement("div");
+  paginador.className = "paginador";
+  grid.after(paginador);
 
-    const totalPaginas = Math.ceil(productos.length / productosPorPagina);
-    let paginaActual = 1;
+  const totalPaginas = Math.ceil(productos.length / productosPorPagina);
+  let paginaActual = 1;
 
-    function mostrarPagina(pagina) {
-      productos.forEach((producto, index) => {
-        const mostrar = index >= (pagina - 1) * productosPorPagina && index < pagina * productosPorPagina;
-        producto.style.display = mostrar ? "flex" : "none";
+  function mostrarPagina(pagina) {
+    productos.forEach((producto, index) => {
+      const mostrar = index >= (pagina - 1) * productosPorPagina && index < pagina * productosPorPagina;
+      producto.style.display = mostrar ? "flex" : "none";
+    });
+
+    // Regenerar botones
+    paginador.innerHTML = "";
+    for (let i = 1; i <= totalPaginas; i++) {
+      const boton = document.createElement("button");
+      boton.textContent = i;
+      boton.className = "pagina-btn" + (i === pagina ? " activo" : "");
+      boton.addEventListener("click", () => {
+        mostrarPagina(i);
+
+        // ⬆️ Hacer scroll al inicio de la sección (padre de grid)
+        const seccion = grid.closest("section") || grid.parentElement;
+        if (seccion) {
+          seccion.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       });
-
-      paginador.innerHTML = "";
-      for (let i = 1; i <= totalPaginas; i++) {
-        const boton = document.createElement("button");
-        boton.textContent = i;
-        boton.className = "pagina-btn" + (i === pagina ? " activo" : "");
-        boton.addEventListener("click", () => mostrarPagina(i));
-        paginador.appendChild(boton);
-      }
+      paginador.appendChild(boton);
     }
 
-    mostrarPagina(paginaActual);
-  });
-});
+    paginaActual = pagina;
+  }
+
+  mostrarPagina(paginaActual);
+});})
