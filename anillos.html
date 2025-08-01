@@ -7,7 +7,29 @@
   <link rel="stylesheet" href="css/anillos.css">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
   
-  
+   
+  <style>
+  .grid-productos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .grid-productos {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .grid-productos {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+
 </head>
 <body>
   <!-- HEADER ... igual que antes -->
