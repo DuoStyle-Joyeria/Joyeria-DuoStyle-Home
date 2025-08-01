@@ -863,3 +863,33 @@ body {
     font-size: 1.8rem;
   }
 }
+
+
+
+/* ====================== */
+/* RESPONSIVE */
+/* ====================== */
+@media screen and (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+
+  .main-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .categorias,
+  .promo-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .producto-card {
+    min-width: 85%;
+  }
+
+  .modal-galeria-track {
+    justify-content: center;
+  }
+}
