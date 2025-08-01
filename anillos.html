@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Open+Sans&display=swap" rel="stylesheet">
   
    
-  
+
 <style>
   /* 🟨 Estilo general de la grilla */
   .grid-productos {
@@ -18,67 +18,64 @@
     padding: 20px;
   }
 
-  @media (max-width: 768px) {
-    /* 🟢 Aumentar el ancho de tarjetas reduciendo padding horizontal */
-    .grid-productos {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      padding: 10px 6px; /* Más cerca de los bordes */
-    }
 
-    /* 🧩 Tarjeta de producto más compacta */
-    .producto-card {
-      padding: 12px 10px;
-      border-radius: 14px;
-      background-color: #fff;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .producto-card img {
-      width: 100%;
-      height: 160px; /* Más horizontal */
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 8px;
-    }
-
-    .producto-card h3 {
-      font-size: 0.9rem;
-      margin: 6px 0 4px;
-    }
-
-    .producto-card p {
-      font-size: 0.75rem;
-      margin-bottom: 4px;
-      line-height: 1.2;
-    }
-
-    .precio {
-      font-size: 0.85rem;
-      margin: 6px 0;
-    }
-
-    .precio-actual {
-      font-size: 0.95rem;
-      color: #C1A14A;
-      margin-right: 6px;
-    }
-
-    .precio-anterior {
-      font-size: 0.8rem;
-      color: #999;
-    }
-
-    .btn-wsp-producto {
-      font-size: 0.75rem;
-      padding: 8px 14px;
-      border-radius: 25px;
-      margin-top: 8px;
-    }
+     @media (max-width: 768px) {
+  .grid-productos {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 10px;
   }
+
+  .producto-card {
+    padding: 12px 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .producto-card img {
+    width: 100%;
+    height: 120px; /* 🔽 Menos vertical */
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 6px;
+  }
+
+  .producto-card h3 {
+    font-size: 0.88rem;
+    margin-bottom: 4px;
+  }
+
+  .producto-card p {
+    font-size: 0.76rem;
+    margin-bottom: 4px;
+  }
+
+  .precio {
+    font-size: 0.85rem;
+    margin: 4px 0;
+  }
+
+  .precio-actual {
+    font-size: 0.95rem;
+    color: #C1A14A;
+    margin-right: 6px;
+  }
+
+  .precio-anterior {
+    font-size: 0.8rem;
+    color: #999;
+  }
+
+  .btn-wsp-producto {
+    font-size: 0.76rem;
+    padding: 8px 12px;
+    border-radius: 25px;
+    margin-top: 6px;
+  }
+}
+
+
+
 
   /* Extra para pantallas un poco más grandes */
   @media (max-width: 480px) {
