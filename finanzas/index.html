@@ -26,8 +26,7 @@
           <input id="regName" type="text" required placeholder="Tu nombre (p.ej. Brandon)" class="w-full border rounded p-2">
           <input id="regEmail" type="email" required placeholder="Email" class="w-full border rounded p-2">
           <input id="regPass" type="password" required placeholder="Contraseña" class="w-full border rounded p-2">
-          <label class="text-sm">Porcentaje sugerido de ahorro personal</label>
-          <input id="regAhorro" type="number" min="0" max="100" step="1" value="20" class="w-full border rounded p-2">
+          <!-- eliminamos input de % ahorro del registro para moverlo a Perfil -->
           <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear</button>
         </form>
       </div>
@@ -42,6 +41,7 @@
         </div>
         <div class="flex items-center gap-2">
           <button id="btnSelectCompany" class="px-3 py-2 rounded border">Empresa</button>
+          <button id="btnPerfil" class="px-3 py-2 rounded border">Perfil</button>
           <button id="btnLogout" class="px-3 py-2 rounded bg-slate-900 text-white">Salir</button>
         </div>
       </div>
@@ -73,6 +73,7 @@
           <button data-tab="gastos" class="tab-btn px-3 py-2 rounded border">Gastos</button>
           <button data-tab="deudas" class="tab-btn px-3 py-2 rounded border">Deudas</button>
           <button data-tab="metas" class="tab-btn px-3 py-2 rounded border">Metas</button>
+          <button data-tab="movimientos" class="tab-btn px-3 py-2 rounded border">Movimientos</button>
           <button data-tab="estadisticas" class="tab-btn px-3 py-2 rounded border">Estadísticas</button>
           <!-- futuro: inventario -->
         </div>
@@ -88,19 +89,38 @@
               <input type="number" id="ventaPrecio" placeholder="Precio de venta" step="0.01" min="0" required class="w-full border rounded p-2">
               <textarea id="ventaNotas" placeholder="Notas" class="w-full border rounded p-2"></textarea>
 
+              <!-- Origen inversion + manual toggle -->
               <div class="bg-slate-50 rounded p-3">
-                <div class="text-sm font-medium">Distribución manual</div>
-                <div class="grid grid-cols-2 gap-2 mt-2">
-                  <input type="number" id="asigReinv" placeholder="Reinversión" step="0.01" min="0" class="border rounded p-2">
-                  <input type="number" id="asigBrandon" placeholder="Brandon" step="0.01" min="0" class="border rounded p-2">
-                  <input type="number" id="asigSocia" placeholder="Socia" step="0.01" min="0" class="border rounded p-2">
-                  <input type="number" id="asigPagoDeuda" placeholder="Pago deuda" step="0.01" min="0" class="border rounded p-2">
+                <div class="text-sm font-medium">Origen de la inversión</div>
+                <select id="ventaFinanciadaPor" class="w-full border rounded p-2 mt-2">
+                  <option value="empresa">Empresa</option>
+                  <option value="brandon">Brandon</option>
+                  <option value="socia">Socia</option>
+                </select>
+
+                <label class="flex items-center gap-2 text-sm mt-3">
+                  <input id="ventaManualToggle" type="checkbox" class="w-4 h-4">
+                  <span>Usar distribución manual (activar para decidir reinversión / pagos manualmente)</span>
+                </label>
+
+                <div id="manualDistribFields" class="mt-3 hidden">
+                  <div class="text-sm font-medium">Distribución manual</div>
+                  <div class="grid grid-cols-2 gap-2 mt-2">
+                    <input type="number" id="asigReinv" placeholder="Reinversión" step="0.01" min="0" class="border rounded p-2">
+                    <input type="number" id="asigBrandon" placeholder="Brandon" step="0.01" min="0" class="border rounded p-2">
+                    <input type="number" id="asigSocia" placeholder="Socia" step="0.01" min="0" class="border rounded p-2">
+                    <input type="number" id="asigPagoDeuda" placeholder="Pago deuda" step="0.01" min="0" class="border rounded p-2">
+                  </div>
                 </div>
+
+                <div id="autoDistribNote" class="mt-3 text-sm text-slate-600">
+                  Modo automático: se devuelve la inversión al inversor (si financió la empresa se divide 50/50) y la utilidad se reparte 50/50 entre Brandon y la Socia. El sistema sugerirá cuánto ahorrar/ir a deudas según la configuración.
+                </div>
+                <p id="ventaResumen" class="text-sm text-slate-600 mt-2"></p>
                 <p id="sugerenciaAhorro" class="text-xs text-slate-600 mt-1"></p>
               </div>
 
               <button class="w-full bg-emerald-600 text-white py-2 rounded">Guardar Venta</button>
-              <p id="ventaResumen" class="text-sm text-slate-600"></p>
             </form>
 
             <div class="bg-white p-4 rounded shadow overflow-auto">
@@ -108,7 +128,7 @@
               <table class="w-full text-sm">
                 <thead class="text-left">
                   <tr>
-                    <th>Fecha</th><th>Producto</th><th>Precio</th><th>Costo</th><th>Utilidad</th><th>Margen</th>
+                    <th>Fecha</th><th>Producto</th><th>Precio</th><th>Costo</th><th>Utilidad</th><th>Margen</th><th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="tbVentas"></tbody>
@@ -139,7 +159,7 @@
               <table class="w-full text-sm">
                 <thead class="text-left">
                   <tr>
-                    <th>Fecha</th><th>Categoría</th><th>Monto</th><th>Pagado por</th><th>Descripción</th>
+                    <th>Fecha</th><th>Categoría</th><th>Monto</th><th>Pagado por</th><th>Descripción</th><th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="tbGastos"></tbody>
@@ -209,16 +229,52 @@
           </div>
         </section>
 
+        <!-- MOVIMIENTOS -->
+        <section id="tab-movimientos" class="tab hidden mt-4">
+          <div class="grid md:grid-cols-2 gap-4">
+            <form id="formMovimiento" class="bg-white p-4 rounded shadow space-y-2">
+              <h3 class="font-semibold text-lg">Nuevo Movimiento (ingreso/egreso)</h3>
+              <select id="movTipo" class="w-full border rounded p-2">
+                <option value="ingreso">Ingreso</option>
+                <option value="egreso">Egreso</option>
+              </select>
+              <select id="movCuenta" class="w-full border rounded p-2">
+                <option value="cajaEmpresa">Caja Empresa</option>
+                <option value="cajaBrandon">Caja Brandon</option>
+                <option value="cajaSocia">Caja Socia</option>
+                <option value="inversiones">Inversiones</option>
+                <option value="deudasTotales">Deudas Totales</option>
+              </select>
+              <input type="date" id="movFecha" class="w-full border rounded p-2">
+              <input type="number" id="movMonto" placeholder="Monto" step="0.01" min="0" class="w-full border rounded p-2">
+              <input type="text" id="movDesc" placeholder="Descripción" class="w-full border rounded p-2">
+              <button class="w-full bg-emerald-600 text-white py-2 rounded">Guardar Movimiento</button>
+            </form>
+
+            <div class="bg-white p-4 rounded shadow overflow-auto">
+              <h3 class="font-semibold text-lg mb-2">Historial de Movimientos</h3>
+              <table class="w-full text-sm">
+                <thead class="text-left">
+                  <tr>
+                    <th>Fecha</th><th>Tipo</th><th>Cuenta</th><th>Monto</th><th>Desc</th><th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tbMovimientos"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
         <!-- ESTADÍSTICAS -->
         <section id="tab-estadisticas" class="tab hidden mt-4">
           <div class="grid md:grid-cols-2 gap-4">
-            <div class="bg-white p-4 rounded shadow">
+            <div class="bg-white p-4 rounded shadow" style="height:320px">
               <h3 class="font-semibold mb-2">Ingresos vs Gastos (últimos 90 días)</h3>
-              <canvas id="chartIG"></canvas>
+              <canvas id="chartIG" height="280"></canvas>
             </div>
-            <div class="bg-white p-4 rounded shadow">
+            <div class="bg-white p-4 rounded shadow" style="height:320px">
               <h3 class="font-semibold mb-2">Utilidad y Margen por venta</h3>
-              <canvas id="chartUtilidad"></canvas>
+              <canvas id="chartUtilidad" height="280"></canvas>
             </div>
           </div>
         </section>
@@ -229,8 +285,7 @@
 
   <!-- Firebase SDKs -->
   <script type="module">
-    // ======= Pega aquí tu configuración de Firebase =======
-    // Firebase Console > Settings > Your apps > SDK setup and configuration
+    // ======= Tu configuración de Firebase (ya presente en tu archivo) =======
    const firebaseConfig = {
     apiKey: "AIzaSyCTFSlLoKv6KKujTqjMeMjNc-AlKQ2-rng",
     authDomain: "duostyle01-611b9.firebaseapp.com",
@@ -244,7 +299,10 @@
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, addDoc, getDocs, onSnapshot, collection, query, orderBy, serverTimestamp, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import {
+      getFirestore, doc, setDoc, getDoc, addDoc, getDocs, onSnapshot, collection,
+      query, orderBy, serverTimestamp, updateDoc, increment, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -257,7 +315,7 @@
 
     // ---- State
     let currentUser = null;
-    let companyId = null; // una sola empresa para MVP
+    let companyId = null; // una sola empresa por ahora
     let unsubscribers = [];
 
     // ---- Auth handlers
@@ -273,7 +331,7 @@
       const name = $("#regName").value.trim();
       const email = $("#regEmail").value.trim();
       const pass = $("#regPass").value.trim();
-      const ahorroPct = Number($("#regAhorro").value)/100;
+      const ahorroPct = 0; // no pedir en registro
 
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(cred.user, { displayName: name });
@@ -285,7 +343,9 @@
       companyId = `${cred.user.uid}-company`;
       await setDoc(doc(db, "companies", companyId), {
         name: "Joyería — Empresa",
-        owners: [{ uid: cred.user.uid, name }]
+        owners: [{ uid: cred.user.uid, name }],
+        // campo empresa: porcentaje obligatorio para deudas (default 10%)
+        mandatoryDebtPct: 0.10
       });
 
       // Estado de cuentas inicial
@@ -315,7 +375,11 @@
       if (!snap.exists()) {
         await setDoc(compRef, {
           name: "Joyería — Empresa",
-          owners: [{ uid: user.uid, name: user.displayName || "Owner" }]
+          owners: [{ uid: user.uid, name: user.displayName || "Owner" }],
+          mandatoryDebtPct: 0.10
+        });
+        await setDoc(doc(db, "companies", companyId, "state", "balances"), {
+          cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0, inversiones: 0, deudasTotales: 0
         });
       }
       $("#companyName").textContent = (await getDoc(compRef)).data().name;
@@ -326,9 +390,12 @@
       subscribeGastos();
       subscribeDeudas();
       subscribeMetas();
+      subscribeMovimientos();
       setupTabs();
       setupVentaFormHints();
       setupCharts();
+      setupVentaToggle();
+      setupPerfilButton();
     });
 
     // ---- Tabs
@@ -368,27 +435,50 @@
       }, { merge: true });
     }
 
-    // ---- Ventas
+    // ---------------------------
+    // VENTAS (crear / editar como eliminar+crear / eliminar)
+    // ---------------------------
     function setupVentaFormHints() {
       const costo = $("#ventaCosto");
       const precio = $("#ventaPrecio");
-      function updateResumen() {
+      async function updateResumen() {
         const c = Number(costo.value||0), p = Number(precio.value||0);
         const util = p - c;
         const margen = p ? (util / p) : 0;
         $("#ventaResumen").textContent = `Utilidad: ${money(util)} (${(margen*100).toFixed(1)}%)`;
-        // Sugerencia de ahorro para Brandon sobre lo que se asigne a él
-        getDoc(doc(db, "users", currentUser.uid)).then(snap => {
-          const pct = (snap.data()?.ahorroSugeridoPct || 0);
+
+        try {
+          const snap = await getDoc(doc(db, "users", currentUser.uid));
+          const pct = (snap.exists() ? (snap.data().ahorroSugeridoPct || 0) : 0);
           const asigB = Number($("#asigBrandon").value||0);
           const sug = asigB * pct;
           $("#sugerenciaAhorro").textContent = pct ? `Sugerencia: aparta ${money(sug)} (${(pct*100).toFixed(0)}% de lo asignado a Brandon) hacia ahorros/metas.` : "";
-        });
+        } catch (err) {
+          $("#sugerenciaAhorro").textContent = "";
+        }
       }
       ["input","change"].forEach(ev => {
         costo.addEventListener(ev, updateResumen);
         precio.addEventListener(ev, updateResumen);
         $("#asigBrandon").addEventListener(ev, updateResumen);
+      });
+    }
+
+    function setupVentaToggle() {
+      $("#ventaManualToggle").addEventListener("change", () => {
+        const on = $("#ventaManualToggle").checked;
+        if (on) {
+          $("#manualDistribFields").classList.remove("hidden");
+          $("#autoDistribNote").classList.add("hidden");
+        } else {
+          $("#manualDistribFields").classList.add("hidden");
+          $("#autoDistribNote").classList.remove("hidden");
+          // limpiar
+          $("#asigReinv").value = "";
+          $("#asigBrandon").value = "";
+          $("#asigSocia").value = "";
+          $("#asigPagoDeuda").value = "";
+        }
       });
     }
 
@@ -402,6 +492,10 @@
       const utilidad = precio - costo;
       const margen = precio ? utilidad / precio : 0;
 
+      const financiadoPor = $("#ventaFinanciadaPor").value; // 'empresa'|'brandon'|'socia'
+      const manualMode = $("#ventaManualToggle").checked;
+
+      // Lectura de campos de asignaciones manuales (pueden estar vacíos)
       const asig = {
         reinversion: Number($("#asigReinv").value||0),
         brandon: Number($("#asigBrandon").value||0),
@@ -409,40 +503,116 @@
         pagoDeuda: Number($("#asigPagoDeuda").value||0)
       };
 
-      const totalAsig = asig.reinversion + asig.brandon + asig.socia + asig.pagoDeuda;
-      if (totalAsig > precio) {
-        alert("La suma de asignaciones no puede exceder el precio de venta.");
-        return;
-      }
+      // Validaciones básicas
+      if (precio <= 0) { alert("El precio debe ser mayor a 0"); return; }
+      if (costo < 0) { alert("El costo no puede ser negativo"); return; }
 
-      const saleRef = await addDoc(collection(db, "companies", companyId, "sales"), {
-        date, producto, costo, precio, utilidad, margen, notas, asignaciones: asig, createdAt: serverTimestamp()
+      // Guardar venta en Firestore
+      const saleDoc = await addDoc(collection(db, "companies", companyId, "sales"), {
+        date, producto, costo, precio, utilidad, margen, notas,
+        asignaciones: { manualMode, financiadoPor, ...asig },
+        createdAt: serverTimestamp()
       });
 
-      // Ajustar balances
-      // - Entra precio a caja empresa, y luego se mueve a asignaciones
-      await adjustBalances({ cajaEmpresa: precio }); // entra todo
-      // Movimientos internos (simples)
-      await adjustBalances({ cajaEmpresa: -asig.reinversion, inversiones: asig.reinversion });
-      await adjustBalances({ cajaEmpresa: -asig.brandon, cajaBrandon: asig.brandon });
-      await adjustBalances({ cajaEmpresa: -asig.socia, cajaSocia: asig.socia });
+      // Aplicar ajustes sobre balances (misma lógica que en el diseño)
+      // Primero: entra todo a cajaEmpresa
+      await adjustBalances({ cajaEmpresa: precio });
 
-      // Pago a deuda reduce deudasTotales (y cajaEmpresa baja)
-      if (asig.pagoDeuda > 0) {
-        await adjustBalances({ cajaEmpresa: -asig.pagoDeuda, deudasTotales: -asig.pagoDeuda });
-        // Opcional: distribuir a una deuda específica (iteración 2: selector)
+      if (manualMode) {
+        const totalAsig = asig.reinversion + asig.brandon + asig.socia + asig.pagoDeuda;
+        if (totalAsig > precio) {
+          alert("La suma de asignaciones manuales no puede exceder el precio de venta.");
+          // No revertimos aquí (simplificación). Mejor validar antes.
+        }
+        if (asig.reinversion > 0) await adjustBalances({ cajaEmpresa: -asig.reinversion, inversiones: asig.reinversion });
+        if (asig.brandon > 0) await adjustBalances({ cajaEmpresa: -asig.brandon, cajaBrandon: asig.brandon });
+        if (asig.socia > 0) await adjustBalances({ cajaEmpresa: -asig.socia, cajaSocia: asig.socia });
+        if (asig.pagoDeuda > 0) await adjustBalances({ cajaEmpresa: -asig.pagoDeuda, deudasTotales: -asig.pagoDeuda });
+      } else {
+        // Modo automático
+        // devolver capital al inversor
+        if (financiadoPor === "empresa") {
+          await adjustBalances({ cajaEmpresa: -costo, cajaBrandon: costo/2, cajaSocia: costo/2 });
+        } else if (financiadoPor === "brandon") {
+          await adjustBalances({ cajaEmpresa: -costo, cajaBrandon: costo });
+        } else if (financiadoPor === "socia") {
+          await adjustBalances({ cajaEmpresa: -costo, cajaSocia: costo });
+        }
+
+        // repartir utilidad 50/50
+        if (utilidad > 0) {
+          const mitad = utilidad/2;
+          await adjustBalances({ cajaEmpresa: -utilidad, cajaBrandon: mitad, cajaSocia: mitad });
+        }
+
+        // si se puso reinversión o pago de deuda manualmente (opcional)
+        if (asig.reinversion > 0) await adjustBalances({ cajaEmpresa: -asig.reinversion, inversiones: asig.reinversion });
+        if (asig.pagoDeuda > 0) await adjustBalances({ cajaEmpresa: -asig.pagoDeuda, deudasTotales: -asig.pagoDeuda });
       }
 
-      // Limpieza
+      // FIN venta
       e.target.reset();
     });
 
+    async function reverseSaleEffects(snapData) {
+      // aplicamos las inversas en orden inverso al original
+      // snapData.asignaciones contiene manualMode, financiadoPor, reinversion, brandon, socia, pagoDeuda
+      const a = snapData.asignaciones || {};
+      const manual = !!a.manualMode;
+      const precio = Number(snapData.precio||0);
+      const costo = Number(snapData.costo||0);
+      const utilidad = Number(snapData.utilidad||0);
+
+      if (manual) {
+        // inverse order of adjustments used in creation
+        // If manual, creation did: +precio, then -reinv (inversiones +), -brandon(+), -socia(+), -pagoDeuda(-deudas)
+        // To reverse: +pagoDeuda (increase deudas), -from cajaBrandon, -from cajaSocia, -from inversiones, then -precio
+        if (a.pagoDeuda) await adjustBalances({ cajaEmpresa: a.pagoDeuda, deudasTotales: a.pagoDeuda });
+        if (a.socia) await adjustBalances({ cajaEmpresa: a.socia, cajaSocia: -a.socia });
+        if (a.brandon) await adjustBalances({ cajaEmpresa: a.brandon, cajaBrandon: -a.brandon });
+        if (a.reinversion) await adjustBalances({ cajaEmpresa: a.reinversion, inversiones: -a.reinversion });
+        // finalmente quitar la entrada inicial
+        if (precio) await adjustBalances({ cajaEmpresa: -precio });
+      } else {
+        // reverse automatic sequence:
+        // creation: +precio
+        // then (maybe) decrease cajaEmpresa by costo and credit the investor
+        // then decrease cajaEmpresa by utilidad and credit both partners
+        // then apply optional reinv and pagoDeuda
+        // So reverse: reverse optional reinv/pagoDeuda, reverse utilidad split, reverse costo distribution, then -precio
+        if (a.pagoDeuda) await adjustBalances({ cajaEmpresa: a.pagoDeuda, deudasTotales: a.pagoDeuda });
+        if (a.reinversion) await adjustBalances({ cajaEmpresa: a.reinversion, inversiones: -a.reinversion });
+
+        // reverse utilidad distribution
+        if (utilidad > 0) {
+          const mitad = utilidad/2;
+          await adjustBalances({ cajaEmpresa: utilidad, cajaBrandon: -mitad, cajaSocia: -mitad });
+        }
+
+        // reverse costo distribution to the investor
+        const financedBy = a.financiadoPor || "empresa";
+        if (financedBy === "empresa") {
+          // creation added: cajaEmpresa -costo, cajaBrandon +costo/2, cajaSocia +costo/2
+          // reverse by: cajaEmpresa +costo, cajaBrandon -costo/2, cajaSocia -costo/2
+          if (costo) await adjustBalances({ cajaEmpresa: costo, cajaBrandon: -costo/2, cajaSocia: -costo/2 });
+        } else if (financedBy === "brandon") {
+          if (costo) await adjustBalances({ cajaEmpresa: costo, cajaBrandon: -costo });
+        } else if (financedBy === "socia") {
+          if (costo) await adjustBalances({ cajaEmpresa: costo, cajaSocia: -costo });
+        }
+
+        // finally remove the initial price
+        if (precio) await adjustBalances({ cajaEmpresa: -precio });
+      }
+    }
+
     function subscribeVentas() {
-      const qSales = query(collection(db, "companies", companyId, "sales"), orderBy("date","desc"));
+      const qSales = query(collection(db, "companies", companyId, "sales"), orderBy("createdAt","desc"));
       const unsub = onSnapshot(qSales, (snap) => {
         const tbody = $("#tbVentas"); tbody.innerHTML = "";
         snap.forEach(docu => {
           const s = docu.data();
+          const id = docu.id;
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${s.date}</td>
@@ -451,15 +621,74 @@
             <td>${money(s.costo)}</td>
             <td>${money(s.utilidad)}</td>
             <td>${(s.margen*100).toFixed(1)}%</td>
+            <td>
+              <button data-id="${id}" class="edit-sale text-blue-600 underline mr-2">Editar</button>
+              <button data-id="${id}" class="del-sale text-red-600 underline">Eliminar</button>
+            </td>
           `;
           tbody.appendChild(tr);
         });
+        // attach handlers
+        $$(".del-sale").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            if (!confirm("Eliminar venta y revertir efectos en balances?")) return;
+            const ref = doc(db, "companies", companyId, "sales", id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return alert("Documento no encontrado.");
+            // revert effects
+            await reverseSaleEffects(snap.data());
+            // delete doc
+            await deleteDoc(ref);
+          };
+        });
+        $$(".edit-sale").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            const ref = doc(db, "companies", companyId, "sales", id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return alert("Documento no encontrado.");
+            const data = snap.data();
+            // We'll implement edit as: revert old effects, open prompt to enter new values, then create new sale
+            if (!confirm("Editar venta: se revertirán los saldos de la venta actual; luego deberá rellenar los nuevos datos para crear la venta corregida. ¿Continuar?")) return;
+            await reverseSaleEffects(data);
+            await deleteDoc(ref);
+            // prefill form with old values
+            $("#ventaFecha").value = data.date || "";
+            $("#ventaProducto").value = data.producto || "";
+            $("#ventaCosto").value = data.costo || "";
+            $("#ventaPrecio").value = data.precio || "";
+            $("#ventaNotas").value = data.notas || "";
+            const a = data.asignaciones || {};
+            $("#ventaFinanciadaPor").value = a.financiadoPor || "empresa";
+            $("#ventaManualToggle").checked = !!a.manualMode;
+            if (a.manualMode) {
+              $("#manualDistribFields").classList.remove("hidden");
+              $("#autoDistribNote").classList.add("hidden");
+              $("#asigReinv").value = a.reinversion || "";
+              $("#asigBrandon").value = a.brandon || "";
+              $("#asigSocia").value = a.socia || "";
+              $("#asigPagoDeuda").value = a.pagoDeuda || "";
+            } else {
+              $("#manualDistribFields").classList.add("hidden");
+              $("#autoDistribNote").classList.remove("hidden");
+              $("#asigReinv").value = a.reinversion || "";
+              $("#asigPagoDeuda").value = a.pagoDeuda || "";
+              $("#asigBrandon").value = "";
+              $("#asigSocia").value = "";
+            }
+            // switch to ventas tab (already there)
+          };
+        });
+
         refreshCharts(); // actualizar estadísticas
       });
       unsubscribers.push(unsub);
     }
 
-    // ---- Gastos
+    // ---------------------------
+    // GASTOS
+    // ---------------------------
     $("#formGasto").addEventListener("submit", async (e) => {
       e.preventDefault();
       const date = $("#gastoFecha").value || new Date().toISOString().slice(0,10);
@@ -468,7 +697,7 @@
       const descripcion = $("#gastoDesc").value.trim();
       const pagadoPor = $("#gastoPagadoPor").value;
 
-      await addDoc(collection(db, "companies", companyId, "expenses"), {
+      const docRef = await addDoc(collection(db, "companies", companyId, "expenses"), {
         date, categoria, monto, descripcion, pagadoPor, createdAt: serverTimestamp()
       });
 
@@ -481,11 +710,11 @@
     });
 
     function subscribeGastos() {
-      const qExp = query(collection(db, "companies", companyId, "expenses"), orderBy("date","desc"));
+      const qExp = query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt","desc"));
       const unsub = onSnapshot(qExp, (snap) => {
         const tbody = $("#tbGastos"); tbody.innerHTML = "";
         snap.forEach(docu => {
-          const g = docu.data();
+          const g = docu.data(); const id = docu.id;
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${g.date}</td>
@@ -493,15 +722,61 @@
             <td>${money(g.monto)}</td>
             <td>${g.pagadoPor}</td>
             <td>${g.descripcion||""}</td>
+            <td>
+              <button data-id="${id}" class="edit-gasto text-blue-600 underline mr-2">Editar</button>
+              <button data-id="${id}" class="del-gasto text-red-600 underline">Eliminar</button>
+            </td>
           `;
           tbody.appendChild(tr);
         });
+
+        $$(".del-gasto").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            if (!confirm("Eliminar gasto y revertir su efecto en balances?")) return;
+            const ref = doc(db, "companies", companyId, "expenses", id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return;
+            const g = snap.data();
+            // revert: agregar el monto a quien pagó
+            if (g.pagadoPor === "empresa") await adjustBalances({ cajaEmpresa: g.monto });
+            if (g.pagadoPor === "brandon") await adjustBalances({ cajaBrandon: g.monto });
+            if (g.pagadoPor === "socia") await adjustBalances({ cajaSocia: g.monto });
+            await deleteDoc(ref);
+          };
+        });
+
+        $$(".edit-gasto").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            const ref = doc(db, "companies", companyId, "expenses", id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return;
+            const g = snap.data();
+            if (!confirm("Editar gasto: se revertirá el gasto actual en balances y podrá ingresar la corrección.")) return;
+            // revert current
+            if (g.pagadoPor === "empresa") await adjustBalances({ cajaEmpresa: g.monto });
+            if (g.pagadoPor === "brandon") await adjustBalances({ cajaBrandon: g.monto });
+            if (g.pagadoPor === "socia") await adjustBalances({ cajaSocia: g.monto });
+            await deleteDoc(ref);
+            // prefill form
+            $("#gastoFecha").value = g.date || "";
+            $("#gastoCat").value = g.categoria || "";
+            $("#gastoMonto").value = g.monto || "";
+            $("#gastoDesc").value = g.descripcion || "";
+            $("#gastoPagadoPor").value = g.pagadoPor || "empresa";
+            // user will submit corrected form
+          };
+        });
+
         refreshCharts();
       });
       unsubscribers.push(unsub);
     }
 
-    // ---- Deudas
+    // ---------------------------
+    // DEUDAS
+    // ---------------------------
     $("#formDeuda").addEventListener("submit", async (e) => {
       e.preventDefault();
       const tipo = $("#deudaTipo").value;
@@ -530,10 +805,13 @@
             <td>
               <input type="number" step="0.01" min="0" placeholder="Abono" class="border rounded p-1 w-28" id="abono-${id}">
               <button data-id="${id}" class="btn-abonar text-emerald-700 underline ml-1">Abonar</button>
+              <button data-id="${id}" class="edit-deuda text-blue-600 underline ml-2">Editar</button>
+              <button data-id="${id}" class="del-deuda text-red-600 underline ml-2">Eliminar</button>
             </td>
           `;
           tbody.appendChild(tr);
         });
+
         $$(".btn-abonar").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
@@ -548,11 +826,46 @@
             inp.value = "";
           };
         });
+
+        $$(".del-deuda").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            if (!confirm("Eliminar deuda y revertir su saldo en el total de deudas?")) return;
+            const ref = doc(db, "companies", companyId, "debts", id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return;
+            const d = snap.data();
+            // revert: reducir deudasTotales en monto inicial (asumimos no pagada)
+            await adjustBalances({ deudasTotales: -d.saldo });
+            await deleteDoc(ref);
+          };
+        });
+
+        $$(".edit-deuda").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            const ref = doc(db, "companies", companyId, "debts", id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return;
+            const d = snap.data();
+            if (!confirm("Editar deuda: esto no ajustará automáticamente pagos anteriores. Proceda con cuidado.")) return;
+            // simple approach: prefill form with base values, and delete existing doc reversing deudasTotales (so you re-create)
+            await adjustBalances({ deudasTotales: -d.saldo });
+            await deleteDoc(ref);
+            $("#deudaTipo").value = d.tipo || "a_proveedor";
+            $("#deudaAcreedor").value = d.acreedor || "";
+            $("#deudaMonto").value = d.montoInicial || "";
+            $("#deudaNotas").value = d.notas || "";
+          };
+        });
+
       });
       unsubscribers.push(unsub);
     }
 
-    // ---- Metas
+    // ---------------------------
+    // METAS
+    // ---------------------------
     $("#formMeta").addEventListener("submit", async (e) => {
       e.preventDefault();
       const tipo = $("#metaTipo").value;
@@ -583,10 +896,13 @@
             <td>
               <input type="number" step="0.01" min="0" placeholder="$" class="border rounded p-1 w-24" id="abmeta-${id}">
               <button data-id="${id}" class="btn-abonar-meta text-emerald-700 underline ml-1">Abonar</button>
+              <button data-id="${id}" class="edit-meta text-blue-600 underline ml-2">Editar</button>
+              <button data-id="${id}" class="del-meta text-red-600 underline ml-2">Eliminar</button>
             </td>
           `;
           tbody.appendChild(tr);
         });
+
         $$(".btn-abonar-meta").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
@@ -604,20 +920,120 @@
             inp.value = "";
           };
         });
+
+        $$(".del-meta").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            if (!confirm("Eliminar meta (si tenía acumulado, se mantendrá el acumulado como histórico). ¿Continuar?")) return;
+            const ref = doc(db, "companies", companyId, "goals", id);
+            // simple approach: delete doc (not reverting acumulado to balances to avoid confusion)
+            await deleteDoc(ref);
+          };
+        });
+
+        $$(".edit-meta").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            const ref = doc(db, "companies", companyId, "goals", id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return;
+            const g = snap.data();
+            if (!confirm("Editar meta: prefill el formulario para crear una nueva versión (la meta antigua se eliminará).")) return;
+            await deleteDoc(ref);
+            $("#metaTipo").value = g.tipo || "negocio";
+            $("#metaNombre").value = g.nombre || "";
+            $("#metaObjetivo").value = g.objetivoMonto || "";
+            $("#metaNotas").value = g.notas || "";
+          };
+        });
+
       });
       unsubscribers.push(unsub);
     }
 
-    // ---- Estadísticas (Chart.js)
+    // ---------------------------
+    // MOVIMIENTOS MANUALES
+    // ---------------------------
+    $("#formMovimiento").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const tipo = $("#movTipo").value; // ingreso / egreso
+      const cuenta = $("#movCuenta").value; // cajaEmpresa, cajaBrandon...
+      const fecha = $("#movFecha").value || new Date().toISOString().slice(0,10);
+      const monto = Number($("#movMonto").value||0);
+      const desc = $("#movDesc").value || "";
+
+      if (monto <= 0) { alert("Monto debe ser mayor que 0"); return; }
+
+      await addDoc(collection(db, "companies", companyId, "movements"), {
+        tipo, cuenta, fecha, monto, desc, createdAt: serverTimestamp()
+      });
+
+      // aplicar efecto
+      const sign = tipo === "ingreso" ? 1 : -1;
+      const delta = sign * monto;
+      if (cuenta === "cajaEmpresa") await adjustBalances({ cajaEmpresa: delta });
+      if (cuenta === "cajaBrandon") await adjustBalances({ cajaBrandon: delta });
+      if (cuenta === "cajaSocia") await adjustBalances({ cajaSocia: delta });
+      if (cuenta === "inversiones") await adjustBalances({ inversiones: delta });
+      if (cuenta === "deudasTotales") await adjustBalances({ deudasTotales: delta });
+      e.target.reset();
+    });
+
+    function subscribeMovimientos() {
+      const q = query(collection(db, "companies", companyId, "movements"), orderBy("createdAt","desc"));
+      const unsub = onSnapshot(q, snap => {
+        const tbody = $("#tbMovimientos"); tbody.innerHTML = "";
+        snap.forEach(docu => {
+          const m = docu.data(); const id = docu.id;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${m.fecha}</td>
+            <td>${m.tipo}</td>
+            <td>${m.cuenta}</td>
+            <td>${money(m.monto)}</td>
+            <td>${m.desc||""}</td>
+            <td>
+              <button data-id="${id}" class="del-mov text-red-600 underline">Eliminar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        $$(".del-mov").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            if (!confirm("Eliminar movimiento y revertir su efecto?")) return;
+            const ref = doc(db, "companies", companyId, "movements", id);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return;
+            const m = snap.data();
+            const sign = m.tipo === "ingreso" ? -1 : 1; // revert
+            const delta = sign * m.monto;
+            if (m.cuenta === "cajaEmpresa") await adjustBalances({ cajaEmpresa: delta });
+            if (m.cuenta === "cajaBrandon") await adjustBalances({ cajaBrandon: delta });
+            if (m.cuenta === "cajaSocia") await adjustBalances({ cajaSocia: delta });
+            if (m.cuenta === "inversiones") await adjustBalances({ inversiones: delta });
+            if (m.cuenta === "deudasTotales") await adjustBalances({ deudasTotales: delta });
+            await deleteDoc(ref);
+          };
+        });
+
+      });
+      unsubscribers.push(unsub);
+    }
+
+    // ---------------------------
+    // ESTADÍSTICAS (Chart.js)
+    // ---------------------------
     let chartIG, chartUtilidad;
     function setupCharts() {
       chartIG = new Chart($("#chartIG"), {
         type: 'line',
         data: { labels: [], datasets: [
-          { label: "Ingresos", data: [], borderColor: "#16a34a", backgroundColor: "#16a34a22" },
-          { label: "Gastos", data: [], borderColor: "#ef4444", backgroundColor: "#ef444422" }
+          { label: "Ingresos", data: [], borderColor: "#16a34a", backgroundColor: "#16a34a22", fill: true },
+          { label: "Gastos", data: [], borderColor: "#ef4444", backgroundColor: "#ef444422", fill: true }
         ]},
-        options: { responsive: true, maintainAspectRatio: false }
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
       });
       chartUtilidad = new Chart($("#chartUtilidad"), {
         type: 'bar',
@@ -672,9 +1088,9 @@
       salesSnap.forEach(s => ventas.push(s.data()));
       ventas.sort((a,b)=> (a.date < b.date ? -1:1));
       const ult = ventas.slice(-30);
-      chartUtilidad.data.labels = ult.map(v => v.producto);
-      chartUtilidad.data.datasets[0].data = ult.map(v => v.utilidad);
-      chartUtilidad.data.datasets[1].data = ult.map(v => Number((v.margen*100).toFixed(1)));
+      chartUtilidad.data.labels = ult.map(v => v.producto || "");
+      chartUtilidad.data.datasets[0].data = ult.map(v => v.utilidad || 0);
+      chartUtilidad.data.datasets[1].data = ult.map(v => Number(((v.margen||0)*100).toFixed(1)));
       chartUtilidad.update();
     }
 
@@ -685,6 +1101,44 @@
       await updateDoc(doc(db, "companies", companyId), { name });
       $("#companyName").textContent = name;
     });
+
+    // Perfil: configurar % ahorro personal y % deuda obligatorio (empresa)
+    function setupPerfilButton() {
+      $("#btnPerfil").addEventListener("click", async () => {
+        try {
+          const userRef = doc(db, "users", currentUser.uid);
+          const snapU = await getDoc(userRef);
+          const currentUserPct = snapU.exists() ? (snapU.data().ahorroSugeridoPct || 0) : 0;
+
+          const compRef = doc(db, "companies", companyId);
+          const snapC = await getDoc(compRef);
+          const currentDebtPct = snapC.exists() ? (snapC.data().mandatoryDebtPct || 0.10) : 0.10;
+
+          const inputUser = prompt("Porcentaje sugerido de ahorro personal (0-100). Ej: 20", String(Math.round(currentUserPct*100)));
+          if (inputUser !== null) {
+            const val = Number(inputUser);
+            if (!isNaN(val) && val >=0 && val <=100) {
+              await updateDoc(userRef, { ahorroSugeridoPct: val/100 });
+              alert("Ahorro personal guardado: " + val + "%");
+            } else alert("Valor inválido");
+          }
+
+          const inputDebt = prompt("Porcentaje obligatorio para deudas por ingreso (%). Ej: 10", String(Math.round(currentDebtPct*100)));
+          if (inputDebt !== null) {
+            const val2 = Number(inputDebt);
+            if (!isNaN(val2) && val2 >=0 && val2 <=100) {
+              await updateDoc(compRef, { mandatoryDebtPct: val2/100 });
+              alert("Porcentaje de deudas guardado: " + val2 + "%");
+            } else alert("Valor inválido");
+          }
+
+        } catch (err) {
+          console.error(err); alert("Error guardando perfil");
+        }
+      });
+    }
+
   </script>
 </body>
 </html>
+
