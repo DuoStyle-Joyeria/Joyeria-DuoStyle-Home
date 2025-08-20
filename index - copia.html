@@ -4,6 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Duo Style | Enlaces</title>
+
+
 <style>
   :root{
     --bg:#fdfbf8;          /* fondo principal claro */
@@ -21,38 +23,23 @@
   }
 
   /* HERO */
-
-  /* Hero con fondo difuminado */
-.hero {
-  position: relative;
-  text-align: center;
-  padding: 48px 20px 28px;
-  background: 
-    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), 
-    var(--bg); /* Mantiene el mismo tono que usamos en toda la web */
-  color: white;
-}
-
-.hero .brand {
-  color: var(--gold);
-}
-
-.hero .tagline {
-  color: #f5f5f5;
-}
-
-
-  .hero{
-    text-align:center;
-    padding:48px 20px 28px;
-    background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(253,251,248,1));
+  .hero {
+    position: relative;
+    text-align: center;
+    padding: 48px 20px 28px;
+    background: 
+      linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), 
+      var(--bg); /* mantiene el fondo claro pero con difuminado negro */
+    color: white;
   }
+
   .logo img{
     width:88px;
     height:auto;
     border-radius:12px;
     box-shadow:0 4px 14px rgba(0,0,0,.08);
   }
+
   .brand{
     font-family: Georgia, 'Times New Roman', serif;
     font-size: clamp(26px,5.6vw,34px);
@@ -61,9 +48,10 @@
     letter-spacing:.8px;
     color:var(--gold);
   }
+
   .tagline{
     margin:8px 0 14px;
-    color:var(--muted);
+    color:#f5f5f5; /* más claro para mejor contraste sobre el fondo */
     font-size:14px;
   }
 
@@ -121,6 +109,9 @@
   .icon{display:grid;place-items:center;width:22px;height:22px}
   .icon svg{fill:currentColor}
 </style>
+
+
+
 </head>
 <body>
 
