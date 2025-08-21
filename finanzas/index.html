@@ -179,47 +179,72 @@
           </div>
         </section>
 
-        
-       <!-- DEUDAS -->
+
+
+        <!-- =========================
+     SECCIÓN: DEUDAS (COMPLETA)
+========================= -->
 <section id="tab-deudas" class="tab hidden mt-4">
   <div class="grid md:grid-cols-2 gap-4">
-
-    <!-- FORMULARIO CREAR / EDITAR DEUDA -->
+    <!-- Formulario Crear/Editar Deuda -->
     <form id="formDeuda" class="bg-white p-4 rounded shadow space-y-2">
       <h3 class="font-semibold text-lg">Nueva Deuda</h3>
 
-      <!-- Seleccionar quién debe -->
-      <label class="block text-sm font-medium">Quién tiene la deuda</label>
-      <select id="deudaDeudor" class="w-full border rounded p-2" required>
+      <!-- Quién es el ACREEDOR (a quién se le debe) -->
+      <label class="text-sm">Acreedor</label>
+      <select id="deudaAcreedorSel" class="w-full border rounded p-2" required>
+        <option value="">— Seleccionar —</option>
         <option value="empresa">Empresa</option>
         <option value="brandon">Brandon</option>
         <option value="socia">Socia</option>
       </select>
 
-      <!-- Seleccionar a quién se le debe -->
-      <label class="block text-sm font-medium">A quién se le debe</label>
-      <select id="deudaAcreedor" class="w-full border rounded p-2" required>
-        <option value="proveedor">Proveedor</option>
+      <!-- Quién es el DEUDOR (quién debe) -->
+      <label class="text-sm mt-2">Deudor</label>
+      <select id="deudaDeudorSel" class="w-full border rounded p-2" required>
+        <option value="">— Seleccionar —</option>
         <option value="empresa">Empresa</option>
         <option value="brandon">Brandon</option>
         <option value="socia">Socia</option>
       </select>
 
-      <!-- Campos básicos -->
-      <input type="number" id="deudaMonto" placeholder="Monto" step="0.01" min="0" required class="w-full border rounded p-2">
-      <textarea id="deudaNotas" placeholder="Notas" class="w-full border rounded p-2"></textarea>
+      <input
+        type="number"
+        id="deudaMonto"
+        placeholder="Monto"
+        step="0.01"
+        min="0.01"
+        required
+        class="w-full border rounded p-2"
+      />
 
-      <input type="hidden" id="editingDeudaId" value="">
-      <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear Deuda</button>
+      <input
+        type="text"
+        id="deudaDescripcion"
+        placeholder="Descripción / Nota (opcional)"
+        class="w-full border rounded p-2"
+      />
+
+      <input type="hidden" id="editingDeudaId" value="" />
+
+      <button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded">
+        Guardar Deuda
+      </button>
+
+      <p id="deudaMsg" class="text-sm text-slate-500"></p>
     </form>
 
-    <!-- LISTADO DE DEUDAS -->
+    <!-- Tabla de Deudas -->
     <div class="bg-white p-4 rounded shadow overflow-auto">
       <h3 class="font-semibold text-lg mb-2">Deudas</h3>
       <table class="w-full text-sm">
         <thead class="text-left">
           <tr>
-            <th>Deudor</th><th>Acreedor</th><th>Saldo</th><th>Acciones</th>
+            <th class="py-2">Acreedor</th>
+            <th class="py-2">Deudor</th>
+            <th class="py-2">Monto Inicial</th>
+            <th class="py-2">Saldo</th>
+            <th class="py-2">Acciones</th>
           </tr>
         </thead>
         <tbody id="tbDeudas"></tbody>
@@ -228,132 +253,327 @@
   </div>
 </section>
 
-<script>
+<!-- Modal para ABONAR deuda -->
+<div id="modalAbono" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+  <div class="bg-white p-5 rounded shadow max-w-sm w-full">
+    <h3 class="font-semibold mb-3">Registrar Abono</h3>
+    <form id="formAbono" class="space-y-3">
+      <input type="hidden" id="abonoDeudaId">
+      <input type="hidden" id="abonoAcreedor">
+      <input type="hidden" id="abonoDeudor">
+      <input type="hidden" id="abonoSaldoActual">
 
-// --- JS PARA FORMULARIO DE DEUDAS ---
+      <div>
+        <label class="block text-sm mb-1">Monto</label>
+        <input type="number" id="abonoMonto" min="0.01" step="0.01" required class="w-full border rounded p-2">
+      </div>
 
-// Crear/editar deudas
-document.getElementById("formDeuda").addEventListener("submit", async (e) => {
-  e.preventDefault();
+      <div>
+        <label class="block text-sm mb-1">¿Quién paga?</label>
+        <select id="abonoPagador" required class="w-full border rounded p-2">
+          <option value="">— Seleccionar —</option>
+          <option value="empresa">Empresa</option>
+          <option value="brandon">Brandon</option>
+          <option value="socia">Socia</option>
+        </select>
+      </div>
 
-  const editingId = document.getElementById("editingDeudaId").value || "";
-  const deudor = document.getElementById("deudaDeudor").value;
-  const acreedor = document.getElementById("deudaAcreedor").value;
-  const monto = Number(document.getElementById("deudaMonto").value || 0);
-  const notas = document.getElementById("deudaNotas").value.trim();
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" id="btnAbonoCancelar" class="px-3 py-2 rounded border">Cancelar</button>
+        <button class="px-3 py-2 rounded bg-emerald-600 text-white">Abonar</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-  if (monto <= 0) {
-    alert("El monto debe ser mayor a 0");
-    return;
+       
+<script type="module">
+  // ========= Utilidad interna: crear movimientos y ajustar cajas =========
+  async function registrarMovimiento({ tipo, cuenta, fecha, monto, desc }) {
+    await addDoc(collection(db, "companies", companyId, "movements"), {
+      tipo, cuenta, fecha, monto, desc, createdAt: serverTimestamp()
+    });
   }
 
-  try {
+  async function aplicarTransferenciaCajas(delta) {
+    // delta: { cajaEmpresa: +/-n, cajaBrandon: +/-n, cajaSocia: +/-n }
+    await adjustBalances({
+      cajaEmpresa: delta.cajaEmpresa || 0,
+      cajaBrandon: delta.cajaBrandon || 0,
+      cajaSocia: delta.cajaSocia || 0
+    });
+  }
+
+  function hoyISO() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  // ========= CREAR / EDITAR DEUDA =========
+  $("#formDeuda").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const editingId = $("#editingDeudaId").value || "";
+    const acreedor = $("#deudaAcreedorSel").value;
+    const deudor   = $("#deudaDeudorSel").value;
+    const monto    = Number($("#deudaMonto").value || 0);
+    const notas    = ($("#deudaDescripcion").value || "").trim();
+
+    if (!acreedor || !deudor) return alert("Selecciona acreedor y deudor.");
+    if (acreedor === deudor)  return alert("Acreedor y deudor no pueden ser el mismo.");
+    if (monto <= 0)           return alert("El monto debe ser mayor a 0.");
+
+    const baseDoc = {
+      acreedor, deudor,
+      montoInicial: monto,
+      saldo: monto,
+      notas: notas,
+      updatedAt: serverTimestamp()
+    };
+
+    let deudaId;
+
     if (editingId) {
-      await updateDoc(doc(db, "companies", companyId, "debts", editingId), {
-        deudor, acreedor, monto, notas, updatedAt: serverTimestamp()
-      });
+      await updateDoc(doc(db, "companies", companyId, "debts", editingId), baseDoc);
+      deudaId = editingId;
+      $("#editingDeudaId").value = "";
     } else {
-      await addDoc(collection(db, "companies", companyId, "debts"), {
-        deudor, acreedor, monto, notas, createdAt: serverTimestamp()
-      });
+      baseDoc.createdAt = serverTimestamp();
+      const ref = await addDoc(collection(db, "companies", companyId, "debts"), baseDoc);
+      deudaId = ref.id;
     }
 
-    document.getElementById("formDeuda").reset();
-    document.getElementById("editingDeudaId").value = "";
-    cargarDeudas();
+    // ======= LÓGICA DE CAJAS EN CREACIÓN =======
+    // Interpretación: al generarse la deuda, el ACREEDOR "entrega" el dinero al DEUDOR.
+    // Por ello, caja del ACREEDOR baja, caja del DEUDOR sube. Si el DEUDOR es empresa
+    // y no tiene caja suficiente cuando hay que devolver (caso inverso), nuestro requerimiento
+    // es que el faltante lo cubran socios 50/50, pero eso aplica cuando el que paga es la empresa
+    // y no alcanza. Aquí en la creación, quien entrega es el acreedor, no el deudor.
+    //
+    // Para cumplir con el requerimiento expresado de "si debe la empresa y su caja está en 0 se saca 50/50",
+    // la situación práctica donde se usa es en el ABONO (pago), no en la creación.
+    // Sin embargo, si tú prefieres modelar que la creación de deuda mueve efectivo,
+    // hacemos la transferencia: Acreedor -> Deudor (egreso/ingreso).
+    //
+    // Movimientos y ajuste de balances:
+    const fecha = hoyISO();
+    const descMov = (notas ? `${notas} — ` : "") + `Creación deuda (${deudor} debe a ${acreedor})`;
 
-  } catch (err) {
-    console.error("Error guardando deuda:", err);
-    alert("Error al guardar la deuda");
-  }
-});
+    // Egreso acreedor
+    await registrarMovimiento({
+      tipo: "egreso",
+      cuenta: acreedor === "empresa" ? "cajaEmpresa" : (acreedor === "brandon" ? "cajaBrandon" : "cajaSocia"),
+      fecha, monto, desc: descMov
+    });
+    // Ingreso deudor
+    await registrarMovimiento({
+      tipo: "ingreso",
+      cuenta: deudor === "empresa" ? "cajaEmpresa" : (deudor === "brandon" ? "cajaBrandon" : "cajaSocia"),
+      fecha, monto, desc: descMov
+    });
 
-// Listar deudas
-async function cargarDeudas() {
-  const q = query(collection(db, "companies", companyId, "debts"));
-  const snapshot = await getDocs(q);
+    // Ajustar balances en caliente (sin esperar recompute)
+    const deltaCreacion = { cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0 };
+    // restamos al acreedor
+    if (acreedor === "empresa") deltaCreacion.cajaEmpresa -= monto;
+    if (acreedor === "brandon") deltaCreacion.cajaBrandon -= monto;
+    if (acreedor === "socia")   deltaCreacion.cajaSocia   -= monto;
+    // sumamos al deudor
+    if (deudor === "empresa")   deltaCreacion.cajaEmpresa += monto;
+    if (deudor === "brandon")   deltaCreacion.cajaBrandon += monto;
+    if (deudor === "socia")     deltaCreacion.cajaSocia   += monto;
 
-  const tbody = document.getElementById("tbDeudas");
-  tbody.innerHTML = "";
+    await aplicarTransferenciaCajas(deltaCreacion);
 
-  snapshot.forEach((docSnap) => {
-    const d = docSnap.data();
-    const tr = document.createElement("tr");
+    $("#formDeuda").reset();
+    $("#deudaMsg").textContent = "Deuda guardada correctamente.";
+    setTimeout(() => ($("#deudaMsg").textContent = ""), 2000);
 
-    tr.innerHTML = `
-      <td>${d.deudor}</td>
-      <td>${d.acreedor}</td>
-      <td>$${d.monto.toLocaleString()}</td>
-      <td>
-        <button onclick="editarDeuda('${docSnap.id}', '${d.deudor}', '${d.acreedor}', ${d.monto}, '${d.notas||""}')" class="text-blue-600">Editar</button>
-        <button onclick="abonarDeuda('${docSnap.id}', ${d.monto}, '${d.deudor}')" class="text-green-600 ml-2">Abonar</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
+    // Recompute para refrescar KPIs y deudasTotales desde colecciones
+    await recomputeBalances();
   });
-}
 
-// Editar deuda
-function editarDeuda(id, deudor, acreedor, monto, notas) {
-  document.getElementById("editingDeudaId").value = id;
-  document.getElementById("deudaDeudor").value = deudor;
-  document.getElementById("deudaAcreedor").value = acreedor;
-  document.getElementById("deudaMonto").value = monto;
-  document.getElementById("deudaNotas").value = notas;
-}
+  // ========= LISTAR / ABONAR / EDITAR / ELIMINAR =========
+  function subscribeDeudas() {
+    const qDeb = query(
+      collection(db, "companies", companyId, "debts"),
+      orderBy("createdAt", "desc")
+    );
 
-// --- ABONAR DEUDA ---
-async function abonarDeuda(id, saldoActual, deudor) {
-  const abono = Number(prompt("Monto a abonar:") || 0);
-  if (abono <= 0 || abono > saldoActual) {
-    alert("Monto inválido");
-    return;
+    const unsub = onSnapshot(qDeb, (snap) => {
+      const tbody = $("#tbDeudas");
+      tbody.innerHTML = "";
+
+      snap.forEach((docu) => {
+        const d = docu.data();
+        const id = docu.id;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="py-2 capitalize">${d.acreedor}</td>
+          <td class="py-2 capitalize">${d.deudor}</td>
+          <td class="py-2">${money(d.montoInicial)}</td>
+          <td class="py-2">${money(d.saldo)}</td>
+          <td class="py-2 whitespace-nowrap">
+            <button data-id="${id}" class="btn-abonar text-emerald-700 underline ml-1">Abonar</button>
+            <button data-id="${id}" class="edit-deuda text-blue-600 underline ml-3">Editar</button>
+            <button data-id="${id}" class="del-deuda text-red-600 underline ml-3">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Handlers
+      $$(".btn-abonar").forEach((btn) => {
+        btn.onclick = async () => {
+          const id = btn.dataset.id;
+          const snap = await getDoc(doc(db, "companies", companyId, "debts", id));
+          if (!snap.exists()) return;
+
+          const d = snap.data();
+          // abrir modal pre-cargado
+          $("#modalAbono").classList.remove("hidden");
+          $("#modalAbono").classList.add("flex");
+
+          $("#abonoDeudaId").value = id;
+          $("#abonoAcreedor").value = d.acreedor;
+          $("#abonoDeudor").value = d.deudor;
+          $("#abonoSaldoActual").value = Number(d.saldo || 0);
+          $("#abonoMonto").value = d.saldo || "";
+          $("#abonoPagador").value = ""; // elige pagador
+        };
+      });
+
+      $$(".del-deuda").forEach((btn) => {
+        btn.onclick = async () => {
+          const id = btn.dataset.id;
+          if (!confirm("Eliminar deuda? Esto recalculará balances.")) return;
+          await deleteDoc(doc(db, "companies", companyId, "debts", id));
+          await recomputeBalances();
+        };
+      });
+
+      $$(".edit-deuda").forEach((btn) => {
+        btn.onclick = async () => {
+          const id = btn.dataset.id;
+          const snap = await getDoc(doc(db, "companies", companyId, "debts", id));
+          if (!snap.exists()) return;
+
+          const d = snap.data();
+          $("#editingDeudaId").value = id;
+          $("#deudaAcreedorSel").value = d.acreedor || "";
+          $("#deudaDeudorSel").value = d.deudor || "";
+          $("#deudaMonto").value = d.montoInicial || "";
+          $("#deudaDescripcion").value = d.notas || "";
+
+          // Ir a pestaña Deudas si no está visible
+          const tabBtn = document.querySelector('[data-tab="deudas"]');
+          if (tabBtn) tabBtn.click();
+        };
+      });
+    });
+
+    unsubscribers.push(unsub);
   }
 
-  try {
-    // si el deudor es la empresa y la caja está en 0, dividir 50/50 entre Brandon y Socia
-    let fuente = deudor;
-    if (deudor === "empresa") {
-      const empresaCaja = await getEmpresaCaja(); // función que ya tienes para consultar saldo
-      if (empresaCaja <= 0) {
-        fuente = "50/50";
-        await registrarMovimiento("brandon", -abono/2, "Abono deuda empresa");
-        await registrarMovimiento("socia", -abono/2, "Abono deuda empresa");
+  // ========= Cerrar modal de Abono =========
+  $("#btnAbonoCancelar").addEventListener("click", () => {
+    $("#modalAbono").classList.add("hidden");
+    $("#modalAbono").classList.remove("flex");
+    $("#formAbono").reset();
+  });
+
+  // ========= Procesar ABONO =========
+  $("#formAbono").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id      = $("#abonoDeudaId").value;
+    const acre    = $("#abonoAcreedor").value; // a quién se le paga (recibe)
+    const deud    = $("#abonoDeudor").value;   // quién debe (no afecta directo al abono)
+    const saldo   = Number($("#abonoSaldoActual").value || 0);
+    const monto   = Number($("#abonoMonto").value || 0);
+    const pagador = $("#abonoPagador").value;
+
+    if (monto <= 0) return alert("Monto inválido.");
+    if (monto > saldo) return alert("El abono no puede ser mayor al saldo.");
+    if (!["empresa","brandon","socia"].includes(pagador)) return alert("Selecciona quién paga.");
+
+    // ======= LÓGICA: QUIÉN PAGA Y DE DÓNDE SALE =======
+    // Regla adicional: si el pagador seleccionado es "empresa" pero su caja no alcanza,
+    // el faltante se cubre 50/50 entre Brandon y Socia.
+    const balSnap = await getDoc(doc(db, "companies", companyId, "state", "balances"));
+    const balances = balSnap.exists() ? balSnap.data() : { cajaEmpresa:0, cajaBrandon:0, cajaSocia:0 };
+
+    const delta = { cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0 };
+    const fecha = hoyISO();
+    const desc  = `Abono deuda (${deud} -> ${acre})`;
+
+    // 1) Restar del pagador (con 50/50 si empresa insuficiente)
+    if (pagador === "empresa") {
+      const disponible = Number(balances.cajaEmpresa || 0);
+      if (disponible >= monto) {
+        // todo sale de empresa
+        delta.cajaEmpresa -= monto;
+        await registrarMovimiento({ tipo:"egreso", cuenta:"cajaEmpresa", fecha, monto, desc });
       } else {
-        await registrarMovimiento("empresa", -abono, "Abono deuda empresa");
+        // empresa aporta lo que tiene, faltante 50/50 socios
+        if (disponible > 0) {
+          delta.cajaEmpresa -= disponible;
+          await registrarMovimiento({ tipo:"egreso", cuenta:"cajaEmpresa", fecha, monto: disponible, desc });
+        }
+        const faltante = Number((monto - disponible).toFixed(2));
+        const mitad = Number((faltante/2).toFixed(2));
+        // para redondeos, que el centavo impar vaya a Brandon
+        const resto = Number((faltante - mitad*2).toFixed(2));
+
+        delta.cajaBrandon -= (mitad + resto);
+        delta.cajaSocia   -=  mitad;
+
+        await registrarMovimiento({ tipo:"egreso", cuenta:"cajaBrandon", fecha, monto: (mitad + resto), desc });
+        await registrarMovimiento({ tipo:"egreso", cuenta:"cajaSocia",   fecha, monto:  mitad,          desc });
       }
-    } else {
-      await registrarMovimiento(deudor, -abono, "Abono deuda personal");
+    } else if (pagador === "brandon") {
+      delta.cajaBrandon -= monto;
+      await registrarMovimiento({ tipo:"egreso", cuenta:"cajaBrandon", fecha, monto, desc });
+    } else if (pagador === "socia") {
+      delta.cajaSocia -= monto;
+      await registrarMovimiento({ tipo:"egreso", cuenta:"cajaSocia", fecha, monto, desc });
     }
 
-    // actualizar saldo de la deuda
+    // 2) Sumar al acreedor (quien recibe el abono)
+    if (acre === "empresa") {
+      delta.cajaEmpresa += monto;
+      await registrarMovimiento({ tipo:"ingreso", cuenta:"cajaEmpresa", fecha, monto, desc });
+    } else if (acre === "brandon") {
+      delta.cajaBrandon += monto;
+      await registrarMovimiento({ tipo:"ingreso", cuenta:"cajaBrandon", fecha, monto, desc });
+    } else if (acre === "socia") {
+      delta.cajaSocia += monto;
+      await registrarMovimiento({ tipo:"ingreso", cuenta:"cajaSocia", fecha, monto, desc });
+    }
+
+    // Aplicar a balances
+    await aplicarTransferenciaCajas(delta);
+
+    // Actualizar saldo de la deuda
     await updateDoc(doc(db, "companies", companyId, "debts", id), {
-      monto: saldoActual - abono,
+      saldo: Number((saldo - monto).toFixed(2)),
       updatedAt: serverTimestamp()
     });
 
-    cargarDeudas();
+    // Cerrar modal
+    $("#modalAbono").classList.add("hidden");
+    $("#modalAbono").classList.remove("flex");
+    $("#formAbono").reset();
 
-  } catch (err) {
-    console.error("Error abonando deuda:", err);
-    alert("Error al abonar deuda");
-  }
-}
-
-// Helpers (tienes que tener ya estas funciones en tu app)
-async function getEmpresaCaja() {
-  const snap = await getDoc(doc(db, "companies", companyId, "balances", "empresa"));
-  return snap.exists() ? (snap.data().saldo || 0) : 0;
-}
-async function registrarMovimiento(cuenta, monto, concepto) {
-  await addDoc(collection(db, "companies", companyId, "movimientos"), {
-    cuenta, monto, concepto, createdAt: serverTimestamp()
+    // Recalcular KPIs/Deuda total
+    await recomputeBalances();
   });
-}
 
-// cargar lista al iniciar
-cargarDeudas();
+  // Exponer para que el resto del app pueda suscribirse (si ya llamas subscribeDeudas en onAuth, esto la reemplaza)
+  window.subscribeDeudas = subscribeDeudas;
 </script>
+
+
 
 
 
