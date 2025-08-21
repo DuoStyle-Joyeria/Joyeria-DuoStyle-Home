@@ -182,7 +182,8 @@
         
 
         
-    <!-- DEUDAS -->
+    
+        <!-- DEUDAS -->
 <section id="tab-deudas" class="tab hidden mt-4">
   <div class="grid md:grid-cols-2 gap-4">
     <form id="formDeuda" class="bg-white p-4 rounded shadow space-y-2">
@@ -235,7 +236,7 @@
         id="btnCrearDeuda"
         class="w-full bg-emerald-600 text-white py-2 rounded"
       >
-        Crear Deuda
+        Guardar Deuda
       </button>
 
       <p id="deudaMsg" class="text-sm text-slate-500"></p>
@@ -259,170 +260,162 @@
 </section>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Helpers
-  const $ = (selector) => document.querySelector(selector);
-  const $$ = (selector) => document.querySelectorAll(selector);
+// CREAR / EDITAR DEUDA
+document.getElementById("formDeuda").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  // CREAR / EDITAR DEUDA
-  $("#formDeuda").addEventListener("submit", async (e) => {
-    e.preventDefault();
+  const btn = document.getElementById("btnCrearDeuda");
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = "Guardando...";
 
-    const btn = $("#btnCrearDeuda");
-    btn.disabled = true;
-    const originalText = btn.textContent;
-    btn.textContent = "Guardando...";
+  try {
+    if (!companyId) throw new Error("companyId no definido.");
 
-    try {
-      if (!companyId) throw new Error("companyId no definido.");
+    const editingId = document.getElementById("editingDeudaId").value || "";
+    const deudor = document.getElementById("deudaDeudor").value;
+    const acreedorTipo = document.getElementById("deudaAcreedorTipo").value;
+    const acreedor = document.getElementById("deudaAcreedor").value.trim();
+    const monto = Number(document.getElementById("deudaMonto").value);
+    const notas = document.getElementById("deudaNotas").value.trim();
 
-      const editingId = $("#editingDeudaId").value || "";
-      const deudor = $("#deudaDeudor").value;
-      const acreedorTipo = $("#deudaAcreedorTipo").value;
-      const acreedor = $("#deudaAcreedor").value.trim();
-      const monto = Number($("#deudaMonto").value);
-      const notas = $("#deudaNotas").value.trim();
+    if (!acreedor) throw new Error("Ingresa el acreedor/descripcion.");
+    if (isNaN(monto) || monto <= 0)
+      throw new Error("El monto debe ser mayor a 0.");
 
-      if (!acreedor) throw new Error("Ingresa el acreedor/descripcion.");
-      if (isNaN(monto) || monto <= 0)
-        throw new Error("El monto debe ser mayor a 0.");
+    const payload = {
+      deudor,
+      acreedorTipo,
+      acreedor,
+      montoInicial: monto,
+      saldo: monto,
+      notas,
+      updatedAt: serverTimestamp(),
+    };
 
-      const payload = {
-        deudor,
-        acreedorTipo,
-        acreedor,
-        montoInicial: monto,
-        saldo: monto,
-        notas,
-        updatedAt: serverTimestamp(),
-      };
-
-      if (editingId) {
-        await updateDoc(
-          doc(db, "companies", companyId, "debts", editingId),
-          payload
-        );
-        $("#editingDeudaId").value = "";
-      } else {
-        payload.createdAt = serverTimestamp();
-        await addDoc(collection(db, "companies", companyId, "debts"), payload);
-      }
-
-      await recomputeBalances();
-
-      $("#formDeuda").reset();
-      $("#deudaMsg").textContent = "Deuda guardada correctamente.";
-      setTimeout(() => ($("#deudaMsg").textContent = ""), 2000);
-    } catch (err) {
-      console.error("Guardar deuda:", err);
-      alert("No se pudo guardar la deuda: " + (err.message || err));
-    } finally {
-      btn.disabled = false;
-      btn.textContent = originalText;
+    if (editingId) {
+      await updateDoc(doc(db, "companies", companyId, "debts", editingId), payload);
+      document.getElementById("editingDeudaId").value = "";
+    } else {
+      payload.createdAt = serverTimestamp();
+      await addDoc(collection(db, "companies", companyId, "debts"), payload);
     }
-  });
 
-  // LISTADO + ACCIONES
-  function subscribeDeudas() {
-    const qDeb = query(
-      collection(db, "companies", companyId, "debts"),
-      orderBy("createdAt", "desc")
-    );
+    await recomputeBalances();
 
-    const unsub = onSnapshot(qDeb, (snap) => {
-      const tbody = $("#tbDeudas");
-      tbody.innerHTML = "";
+    document.getElementById("formDeuda").reset();
+    document.getElementById("deudaMsg").textContent = "Deuda guardada correctamente.";
+    setTimeout(() => (document.getElementById("deudaMsg").textContent = ""), 2000);
+  } catch (err) {
+    console.error("Guardar deuda:", err);
+    alert("No se pudo guardar la deuda: " + (err.message || err));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+});
 
-      snap.forEach((docu) => {
-        const d = docu.data();
-        const id = docu.id;
+// LISTADO + ACCIONES
+function subscribeDeudas() {
+  const qDeb = query(
+    collection(db, "companies", companyId, "debts"),
+    orderBy("createdAt", "desc")
+  );
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${d.deudor}</td>
-          <td>${d.acreedor} (${d.acreedorTipo})</td>
-          <td>${money(d.saldo)}</td>
-          <td class="whitespace-nowrap">
-            <input type="number" step="0.01" min="0" placeholder="Abono" class="border rounded p-1 w-28" id="abono-${id}">
-            <button data-id="${id}" class="btn-abonar text-emerald-700 underline ml-1">Abonar</button>
-            <button data-id="${id}" class="edit-deuda text-blue-600 underline ml-2">Editar</button>
-            <button data-id="${id}" class="del-deuda text-red-600 underline ml-2">Eliminar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+  const unsub = onSnapshot(qDeb, (snap) => {
+    const tbody = document.getElementById("tbDeudas");
+    tbody.innerHTML = "";
 
-      // Abonar deuda
-      $$(".btn-abonar").forEach((btn) => {
-        btn.onclick = async () => {
-          try {
-            const id = btn.dataset.id;
-            const ab = Number($(`#abono-${id}`).value || 0);
-            if (isNaN(ab) || ab <= 0) return;
+    snap.forEach((docu) => {
+      const d = docu.data();
+      const id = docu.id;
 
-            const ref = doc(db, "companies", companyId, "debts", id);
-            const snapD = await getDoc(ref);
-            if (!snapD.exists()) return;
-
-            const deuda = snapD.data();
-
-            // 💡 lógica especial si caja está en 0 → reparte entre socios
-            if (deuda.deudor === "empresa" && getEmpresaCaja() === 0) {
-              descontarCaja("brandon", ab / 2);
-              descontarCaja("socia", ab / 2);
-            } else {
-              descontarCaja(deuda.deudor, ab);
-            }
-
-            const saldo = Math.max(0, Number(deuda.saldo || 0) - ab);
-            await updateDoc(ref, { saldo, updatedAt: serverTimestamp() });
-
-            await recomputeBalances();
-            $(`#abono-${id}`).value = "";
-          } catch (err) {
-            console.error("Abonar deuda:", err);
-            alert("No se pudo abonar: " + (err.message || err));
-          }
-        };
-      });
-
-      // Eliminar deuda
-      $$(".del-deuda").forEach((btn) => {
-        btn.onclick = async () => {
-          const id = btn.dataset.id;
-          if (!confirm("Eliminar deuda? Esto recalculará balances.")) return;
-          await deleteDoc(doc(db, "companies", companyId, "debts", id));
-          await recomputeBalances();
-        };
-      });
-
-      // Editar deuda
-      $$(".edit-deuda").forEach((btn) => {
-        btn.onclick = async () => {
-          const id = btn.dataset.id;
-          const snap = await getDoc(doc(db, "companies", companyId, "debts", id));
-          if (!snap.exists()) return;
-
-          const d = snap.data();
-          $("#editingDeudaId").value = id;
-          $("#deudaDeudor").value = d.deudor || "empresa";
-          $("#deudaAcreedorTipo").value = d.acreedorTipo || "proveedor";
-          $("#deudaAcreedor").value = d.acreedor || "";
-          $("#deudaMonto").value = d.montoInicial || "";
-          $("#deudaNotas").value = d.notas || "";
-
-          const tabBtn = document.querySelector('[data-tab="deudas"]');
-          if (tabBtn) tabBtn.click();
-        };
-      });
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${d.deudor}</td>
+        <td>${d.acreedor} (${d.acreedorTipo})</td>
+        <td>${money(d.saldo)}</td>
+        <td class="whitespace-nowrap">
+          <input type="number" step="0.01" min="0" placeholder="Abono" class="border rounded p-1 w-28" id="abono-${id}">
+          <button data-id="${id}" class="btn-abonar text-emerald-700 underline ml-1">Abonar</button>
+          <button data-id="${id}" class="edit-deuda text-blue-600 underline ml-2">Editar</button>
+          <button data-id="${id}" class="del-deuda text-red-600 underline ml-2">Eliminar</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
     });
 
-    unsubscribers.push(unsub);
-  }
+    // Abonar deuda
+    document.querySelectorAll(".btn-abonar").forEach((btn) => {
+      btn.onclick = async () => {
+        try {
+          const id = btn.dataset.id;
+          const ab = Number(document.getElementById(`abono-${id}`).value || 0);
+          if (isNaN(ab) || ab <= 0) return;
 
-  subscribeDeudas();
-});
+          const ref = doc(db, "companies", companyId, "debts", id);
+          const snapD = await getDoc(ref);
+          if (!snapD.exists()) return;
+
+          const deuda = snapD.data();
+
+          // 💡 lógica especial si caja está en 0 → reparte entre socios
+          if (deuda.deudor === "empresa" && getEmpresaCaja() === 0) {
+            descontarCaja("brandon", ab / 2);
+            descontarCaja("socia", ab / 2);
+          } else {
+            descontarCaja(deuda.deudor, ab);
+          }
+
+          const saldo = Math.max(0, Number(deuda.saldo || 0) - ab);
+          await updateDoc(ref, { saldo, updatedAt: serverTimestamp() });
+
+          await recomputeBalances();
+          document.getElementById(`abono-${id}`).value = "";
+        } catch (err) {
+          console.error("Abonar deuda:", err);
+          alert("No se pudo abonar: " + (err.message || err));
+        }
+      };
+    });
+
+    // Eliminar deuda
+    document.querySelectorAll(".del-deuda").forEach((btn) => {
+      btn.onclick = async () => {
+        const id = btn.dataset.id;
+        if (!confirm("Eliminar deuda? Esto recalculará balances.")) return;
+        await deleteDoc(doc(db, "companies", companyId, "debts", id));
+        await recomputeBalances();
+      };
+    });
+
+    // Editar deuda
+    document.querySelectorAll(".edit-deuda").forEach((btn) => {
+      btn.onclick = async () => {
+        const id = btn.dataset.id;
+        const snap = await getDoc(doc(db, "companies", companyId, "debts", id));
+        if (!snap.exists()) return;
+
+        const d = snap.data();
+        document.getElementById("editingDeudaId").value = id;
+        document.getElementById("deudaDeudor").value = d.deudor || "empresa";
+        document.getElementById("deudaAcreedorTipo").value = d.acreedorTipo || "proveedor";
+        document.getElementById("deudaAcreedor").value = d.acreedor || "";
+        document.getElementById("deudaMonto").value = d.montoInicial || "";
+        document.getElementById("deudaNotas").value = d.notas || "";
+
+        const tabBtn = document.querySelector('[data-tab="deudas"]');
+        if (tabBtn) tabBtn.click();
+      };
+    });
+  });
+
+  unsubscribers.push(unsub);
+}
+
+subscribeDeudas();
 </script>
+
 
 
 
