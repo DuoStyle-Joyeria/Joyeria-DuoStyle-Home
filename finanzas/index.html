@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- NOTE: no Firebase config duplicado en el head para evitar 'cannot redeclare' -->
 </head>
 <body class="bg-slate-50 text-slate-800">
   <div id="app" class="max-w-6xl mx-auto p-4">
@@ -75,7 +76,6 @@
           <button data-tab="metas" class="tab-btn px-3 py-2 rounded border">Metas</button>
           <button data-tab="movimientos" class="tab-btn px-3 py-2 rounded border">Movimientos</button>
           <button data-tab="estadisticas" class="tab-btn px-3 py-2 rounded border">Estadísticas</button>
-          <!-- futuro: inventario -->
         </div>
 
         <!-- VENTAS -->
@@ -120,6 +120,8 @@
                 <p id="sugerenciaAhorro" class="text-xs text-slate-600 mt-1"></p>
               </div>
 
+              <!-- hidden field to track editing -->
+              <input type="hidden" id="editingSaleId" value="">
               <button class="w-full bg-emerald-600 text-white py-2 rounded">Guardar Venta</button>
             </form>
 
@@ -151,6 +153,7 @@
                 <option value="brandon">Brandon</option>
                 <option value="socia">Socia</option>
               </select>
+              <input type="hidden" id="editingGastoId" value="">
               <button class="w-full bg-emerald-600 text-white py-2 rounded">Guardar Gasto</button>
             </form>
 
@@ -182,6 +185,7 @@
               <input type="text" id="deudaAcreedor" placeholder="Acreedor/Descripción" required class="w-full border rounded p-2">
               <input type="number" id="deudaMonto" placeholder="Monto" step="0.01" min="0" required class="w-full border rounded p-2">
               <textarea id="deudaNotas" placeholder="Notas" class="w-full border rounded p-2"></textarea>
+              <input type="hidden" id="editingDeudaId" value="">
               <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear Deuda</button>
             </form>
 
@@ -212,6 +216,7 @@
               <input type="text" id="metaNombre" placeholder="Nombre de la meta" required class="w-full border rounded p-2">
               <input type="number" id="metaObjetivo" placeholder="Objetivo ($)" step="0.01" min="0" required class="w-full border rounded p-2">
               <textarea id="metaNotas" placeholder="Notas" class="w-full border rounded p-2"></textarea>
+              <input type="hidden" id="editingMetaId" value="">
               <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear Meta</button>
             </form>
 
@@ -220,7 +225,7 @@
               <table class="w-full text-sm">
                 <thead class="text-left">
                   <tr>
-                    <th>Meta</th><th>Tipo</th><th>Objetivo</th><th>Acumulado</th><th>%</th><th>Abonar</th>
+                    <th>Meta</th><th>Tipo</th><th>Objetivo</th><th>Acumulado</th><th>%</th><th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="tbMetas"></tbody>
@@ -248,6 +253,7 @@
               <input type="date" id="movFecha" class="w-full border rounded p-2">
               <input type="number" id="movMonto" placeholder="Monto" step="0.01" min="0" class="w-full border rounded p-2">
               <input type="text" id="movDesc" placeholder="Descripción" class="w-full border rounded p-2">
+              <input type="hidden" id="editingMovId" value="">
               <button class="w-full bg-emerald-600 text-white py-2 rounded">Guardar Movimiento</button>
             </form>
 
@@ -283,9 +289,11 @@
     </div>
   </div>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDKs & App logic (único bloque con firebaseConfig) -->
   <script type="module">
-    // ======= Tu configuración de Firebase (ya presente en tu archivo) =======
+    // =========================
+    // === AQUI: FIREBASE CONFIG (usa la tuya, la dejé como estaba) ===
+    // =========================
    const firebaseConfig = {
     apiKey: "AIzaSyCTFSlLoKv6KKujTqjMeMjNc-AlKQ2-rng",
     authDomain: "duostyle01-611b9.firebaseapp.com",
@@ -298,7 +306,9 @@
     // =====================================================
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import {
+      getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile
+    } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
     import {
       getFirestore, doc, setDoc, getDoc, addDoc, getDocs, onSnapshot, collection,
       query, orderBy, serverTimestamp, updateDoc, increment, deleteDoc
@@ -307,6 +317,10 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    // make db/auth accessible in console if needed
+    window.db = db;
+    window.auth = auth;
 
     // ---- UI helpers
     const $ = sel => document.querySelector(sel);
@@ -356,8 +370,10 @@
 
     $("#btnLogout").addEventListener("click", () => signOut(auth));
 
+    // onAuth change -> set companyId, subscribe to collections
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
+      // cleanup
       unsubscribers.forEach(u => u && u());
       unsubscribers = [];
       if (!user) {
@@ -384,18 +400,36 @@
       }
       $("#companyName").textContent = (await getDoc(compRef)).data().name;
 
-      // Suscripciones
-      subscribeKPIs();
+      // Suscripciones y setups
+      subscribeKPIs();      // muestra balances (se actualiza cuando recomputeBalances escribe)
       subscribeVentas();
       subscribeGastos();
       subscribeDeudas();
       subscribeMetas();
       subscribeMovimientos();
+      // setup UI handlers
       setupTabs();
       setupVentaFormHints();
       setupCharts();
       setupVentaToggle();
       setupPerfilButton();
+
+      // Keep realtime recompute: whenever core collections change, recompute balances
+      // (we subscribe to collections and recompute on snapshot)
+      const qSales = query(collection(db, "companies", companyId, "sales"), orderBy("createdAt","desc"));
+      const qExp = query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt","desc"));
+      const qDeb = query(collection(db, "companies", companyId, "debts"), orderBy("createdAt","desc"));
+      const qMov = query(collection(db, "companies", companyId, "movements"), orderBy("createdAt","desc"));
+      const qGoals = query(collection(db, "companies", companyId, "goals"), orderBy("createdAt","desc"));
+
+      unsubscribers.push(onSnapshot(qSales, () => recomputeBalances()));
+      unsubscribers.push(onSnapshot(qExp, () => recomputeBalances()));
+      unsubscribers.push(onSnapshot(qDeb, () => recomputeBalances()));
+      unsubscribers.push(onSnapshot(qMov, () => recomputeBalances()));
+      unsubscribers.push(onSnapshot(qGoals, () => recomputeBalances()));
+
+      // initial compute
+      await recomputeBalances();
     });
 
     // ---- Tabs
@@ -411,11 +445,11 @@
       });
     }
 
-    // ---- KPI / balances
+    // ---- Show KPIs (reads balances doc)
     function subscribeKPIs() {
       const ref = doc(db, "companies", companyId, "state", "balances");
       const unsub = onSnapshot(ref, snap => {
-        const d = snap.data() || {};
+        const d = snap.exists() ? snap.data() : { cajaEmpresa:0, cajaBrandon:0, cajaSocia:0, deudasTotales:0 };
         $("#kpiCajaEmpresa").textContent = money(d.cajaEmpresa);
         $("#kpiCajaBrandon").textContent = money(d.cajaBrandon);
         $("#kpiCajaSocia").textContent = money(d.cajaSocia);
@@ -424,8 +458,131 @@
       unsubscribers.push(unsub);
     }
 
+    // ---------------------------
+    // UTIL: RECOMPUTE BALANCES FROM RECORDS (robusto)
+    // ---------------------------
+    async function recomputeBalances() {
+      // This function reads sales, expenses, debts, movements and goals
+      // and rebuilds balances from zero. This avoids incremental drift when editing/deleting.
+      try {
+        const base = { cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0, inversiones: 0, deudasTotales: 0 };
+
+        // 1) Sales
+        const salesSnap = await getDocs(collection(db, "companies", companyId, "sales"));
+        salesSnap.forEach(snap => {
+          const s = snap.data();
+          const price = Number(s.precio || s.price || 0);
+          const cost = Number(s.costo || s.cost || 0);
+          const utilidad = Number(s.utilidad || (price - cost) || 0);
+          const a = s.asignaciones || {};
+          const manual = !!a.manualMode;
+
+          // price enters company
+          base.cajaEmpresa += price;
+
+          if (manual) {
+            // manual assigns are explicit: reinversion, brandon, socia, pagoDeuda
+            const reinv = Number(a.reinversion || 0);
+            const br = Number(a.brandon || 0);
+            const so = Number(a.socia || 0);
+            const pd = Number(a.pagoDeuda || 0);
+            // apply manual: company pays reinv, brandon, socia, pagoDeuda (reduces deudas)
+            base.cajaEmpresa -= reinv;
+            base.inversiones += reinv;
+            base.cajaEmpresa -= br;
+            base.cajaBrandon += br;
+            base.cajaEmpresa -= so;
+            base.cajaSocia += so;
+            base.cajaEmpresa -= pd;
+            base.deudasTotales -= pd; // payments reduce total debts
+          } else {
+            // automatic: return the cost to investor, split utility 50/50
+            const financedBy = a.financiadoPor || "empresa";
+            if (financedBy === "empresa") {
+              base.cajaEmpresa -= cost;
+              base.cajaBrandon += cost/2;
+              base.cajaSocia += cost/2;
+            } else if (financedBy === "brandon") {
+              base.cajaEmpresa -= cost;
+              base.cajaBrandon += cost;
+            } else if (financedBy === "socia") {
+              base.cajaEmpresa -= cost;
+              base.cajaSocia += cost;
+            }
+
+            if (utilidad > 0) {
+              base.cajaEmpresa -= utilidad;
+              base.cajaBrandon += utilidad/2;
+              base.cajaSocia += utilidad/2;
+            }
+
+            // optional manual fields in asignaciones still applied
+            const reinv = Number(a.reinversion || 0);
+            const pd = Number(a.pagoDeuda || 0);
+            base.cajaEmpresa -= reinv;
+            base.inversiones += reinv;
+            base.cajaEmpresa -= pd;
+            base.deudasTotales -= pd;
+          }
+        });
+
+        // 2) Expenses: subtract from payer
+        const expSnap = await getDocs(collection(db, "companies", companyId, "expenses"));
+        expSnap.forEach(snap => {
+          const g = snap.data();
+          const monto = Number(g.monto || 0);
+          if (g.pagadoPor === "empresa") base.cajaEmpresa -= monto;
+          if (g.pagadoPor === "brandon") base.cajaBrandon -= monto;
+          if (g.pagadoPor === "socia") base.cajaSocia -= monto;
+        });
+
+        // 3) Debts: sum current saldo
+        const debtsSnap = await getDocs(collection(db, "companies", companyId, "debts"));
+        debtsSnap.forEach(snap => {
+          const d = snap.data();
+          const saldo = Number(d.saldo || d.montoInicial || 0);
+          base.deudasTotales += saldo;
+        });
+
+        // 4) Movements: apply each ingreso/egreso
+        const movSnap = await getDocs(collection(db, "companies", companyId, "movements"));
+        movSnap.forEach(snap => {
+          const m = snap.data();
+          const monto = Number(m.monto || 0);
+          const sign = (m.tipo === "ingreso") ? 1 : -1;
+          const delta = sign * monto;
+          if (m.cuenta === "cajaEmpresa") base.cajaEmpresa += delta;
+          if (m.cuenta === "cajaBrandon") base.cajaBrandon += delta;
+          if (m.cuenta === "cajaSocia") base.cajaSocia += delta;
+          if (m.cuenta === "inversiones") base.inversiones += delta;
+          if (m.cuenta === "deudasTotales") base.deudasTotales += delta;
+        });
+
+        // 5) Goals: subtract acumulated amounts (they are "locked" money)
+        const goalsSnap = await getDocs(collection(db, "companies", companyId, "goals"));
+        goalsSnap.forEach(snap => {
+          const g = snap.data();
+          const acum = Number(g.acumulado || 0);
+          if (g.tipo === "negocio") base.cajaEmpresa -= acum;
+          if (g.tipo === "brandon") base.cajaBrandon -= acum;
+          if (g.tipo === "socia") base.cajaSocia -= acum;
+        });
+
+        // Normalize small floating rounding errors
+        for (let k of Object.keys(base)) base[k] = Number(base[k].toFixed(2));
+
+        // Write absolute balances to balances doc (overwrite)
+        const ref = doc(db, "companies", companyId, "state", "balances");
+        await setDoc(ref, base, { merge: true });
+
+      } catch (err) {
+        console.error("Error recomputing balances:", err);
+      }
+    }
+
+    // ---- keep legacy adjustBalances for simple ops but recompute after critical ops
     async function adjustBalances({ cajaEmpresa=0, cajaBrandon=0, cajaSocia=0, deudasTotales=0, inversiones=0 }) {
-      const ref = doc(db, "companies", companyId,"state", "balances");
+      const ref = doc(db, "companies", companyId, "state", "balances");
       await setDoc(ref, {
         cajaEmpresa: increment(cajaEmpresa),
         cajaBrandon: increment(cajaBrandon),
@@ -436,7 +593,7 @@
     }
 
     // ---------------------------
-    // VENTAS (crear / editar como eliminar+crear / eliminar)
+    // VENTAS (create / edit / delete)
     // ---------------------------
     function setupVentaFormHints() {
       const costo = $("#ventaCosto");
@@ -482,8 +639,11 @@
       });
     }
 
+    // Submit handler supports create & edit (editingSaleId)
     $("#formVenta").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const editingId = $("#editingSaleId").value || "";
+
       const date = $("#ventaFecha").value || new Date().toISOString().slice(0,10);
       const producto = $("#ventaProducto").value.trim();
       const costo = Number($("#ventaCosto").value||0);
@@ -495,117 +655,43 @@
       const financiadoPor = $("#ventaFinanciadaPor").value; // 'empresa'|'brandon'|'socia'
       const manualMode = $("#ventaManualToggle").checked;
 
-      // Lectura de campos de asignaciones manuales (pueden estar vacíos)
-      const asig = {
+      const asignaciones = {
+        manualMode,
+        financiadoPor,
         reinversion: Number($("#asigReinv").value||0),
         brandon: Number($("#asigBrandon").value||0),
         socia: Number($("#asigSocia").value||0),
         pagoDeuda: Number($("#asigPagoDeuda").value||0)
       };
 
-      // Validaciones básicas
       if (precio <= 0) { alert("El precio debe ser mayor a 0"); return; }
       if (costo < 0) { alert("El costo no puede ser negativo"); return; }
 
-      // Guardar venta en Firestore
-      const saleDoc = await addDoc(collection(db, "companies", companyId, "sales"), {
-        date, producto, costo, precio, utilidad, margen, notas,
-        asignaciones: { manualMode, financiadoPor, ...asig },
-        createdAt: serverTimestamp()
-      });
-
-      // Aplicar ajustes sobre balances (misma lógica que en el diseño)
-      // Primero: entra todo a cajaEmpresa
-      await adjustBalances({ cajaEmpresa: precio });
-
-      if (manualMode) {
-        const totalAsig = asig.reinversion + asig.brandon + asig.socia + asig.pagoDeuda;
-        if (totalAsig > precio) {
-          alert("La suma de asignaciones manuales no puede exceder el precio de venta.");
-          // No revertimos aquí (simplificación). Mejor validar antes.
-        }
-        if (asig.reinversion > 0) await adjustBalances({ cajaEmpresa: -asig.reinversion, inversiones: asig.reinversion });
-        if (asig.brandon > 0) await adjustBalances({ cajaEmpresa: -asig.brandon, cajaBrandon: asig.brandon });
-        if (asig.socia > 0) await adjustBalances({ cajaEmpresa: -asig.socia, cajaSocia: asig.socia });
-        if (asig.pagoDeuda > 0) await adjustBalances({ cajaEmpresa: -asig.pagoDeuda, deudasTotales: -asig.pagoDeuda });
+      if (editingId) {
+        // update existing sale
+        const ref = doc(db, "companies", companyId, "sales", editingId);
+        await updateDoc(ref, {
+          date, producto, costo, precio, utilidad, margen, notas, asignaciones, updatedAt: serverTimestamp()
+        });
+        // clear edit
+        $("#editingSaleId").value = "";
       } else {
-        // Modo automático
-        // devolver capital al inversor
-        if (financiadoPor === "empresa") {
-          await adjustBalances({ cajaEmpresa: -costo, cajaBrandon: costo/2, cajaSocia: costo/2 });
-        } else if (financiadoPor === "brandon") {
-          await adjustBalances({ cajaEmpresa: -costo, cajaBrandon: costo });
-        } else if (financiadoPor === "socia") {
-          await adjustBalances({ cajaEmpresa: -costo, cajaSocia: costo });
-        }
-
-        // repartir utilidad 50/50
-        if (utilidad > 0) {
-          const mitad = utilidad/2;
-          await adjustBalances({ cajaEmpresa: -utilidad, cajaBrandon: mitad, cajaSocia: mitad });
-        }
-
-        // si se puso reinversión o pago de deuda manualmente (opcional)
-        if (asig.reinversion > 0) await adjustBalances({ cajaEmpresa: -asig.reinversion, inversiones: asig.reinversion });
-        if (asig.pagoDeuda > 0) await adjustBalances({ cajaEmpresa: -asig.pagoDeuda, deudasTotales: -asig.pagoDeuda });
+        // create new sale
+        await addDoc(collection(db, "companies", companyId, "sales"), {
+          date, producto, costo, precio, utilidad, margen, notas, asignaciones, createdAt: serverTimestamp()
+        });
       }
 
-      // FIN venta
+      // After create/update we recompute balances (robust)
+      await recomputeBalances();
+
+      // reset form
       e.target.reset();
+      $("#manualDistribFields").classList.add("hidden");
+      $("#autoDistribNote").classList.remove("hidden");
     });
 
-    async function reverseSaleEffects(snapData) {
-      // aplicamos las inversas en orden inverso al original
-      // snapData.asignaciones contiene manualMode, financiadoPor, reinversion, brandon, socia, pagoDeuda
-      const a = snapData.asignaciones || {};
-      const manual = !!a.manualMode;
-      const precio = Number(snapData.precio||0);
-      const costo = Number(snapData.costo||0);
-      const utilidad = Number(snapData.utilidad||0);
-
-      if (manual) {
-        // inverse order of adjustments used in creation
-        // If manual, creation did: +precio, then -reinv (inversiones +), -brandon(+), -socia(+), -pagoDeuda(-deudas)
-        // To reverse: +pagoDeuda (increase deudas), -from cajaBrandon, -from cajaSocia, -from inversiones, then -precio
-        if (a.pagoDeuda) await adjustBalances({ cajaEmpresa: a.pagoDeuda, deudasTotales: a.pagoDeuda });
-        if (a.socia) await adjustBalances({ cajaEmpresa: a.socia, cajaSocia: -a.socia });
-        if (a.brandon) await adjustBalances({ cajaEmpresa: a.brandon, cajaBrandon: -a.brandon });
-        if (a.reinversion) await adjustBalances({ cajaEmpresa: a.reinversion, inversiones: -a.reinversion });
-        // finalmente quitar la entrada inicial
-        if (precio) await adjustBalances({ cajaEmpresa: -precio });
-      } else {
-        // reverse automatic sequence:
-        // creation: +precio
-        // then (maybe) decrease cajaEmpresa by costo and credit the investor
-        // then decrease cajaEmpresa by utilidad and credit both partners
-        // then apply optional reinv and pagoDeuda
-        // So reverse: reverse optional reinv/pagoDeuda, reverse utilidad split, reverse costo distribution, then -precio
-        if (a.pagoDeuda) await adjustBalances({ cajaEmpresa: a.pagoDeuda, deudasTotales: a.pagoDeuda });
-        if (a.reinversion) await adjustBalances({ cajaEmpresa: a.reinversion, inversiones: -a.reinversion });
-
-        // reverse utilidad distribution
-        if (utilidad > 0) {
-          const mitad = utilidad/2;
-          await adjustBalances({ cajaEmpresa: utilidad, cajaBrandon: -mitad, cajaSocia: -mitad });
-        }
-
-        // reverse costo distribution to the investor
-        const financedBy = a.financiadoPor || "empresa";
-        if (financedBy === "empresa") {
-          // creation added: cajaEmpresa -costo, cajaBrandon +costo/2, cajaSocia +costo/2
-          // reverse by: cajaEmpresa +costo, cajaBrandon -costo/2, cajaSocia -costo/2
-          if (costo) await adjustBalances({ cajaEmpresa: costo, cajaBrandon: -costo/2, cajaSocia: -costo/2 });
-        } else if (financedBy === "brandon") {
-          if (costo) await adjustBalances({ cajaEmpresa: costo, cajaBrandon: -costo });
-        } else if (financedBy === "socia") {
-          if (costo) await adjustBalances({ cajaEmpresa: costo, cajaSocia: -costo });
-        }
-
-        // finally remove the initial price
-        if (precio) await adjustBalances({ cajaEmpresa: -precio });
-      }
-    }
-
+    // render sales table and attach edit/delete using recompute approach
     function subscribeVentas() {
       const qSales = query(collection(db, "companies", companyId, "sales"), orderBy("createdAt","desc"));
       const unsub = onSnapshot(qSales, (snap) => {
@@ -628,20 +714,18 @@
           `;
           tbody.appendChild(tr);
         });
-        // attach handlers
+
+        // delete handlers: simply delete the doc and recompute
         $$(".del-sale").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
-            if (!confirm("Eliminar venta y revertir efectos en balances?")) return;
-            const ref = doc(db, "companies", companyId, "sales", id);
-            const snap = await getDoc(ref);
-            if (!snap.exists()) return alert("Documento no encontrado.");
-            // revert effects
-            await reverseSaleEffects(snap.data());
-            // delete doc
-            await deleteDoc(ref);
+            if (!confirm("Eliminar venta? Esto recalculará balances.")) return;
+            await deleteDoc(doc(db, "companies", companyId, "sales", id));
+            await recomputeBalances();
           };
         });
+
+        // edit handlers: prefill form (no reversing; we will update on submit)
         $$(".edit-sale").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
@@ -649,11 +733,8 @@
             const snap = await getDoc(ref);
             if (!snap.exists()) return alert("Documento no encontrado.");
             const data = snap.data();
-            // We'll implement edit as: revert old effects, open prompt to enter new values, then create new sale
-            if (!confirm("Editar venta: se revertirán los saldos de la venta actual; luego deberá rellenar los nuevos datos para crear la venta corregida. ¿Continuar?")) return;
-            await reverseSaleEffects(data);
-            await deleteDoc(ref);
-            // prefill form with old values
+            // prefill form and set editing id
+            $("#editingSaleId").value = id;
             $("#ventaFecha").value = data.date || "";
             $("#ventaProducto").value = data.producto || "";
             $("#ventaCosto").value = data.costo || "";
@@ -677,7 +758,8 @@
               $("#asigBrandon").value = "";
               $("#asigSocia").value = "";
             }
-            // switch to ventas tab (already there)
+            // switch to ventas tab if not there (optional)
+            document.querySelector('[data-tab="ventas"]').click();
           };
         });
 
@@ -687,25 +769,30 @@
     }
 
     // ---------------------------
-    // GASTOS
+    // GASTOS (create / edit / delete)
     // ---------------------------
     $("#formGasto").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const editingId = $("#editingGastoId").value || "";
+
       const date = $("#gastoFecha").value || new Date().toISOString().slice(0,10);
       const categoria = $("#gastoCat").value.trim();
       const monto = Number($("#gastoMonto").value||0);
       const descripcion = $("#gastoDesc").value.trim();
       const pagadoPor = $("#gastoPagadoPor").value;
 
-      const docRef = await addDoc(collection(db, "companies", companyId, "expenses"), {
-        date, categoria, monto, descripcion, pagadoPor, createdAt: serverTimestamp()
-      });
+      if (editingId) {
+        await updateDoc(doc(db, "companies", companyId, "expenses", editingId), {
+          date, categoria, monto, descripcion, pagadoPor, updatedAt: serverTimestamp()
+        });
+        $("#editingGastoId").value = "";
+      } else {
+        await addDoc(collection(db, "companies", companyId, "expenses"), {
+          date, categoria, monto, descripcion, pagadoPor, createdAt: serverTimestamp()
+        });
+      }
 
-      // Ajustar balances según quién pagó
-      if (pagadoPor === "empresa") await adjustBalances({ cajaEmpresa: -monto });
-      if (pagadoPor === "brandon") await adjustBalances({ cajaBrandon: -monto });
-      if (pagadoPor === "socia") await adjustBalances({ cajaSocia: -monto });
-
+      await recomputeBalances();
       e.target.reset();
     });
 
@@ -733,16 +820,9 @@
         $$(".del-gasto").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
-            if (!confirm("Eliminar gasto y revertir su efecto en balances?")) return;
-            const ref = doc(db, "companies", companyId, "expenses", id);
-            const snap = await getDoc(ref);
-            if (!snap.exists()) return;
-            const g = snap.data();
-            // revert: agregar el monto a quien pagó
-            if (g.pagadoPor === "empresa") await adjustBalances({ cajaEmpresa: g.monto });
-            if (g.pagadoPor === "brandon") await adjustBalances({ cajaBrandon: g.monto });
-            if (g.pagadoPor === "socia") await adjustBalances({ cajaSocia: g.monto });
-            await deleteDoc(ref);
+            if (!confirm("Eliminar gasto? Esto recalculará balances.")) return;
+            await deleteDoc(doc(db, "companies", companyId, "expenses", id));
+            await recomputeBalances();
           };
         });
 
@@ -753,19 +833,14 @@
             const snap = await getDoc(ref);
             if (!snap.exists()) return;
             const g = snap.data();
-            if (!confirm("Editar gasto: se revertirá el gasto actual en balances y podrá ingresar la corrección.")) return;
-            // revert current
-            if (g.pagadoPor === "empresa") await adjustBalances({ cajaEmpresa: g.monto });
-            if (g.pagadoPor === "brandon") await adjustBalances({ cajaBrandon: g.monto });
-            if (g.pagadoPor === "socia") await adjustBalances({ cajaSocia: g.monto });
-            await deleteDoc(ref);
-            // prefill form
+            // prefill and set editing id
+            $("#editingGastoId").value = id;
             $("#gastoFecha").value = g.date || "";
             $("#gastoCat").value = g.categoria || "";
             $("#gastoMonto").value = g.monto || "";
             $("#gastoDesc").value = g.descripcion || "";
             $("#gastoPagadoPor").value = g.pagadoPor || "empresa";
-            // user will submit corrected form
+            document.querySelector('[data-tab="gastos"]').click();
           };
         });
 
@@ -779,15 +854,25 @@
     // ---------------------------
     $("#formDeuda").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const editingId = $("#editingDeudaId").value || "";
+
       const tipo = $("#deudaTipo").value;
       const acreedor = $("#deudaAcreedor").value.trim();
       const monto = Number($("#deudaMonto").value||0);
       const notas = $("#deudaNotas").value.trim();
 
-      const ref = await addDoc(collection(db, "companies", companyId, "debts"), {
-        tipo, acreedor, montoInicial: monto, saldo: monto, notas, createdAt: serverTimestamp()
-      });
-      await adjustBalances({ deudasTotales: monto });
+      if (editingId) {
+        await updateDoc(doc(db, "companies", companyId, "debts", editingId), {
+          tipo, acreedor, montoInicial: monto, saldo: monto, notas, updatedAt: serverTimestamp()
+        });
+        $("#editingDeudaId").value = "";
+      } else {
+        await addDoc(collection(db, "companies", companyId, "debts"), {
+          tipo, acreedor, montoInicial: monto, saldo: monto, notas, createdAt: serverTimestamp()
+        });
+      }
+
+      await recomputeBalances();
       e.target.reset();
     });
 
@@ -822,7 +907,8 @@
             const snap = await getDoc(ref);
             const saldo = snap.data().saldo - abono;
             await updateDoc(ref, { saldo: Math.max(0, saldo) });
-            await adjustBalances({ deudasTotales: -abono, cajaEmpresa: -abono }); // si abonamos desde caja empresa
+            // assume payment from company caja
+            await recomputeBalances();
             inp.value = "";
           };
         });
@@ -830,14 +916,9 @@
         $$(".del-deuda").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
-            if (!confirm("Eliminar deuda y revertir su saldo en el total de deudas?")) return;
-            const ref = doc(db, "companies", companyId, "debts", id);
-            const snap = await getDoc(ref);
-            if (!snap.exists()) return;
-            const d = snap.data();
-            // revert: reducir deudasTotales en monto inicial (asumimos no pagada)
-            await adjustBalances({ deudasTotales: -d.saldo });
-            await deleteDoc(ref);
+            if (!confirm("Eliminar deuda? Esto recalculará balances.")) return;
+            await deleteDoc(doc(db, "companies", companyId, "debts", id));
+            await recomputeBalances();
           };
         });
 
@@ -848,14 +929,13 @@
             const snap = await getDoc(ref);
             if (!snap.exists()) return;
             const d = snap.data();
-            if (!confirm("Editar deuda: esto no ajustará automáticamente pagos anteriores. Proceda con cuidado.")) return;
-            // simple approach: prefill form with base values, and delete existing doc reversing deudasTotales (so you re-create)
-            await adjustBalances({ deudasTotales: -d.saldo });
-            await deleteDoc(ref);
+            // prefill for edit
+            $("#editingDeudaId").value = id;
             $("#deudaTipo").value = d.tipo || "a_proveedor";
             $("#deudaAcreedor").value = d.acreedor || "";
             $("#deudaMonto").value = d.montoInicial || "";
             $("#deudaNotas").value = d.notas || "";
+            document.querySelector('[data-tab="deudas"]').click();
           };
         });
 
@@ -868,14 +948,25 @@
     // ---------------------------
     $("#formMeta").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const editingId = $("#editingMetaId").value || "";
+
       const tipo = $("#metaTipo").value;
       const nombre = $("#metaNombre").value.trim();
       const objetivoMonto = Number($("#metaObjetivo").value||0);
       const notas = $("#metaNotas").value.trim();
 
-      await addDoc(collection(db, "companies", companyId, "goals"), {
-        tipo, nombre, objetivoMonto, acumulado: 0, notas, createdAt: serverTimestamp()
-      });
+      if (editingId) {
+        await updateDoc(doc(db, "companies", companyId, "goals", editingId), {
+          tipo, nombre, objetivoMonto, updatedAt: serverTimestamp()
+        });
+        $("#editingMetaId").value = "";
+      } else {
+        await addDoc(collection(db, "companies", companyId, "goals"), {
+          tipo, nombre, objetivoMonto, acumulado: 0, notas, createdAt: serverTimestamp()
+        });
+      }
+
+      await recomputeBalances();
       e.target.reset();
     });
 
@@ -913,10 +1004,8 @@
             const snap = await getDoc(ref);
             const acum = (snap.data().acumulado || 0) + abono;
             await updateDoc(ref, { acumulado: acum });
-            // Salida de caja según tipo
-            if (snap.data().tipo === "negocio") await adjustBalances({ cajaEmpresa: -abono });
-            if (snap.data().tipo === "brandon") await adjustBalances({ cajaBrandon: -abono });
-            if (snap.data().tipo === "socia") await adjustBalances({ cajaSocia: -abono });
+            // recompute balances to reflect the withdrawal
+            await recomputeBalances();
             inp.value = "";
           };
         });
@@ -924,10 +1013,9 @@
         $$(".del-meta").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
-            if (!confirm("Eliminar meta (si tenía acumulado, se mantendrá el acumulado como histórico). ¿Continuar?")) return;
-            const ref = doc(db, "companies", companyId, "goals", id);
-            // simple approach: delete doc (not reverting acumulado to balances to avoid confusion)
-            await deleteDoc(ref);
+            if (!confirm("Eliminar meta? (su acumulado desaparecerá del listado)")) return;
+            await deleteDoc(doc(db, "companies", companyId, "goals", id));
+            await recomputeBalances();
           };
         });
 
@@ -938,12 +1026,13 @@
             const snap = await getDoc(ref);
             if (!snap.exists()) return;
             const g = snap.data();
-            if (!confirm("Editar meta: prefill el formulario para crear una nueva versión (la meta antigua se eliminará).")) return;
-            await deleteDoc(ref);
+            // prefill edit
+            $("#editingMetaId").value = id;
             $("#metaTipo").value = g.tipo || "negocio";
             $("#metaNombre").value = g.nombre || "";
             $("#metaObjetivo").value = g.objetivoMonto || "";
             $("#metaNotas").value = g.notas || "";
+            document.querySelector('[data-tab="metas"]').click();
           };
         });
 
@@ -956,6 +1045,8 @@
     // ---------------------------
     $("#formMovimiento").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const editingId = $("#editingMovId").value || "";
+
       const tipo = $("#movTipo").value; // ingreso / egreso
       const cuenta = $("#movCuenta").value; // cajaEmpresa, cajaBrandon...
       const fecha = $("#movFecha").value || new Date().toISOString().slice(0,10);
@@ -964,18 +1055,18 @@
 
       if (monto <= 0) { alert("Monto debe ser mayor que 0"); return; }
 
-      await addDoc(collection(db, "companies", companyId, "movements"), {
-        tipo, cuenta, fecha, monto, desc, createdAt: serverTimestamp()
-      });
+      if (editingId) {
+        await updateDoc(doc(db, "companies", companyId, "movements", editingId), {
+          tipo, cuenta, fecha, monto, desc, updatedAt: serverTimestamp()
+        });
+        $("#editingMovId").value = "";
+      } else {
+        await addDoc(collection(db, "companies", companyId, "movements"), {
+          tipo, cuenta, fecha, monto, desc, createdAt: serverTimestamp()
+        });
+      }
 
-      // aplicar efecto
-      const sign = tipo === "ingreso" ? 1 : -1;
-      const delta = sign * monto;
-      if (cuenta === "cajaEmpresa") await adjustBalances({ cajaEmpresa: delta });
-      if (cuenta === "cajaBrandon") await adjustBalances({ cajaBrandon: delta });
-      if (cuenta === "cajaSocia") await adjustBalances({ cajaSocia: delta });
-      if (cuenta === "inversiones") await adjustBalances({ inversiones: delta });
-      if (cuenta === "deudasTotales") await adjustBalances({ deudasTotales: delta });
+      await recomputeBalances();
       e.target.reset();
     });
 
@@ -993,6 +1084,7 @@
             <td>${money(m.monto)}</td>
             <td>${m.desc||""}</td>
             <td>
+              <button data-id="${id}" class="edit-mov text-blue-600 underline mr-2">Editar</button>
               <button data-id="${id}" class="del-mov text-red-600 underline">Eliminar</button>
             </td>
           `;
@@ -1002,19 +1094,26 @@
         $$(".del-mov").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
-            if (!confirm("Eliminar movimiento y revertir su efecto?")) return;
+            if (!confirm("Eliminar movimiento? Esto recalculará balances.")) return;
+            await deleteDoc(doc(db, "companies", companyId, "movements", id));
+            await recomputeBalances();
+          };
+        });
+
+        $$(".edit-mov").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
             const ref = doc(db, "companies", companyId, "movements", id);
             const snap = await getDoc(ref);
             if (!snap.exists()) return;
             const m = snap.data();
-            const sign = m.tipo === "ingreso" ? -1 : 1; // revert
-            const delta = sign * m.monto;
-            if (m.cuenta === "cajaEmpresa") await adjustBalances({ cajaEmpresa: delta });
-            if (m.cuenta === "cajaBrandon") await adjustBalances({ cajaBrandon: delta });
-            if (m.cuenta === "cajaSocia") await adjustBalances({ cajaSocia: delta });
-            if (m.cuenta === "inversiones") await adjustBalances({ inversiones: delta });
-            if (m.cuenta === "deudasTotales") await adjustBalances({ deudasTotales: delta });
-            await deleteDoc(ref);
+            $("#editingMovId").value = id;
+            $("#movTipo").value = m.tipo || "ingreso";
+            $("#movCuenta").value = m.cuenta || "cajaEmpresa";
+            $("#movFecha").value = m.fecha || "";
+            $("#movMonto").value = m.monto || "";
+            $("#movDesc").value = m.desc || "";
+            document.querySelector('[data-tab="movimientos"]').click();
           };
         });
 
@@ -1023,10 +1122,14 @@
     }
 
     // ---------------------------
-    // ESTADÍSTICAS (Chart.js)
+    // ESTADÍSTICAS (Chart.js) - destroy existing charts to avoid duplication
     // ---------------------------
-    let chartIG, chartUtilidad;
+    let chartIG = null, chartUtilidad = null;
     function setupCharts() {
+      // destroy previous if exist
+      try { if (chartIG) chartIG.destroy(); } catch(e){}
+      try { if (chartUtilidad) chartUtilidad.destroy(); } catch(e){}
+
       chartIG = new Chart($("#chartIG"), {
         type: 'line',
         data: { labels: [], datasets: [
@@ -1052,46 +1155,50 @@
     }
 
     async function refreshCharts() {
-      // Últimos 90 días: sumar ingresos (ventas.precio) y gastos por día
-      const today = new Date();
-      const from = new Date(today.getTime() - 90*24*3600*1000);
-      function fmt(d){ return d.toISOString().slice(0,10); }
+      // This uses current collections to build stats
+      try {
+        const today = new Date();
+        const from = new Date(today.getTime() - 90*24*3600*1000);
+        function fmt(d){ return d.toISOString().slice(0,10); }
 
-      const salesSnap = await getDocs(collection(db, "companies", companyId, "sales"));
-      const expSnap = await getDocs(collection(db, "companies", companyId, "expenses"));
+        const salesSnap = await getDocs(collection(db, "companies", companyId, "sales"));
+        const expSnap = await getDocs(collection(db, "companies", companyId, "expenses"));
 
-      const byDateIn = {}, byDateOut = {};
-      salesSnap.forEach(s => {
-        const d = s.data();
-        const key = d.date;
-        byDateIn[key] = (byDateIn[key]||0) + Number(d.precio||0);
-      });
-      expSnap.forEach(g => {
-        const d = g.data();
-        const key = d.date;
-        byDateOut[key] = (byDateOut[key]||0) + Number(d.monto||0);
-      });
+        const byDateIn = {}, byDateOut = {};
+        salesSnap.forEach(s => {
+          const d = s.data();
+          const key = d.date;
+          byDateIn[key] = (byDateIn[key]||0) + Number(d.precio||0);
+        });
+        expSnap.forEach(g => {
+          const d = g.data();
+          const key = d.date;
+          byDateOut[key] = (byDateOut[key]||0) + Number(d.monto||0);
+        });
 
-      // build labels
-      const labels = [];
-      for (let t=from; t<=today; t = new Date(t.getTime()+24*3600*1000)) labels.push(fmt(t));
-      const ingresos = labels.map(l => byDateIn[l]||0);
-      const gastos = labels.map(l => byDateOut[l]||0);
+        // build labels
+        const labels = [];
+        for (let t=from; t<=today; t = new Date(t.getTime()+24*3600*1000)) labels.push(fmt(t));
+        const ingresos = labels.map(l => byDateIn[l]||0);
+        const gastos = labels.map(l => byDateOut[l]||0);
 
-      chartIG.data.labels = labels;
-      chartIG.data.datasets[0].data = ingresos;
-      chartIG.data.datasets[1].data = gastos;
-      chartIG.update();
+        chartIG.data.labels = labels;
+        chartIG.data.datasets[0].data = ingresos;
+        chartIG.data.datasets[1].data = gastos;
+        chartIG.update();
 
-      // Utilidad por venta (últimas 30)
-      const ventas = [];
-      salesSnap.forEach(s => ventas.push(s.data()));
-      ventas.sort((a,b)=> (a.date < b.date ? -1:1));
-      const ult = ventas.slice(-30);
-      chartUtilidad.data.labels = ult.map(v => v.producto || "");
-      chartUtilidad.data.datasets[0].data = ult.map(v => v.utilidad || 0);
-      chartUtilidad.data.datasets[1].data = ult.map(v => Number(((v.margen||0)*100).toFixed(1)));
-      chartUtilidad.update();
+        // Utilidad por venta (últimas 30)
+        const ventas = [];
+        salesSnap.forEach(s => ventas.push(s.data()));
+        ventas.sort((a,b)=> (a.date < b.date ? -1:1));
+        const ult = ventas.slice(-30);
+        chartUtilidad.data.labels = ult.map(v => v.producto || "");
+        chartUtilidad.data.datasets[0].data = ult.map(v => v.utilidad || 0);
+        chartUtilidad.data.datasets[1].data = ult.map(v => Number(((v.margen||0)*100).toFixed(1)));
+        chartUtilidad.update();
+      } catch (err) {
+        console.error("Error refreshCharts:", err);
+      }
     }
 
     // ---- Cambiar empresa (placeholder MVP)
@@ -1138,7 +1245,14 @@
       });
     }
 
+    // ---------------------------
+    // Helpers: ensure charts update periodically and when data changes
+    // ---------------------------
+    // Recompute charts after collections change (already many listeners call refreshCharts)
+    // We'll set periodic refresh to ensure UI stays responsive
+    setInterval(() => { try { refreshCharts(); } catch(e){} }, 30_000);
+
+    // End of module
   </script>
 </body>
 </html>
-
