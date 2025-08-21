@@ -297,7 +297,7 @@
   </div>
 
   <!-- =========================
-       SCRIPT: Firebase + Lógica
+       SCRIPT: Firebase + Lógica (PARTE 1)
        ========================= -->
   <script type="module">
     // --------- FIREBASE CONFIG (usa el tuyo, aquí dejo el que ya usabas) ----------
@@ -452,11 +452,12 @@
       unsubscribers.push(unsub);
     }
 
-    // ------------------------------------------------
+        // ------------------------------------------------
     // computePaidBy: decide quién pagó el costo y crear movs si needed
     // ------------------------------------------------
     async function computePaidBy(financiadoPor, amount, createMovements = false) {
       try {
+        // read current balances to know cuánto tiene la empresa
         const balSnap = await getDoc(doc(db, "companies", companyId, "state", "balances"));
         const balances = balSnap.exists() ? balSnap.data() : { cajaEmpresa:0, cajaBrandon:0, cajaSocia:0 };
         const empresaCaja = Number(balances.cajaEmpresa || 0);
@@ -464,31 +465,38 @@
         let pb = { empresa: 0, brandon: 0, socia: 0 };
 
         if (financiadoPor === "brandon") {
-          pb.brandon = amount;
+          // Brandon financia -> full a Brandon
+          pb.brandon = Number(amount);
         } else if (financiadoPor === "socia") {
-          pb.socia = amount;
+          // Socia financia -> full a Socia
+          pb.socia = Number(amount);
         } else { // financiadoPor === 'empresa'
+          // Si la empresa tiene suficiente, cubre todo
           if (empresaCaja >= amount) {
-            pb.empresa = amount;
+            pb.empresa = Number(amount);
           } else {
-            pb.empresa = Math.max(0, empresaCaja);
-            const shortage = amount - pb.empresa;
+            // Empresa cubre lo que tenga, el resto se divide 50/50 entre Brandon y Socia
+            pb.empresa = Number(Math.max(0, empresaCaja).toFixed(2));
+            const shortage = Number((amount - pb.empresa).toFixed(2));
             const half = Number((shortage/2).toFixed(2));
             pb.brandon = half;
             pb.socia = half;
+            // ajuste de resto por centavos
             const remainder = Number((shortage - (half*2)).toFixed(2));
             if (remainder !== 0) pb.brandon = Number((pb.brandon + remainder).toFixed(2));
           }
         }
 
         // Create movements to reflect partners' advances (egreso) if requested and there are advances
+        // Nota: para la parte de empresa no creamos movimiento aquí; las entradas/salidas de empresa vienen de la venta/gasto y del recompute.
         if (createMovements) {
           const moves = [];
+          const today = new Date().toISOString().slice(0,10);
           if (pb.brandon && pb.brandon > 0) {
             moves.push(addDoc(collection(db, "companies", companyId, "movements"), {
               tipo: "egreso",
               cuenta: "cajaBrandon",
-              fecha: new Date().toISOString().slice(0,10),
+              fecha: today,
               monto: pb.brandon,
               desc: `Anticipo de Brandon para costo (${financiadoPor})`,
               createdAt: serverTimestamp()
@@ -498,13 +506,12 @@
             moves.push(addDoc(collection(db, "companies", companyId, "movements"), {
               tipo: "egreso",
               cuenta: "cajaSocia",
-              fecha: new Date().toISOString().slice(0,10),
+              fecha: today,
               monto: pb.socia,
               desc: `Anticipo de Socia para costo (${financiadoPor})`,
               createdAt: serverTimestamp()
             }));
           }
-          // no movement for empresa portion: empresa reduction is handled when processing the sale/gasto itself
           if (moves.length) await Promise.all(moves);
         }
 
@@ -517,13 +524,14 @@
     }
 
     // ------------------------------------------------
-    // recomputeBalances: recalcula todo desde cero (ventas, gastos, debts, movements, goals)
+    // recomputeBalances: recalcula todo desde cero (movimientos, ventas, gastos, deudas, metas)
     // ------------------------------------------------
     async function recomputeBalances() {
       try {
+        // base: iniciar todo en 0
         const base = { cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0, inversiones: 0, deudasTotales: 0 };
 
-        // 1) Movements (aplican directamente)
+        // 1) Movements (aplican directamente: ingresos +, egresos -)
         const movSnap = await getDocs(collection(db, "companies", companyId, "movements"));
         movSnap.forEach(snap => {
           const m = snap.data();
@@ -537,7 +545,7 @@
           if (m.cuenta === "deudasTotales") base.deudasTotales += delta;
         });
 
-        // 2) Sales
+        // 2) Sales (usar asignaciones.paidBy si existe; evita duplicar restas)
         const salesSnap = await getDocs(collection(db, "companies", companyId, "sales"));
         salesSnap.forEach(snap => {
           const s = snap.data();
@@ -546,45 +554,54 @@
           const utilidad = Number(s.utilidad || (price - cost) || 0);
           const a = s.asignaciones || {};
 
-          // ingreso por la venta
+          // 2.1 Ingreso por la venta: todo entra inicialmente a cajaEmpresa
           base.cajaEmpresa += price;
 
-          // descontar COSTO de la empresa (la venta aporta precio a empresa,
-          // y luego la empresa entrega el costo para reembolsar a quien corresponda)
-          base.cajaEmpresa -= cost;
+          // 2.2 Reembolso de COSTO: usar paidBy (la función computePaidBy genera movimientos para socios en el momento de crear la venta;
+          // aquí sólo aplicamos los montos desde el objeto paidBy si existe)
+          const pb = a.paidBy || {};
+          if (Object.keys(pb).length) {
+            // restar la porción que cubrió la empresa y acreditar a quien aportó
+            const empresaPortion = Number(pb.empresa || 0);
+            const brandonPortion = Number(pb.brandon || 0);
+            const sociaPortion = Number(pb.socia || 0);
 
-          // si existe asignaciones.paidBy (calculado al crear la venta), pagar a socios según eso
-          if (a.paidBy) {
-            base.cajaBrandon += Number(a.paidBy.brandon || 0);
-            base.cajaSocia += Number(a.paidBy.socia || 0);
-            // pb.empresa ya queda implícita en el -cost aplicado a cajaEmpresa
+            base.cajaEmpresa -= empresaPortion;
+            base.cajaBrandon += brandonPortion;
+            base.cajaSocia += sociaPortion;
           } else {
-            // fallback: usar financiadoPor
+            // fallback: usar financiadoPor simple (para documentos viejos)
             const financedBy = a.financiadoPor || "empresa";
             if (financedBy === "brandon") base.cajaBrandon += cost;
-            if (financedBy === "socia") base.cajaSocia += cost;
-            // if empresa, already taken from cajaEmpresa
+            else if (financedBy === "socia") base.cajaSocia += cost;
+            else base.cajaEmpresa -= cost; // si fue empresa y no hay paidBy, restamos el costo a la empresa
           }
 
-          // reparto utilidad
-          if (utilidad > 0) {
-            base.cajaEmpresa -= utilidad;
-            base.cajaBrandon += utilidad/2;
-            base.cajaSocia += utilidad/2;
-          }
-
-          // reinversiones/pagoDeuda opcionales
-          if (a.reinversion) {
-            base.cajaEmpresa -= Number(a.reinversion || 0);
-            base.inversiones += Number(a.reinversion || 0);
-          }
-          if (a.pagoDeuda) {
-            base.cajaEmpresa -= Number(a.pagoDeuda || 0);
-            base.deudasTotales -= Number(a.pagoDeuda || 0);
+          // 2.3 Distribución de utilidad
+          if (a.manualMode) {
+            // modo manual: aplicar asignaciones directas (no auto 50/50)
+            if (a.reinversion) {
+              base.cajaEmpresa -= Number(a.reinversion || 0);
+              base.inversiones += Number(a.reinversion || 0);
+            }
+            if (a.brandon) base.cajaBrandon += Number(a.brandon || 0);
+            if (a.socia) base.cajaSocia += Number(a.socia || 0);
+            if (a.pagoDeuda) {
+              base.cajaEmpresa -= Number(a.pagoDeuda || 0);
+              base.deudasTotales -= Number(a.pagoDeuda || 0);
+            }
+          } else {
+            // modo automático: utilidad repartida 50/50 entre Brandon y Socia; empresa paga esa utilidad (la salida viene de la cajaEmpresa que recibió el price)
+            if (utilidad > 0) {
+              base.cajaEmpresa -= utilidad; // salida de empresa
+              base.cajaBrandon += utilidad/2;
+              base.cajaSocia += utilidad/2;
+            }
+            // si utilidad negativa (pérdida), se aplica a empresa (ya absorbida por price - cost)
           }
         });
 
-        // 3) Expenses
+        // 3) Expenses: usar paidDistribution si existe (evita duplicado)
         const expSnap = await getDocs(collection(db, "companies", companyId, "expenses"));
         expSnap.forEach(snap => {
           const g = snap.data();
@@ -608,7 +625,7 @@
           base.deudasTotales += saldo;
         });
 
-        // 5) Goals: acumulado reduce cash de cada ente
+        // 5) Goals: acumulado reduce cash de cada ente (las metas aportadas ya se consideraron como movimientos cuando se abonaron; esto evita doble)
         const goalsSnap = await getDocs(collection(db, "companies", companyId, "goals"));
         goalsSnap.forEach(snap => {
           const g = snap.data();
@@ -618,10 +635,19 @@
           if (g.tipo === "socia") base.cajaSocia -= acum;
         });
 
-        // normalize floats
+        // Normalize floats
         for (let k of Object.keys(base)) base[k] = Number(base[k].toFixed(2));
 
-        // write absolute balances doc
+        // IMPORTANT: Evitar cajaEmpresa negativa — si queda negativa, repartir déficit 50/50 entre Brandon y Socia (regla solicitada)
+        if (base.cajaEmpresa < 0) {
+          const deficit = -base.cajaEmpresa;
+          base.cajaEmpresa = 0;
+          const halfDef = Number((deficit/2).toFixed(2));
+          base.cajaBrandon -= halfDef;
+          base.cajaSocia -= halfDef;
+        }
+
+        // Guardar balances absolutos
         await setDoc(doc(db, "companies", companyId, "state", "balances"), base, { merge: true });
       } catch (err) {
         console.error("recomputeBalances error:", err);
@@ -639,15 +665,16 @@
       }, { merge: true });
     }
 
-    // ------------------------------------------------
-    // VENTAS: submit handler -> compute paidBy (create movs if new) and save
-    // ------------------------------------------------
+    // ---------------------------
+    // VENTAS (submit)
+    // ---------------------------
     function setupVentaFormHints() {
-      const costo = $("#ventaCosto"), precio = $("#ventaPrecio");
+      const costo = $("#ventaCosto");
+      const precio = $("#ventaPrecio");
       async function updateResumen() {
         const c = Number(costo.value||0), p = Number(precio.value||0);
         const util = p - c;
-        const margen = p ? (util/p) : 0;
+        const margen = p ? (util / p) : 0;
         $("#ventaResumen").textContent = `Utilidad: ${money(util)} (${(margen*100).toFixed(1)}%)`;
         try {
           const snap = await getDoc(doc(db, "users", currentUser.uid));
@@ -655,7 +682,9 @@
           const asigB = Number($("#asigBrandon").value||0);
           const sug = asigB * pct;
           $("#sugerenciaAhorro").textContent = pct ? `Sugerencia: aparta ${money(sug)} (${(pct*100).toFixed(0)}% de lo asignado a Brandon) hacia ahorros.` : "";
-        } catch(e) { $("#sugerenciaAhorro").textContent = ""; }
+        } catch (err) {
+          $("#sugerenciaAhorro").textContent = "";
+        }
       }
       ["input","change"].forEach(ev => {
         costo.addEventListener(ev, updateResumen);
@@ -667,13 +696,21 @@
     function setupVentaToggle() {
       $("#ventaManualToggle").addEventListener("change", () => {
         const on = $("#ventaManualToggle").checked;
-        if (on) { $("#manualDistribFields").classList.remove("hidden"); $("#autoDistribNote").classList.add("hidden"); }
-        else { $("#manualDistribFields").classList.add("hidden"); $("#autoDistribNote").classList.remove("hidden");
-          $("#asigReinv").value=""; $("#asigBrandon").value=""; $("#asigSocia").value=""; $("#asigPagoDeuda").value=""; }
+        if (on) {
+          $("#manualDistribFields").classList.remove("hidden");
+          $("#autoDistribNote").classList.add("hidden");
+        } else {
+          $("#manualDistribFields").classList.add("hidden");
+          $("#autoDistribNote").classList.remove("hidden");
+          // limpiar
+          $("#asigReinv").value = "";
+          $("#asigBrandon").value = "";
+          $("#asigSocia").value = "";
+          $("#asigPagoDeuda").value = "";
+        }
       });
     }
 
-    // submit ventas
     $("#formVenta").addEventListener("submit", async (e) => {
       e.preventDefault();
       const editingId = $("#editingSaleId").value || "";
@@ -687,7 +724,7 @@
       const financiadoPor = $("#ventaFinanciadaPor").value;
       const manualMode = $("#ventaManualToggle").checked;
 
-      const asignaciones = {
+      const asig = {
         manualMode,
         financiadoPor,
         reinversion: Number($("#asigReinv").value||0),
@@ -702,15 +739,17 @@
       // compute paidBy and create movements only if this is a NEW sale
       const createMovs = !editingId;
       const paidBy = await computePaidBy(financiadoPor, costo, createMovs);
-      asignaciones.paidBy = paidBy;
+      asig.paidBy = paidBy;
 
       if (editingId) {
         await updateDoc(doc(db, "companies", companyId, "sales", editingId), {
-          date, producto, costo, precio, utilidad, margen, notas, asignaciones, updatedAt: serverTimestamp()
+          date, producto, costo, precio, utilidad, margen, notas,
+          asignaciones: asig, updatedAt: serverTimestamp()
         });
       } else {
         await addDoc(collection(db, "companies", companyId, "sales"), {
-          date, producto, costo, precio, utilidad, margen, notas, asignaciones, createdAt: serverTimestamp()
+          date, producto, costo, precio, utilidad, margen, notas,
+          asignaciones: asig, createdAt: serverTimestamp()
         });
       }
 
@@ -723,7 +762,39 @@
       $("#autoDistribNote").classList.remove("hidden");
     });
 
-    // subscribeVentas renders table and attaches edit/delete
+    // ---------------------------
+    // GASTOS (submit)
+    // ---------------------------
+    $("#formGasto").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const editingId = $("#editingGastoId").value || "";
+      const date = $("#gastoFecha").value || new Date().toISOString().slice(0,10);
+      const categoria = $("#gastoCat").value.trim();
+      const monto = Number($("#gastoMonto").value||0);
+      const descripcion = $("#gastoDesc").value.trim();
+      const pagadoPor = $("#gastoPagadoPor").value;
+
+      // compute distribution and create movements if new
+      const createMovs = !editingId;
+      const paidDistribution = await computePaidBy(pagadoPor, monto, createMovs);
+
+      if (editingId) {
+        await updateDoc(doc(db, "companies", companyId, "expenses", editingId), {
+          date, categoria, monto, descripcion, pagadoPor, paidDistribution, updatedAt: serverTimestamp()
+        });
+        $("#editingGastoId").value = "";
+      } else {
+        await addDoc(collection(db, "companies", companyId, "expenses"), {
+          date, categoria, monto, descripcion, pagadoPor, paidDistribution, createdAt: serverTimestamp()
+        });
+      }
+
+      await recomputeBalances();
+      e.target.reset();
+    });
+    // ---------------------------
+    // SUBSCRIPTIONS: VENTAS / GASTOS (render + handlers)
+    // ---------------------------
     function subscribeVentas() {
       const qSales = query(collection(db, "companies", companyId, "sales"), orderBy("createdAt","desc"));
       const unsub = onSnapshot(qSales, (snap) => {
@@ -789,37 +860,6 @@
       unsubscribers.push(unsub);
     }
 
-    // ------------------------------------------------
-    // GASTOS: compute paidDistribution (same rule) -> save with paidDistribution
-    // ------------------------------------------------
-    $("#formGasto").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const editingId = $("#editingGastoId").value || "";
-      const date = $("#gastoFecha").value || new Date().toISOString().slice(0,10);
-      const categoria = $("#gastoCat").value.trim();
-      const monto = Number($("#gastoMonto").value||0);
-      const descripcion = $("#gastoDesc").value.trim();
-      const pagadoPor = $("#gastoPagadoPor").value;
-
-      // compute distribution and create movements if new
-      const createMovs = !editingId;
-      const paidDistribution = await computePaidBy(pagadoPor, monto, createMovs);
-
-      if (editingId) {
-        await updateDoc(doc(db, "companies", companyId, "expenses", editingId), {
-          date, categoria, monto, descripcion, pagadoPor, paidDistribution, updatedAt: serverTimestamp()
-        });
-        $("#editingGastoId").value = "";
-      } else {
-        await addDoc(collection(db, "companies", companyId, "expenses"), {
-          date, categoria, monto, descripcion, pagadoPor, paidDistribution, createdAt: serverTimestamp()
-        });
-      }
-
-      await recomputeBalances();
-      e.target.reset();
-    });
-
     function subscribeGastos() {
       const qExp = query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt","desc"));
       const unsub = onSnapshot(qExp, (snap) => {
@@ -868,8 +908,9 @@
     }
 
     // ------------------------------------------------
-    // DEUDAS
+    // DEUDAS / METAS / MOVIMIENTOS (handlers y subscribes)
     // ------------------------------------------------
+    // --- DEUDAS (submit + subscribe)
     $("#formDeuda").addEventListener("submit", async (e) => {
       e.preventDefault();
       const editingId = $("#editingDeudaId").value || "";
@@ -954,9 +995,7 @@
       unsubscribers.push(unsub);
     }
 
-    // ------------------------------------------------
-    // METAS
-    // ------------------------------------------------
+    // --- METAS
     $("#formMeta").addEventListener("submit", async (e) => {
       e.preventDefault();
       const editingId = $("#editingMetaId").value || "";
@@ -1042,9 +1081,7 @@
       unsubscribers.push(unsub);
     }
 
-    // ------------------------------------------------
-    // MOVIMIENTOS MANUALES (ingresos/egresos)
-    // ------------------------------------------------
+    // --- MOVIMIENTOS
     $("#formMovimiento").addEventListener("submit", async (e) => {
       e.preventDefault();
       const editingId = $("#editingMovId").value || "";
