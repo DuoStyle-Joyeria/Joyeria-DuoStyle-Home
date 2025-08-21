@@ -8,11 +8,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- NOTE: no Firebase config duplicado en el head para evitar 'cannot redeclare' -->
+  <!-- Nota: no repetir firebaseConfig en el head -->
+  <style>
+    /* Pequeño ajuste para que tablas no rompan en mobile */
+    table { border-collapse: collapse; width: 100%; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid #eee; }
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
   <div id="app" class="max-w-6xl mx-auto p-4">
-    <!-- Auth -->
+    <!-- AUTH -->
     <div id="authView" class="mt-10">
       <h1 class="text-2xl font-bold mb-4">Acceso</h1>
       <div class="grid md:grid-cols-2 gap-6">
@@ -27,13 +32,13 @@
           <input id="regName" type="text" required placeholder="Tu nombre (p.ej. Brandon)" class="w-full border rounded p-2">
           <input id="regEmail" type="email" required placeholder="Email" class="w-full border rounded p-2">
           <input id="regPass" type="password" required placeholder="Contraseña" class="w-full border rounded p-2">
-          <!-- eliminamos input de % ahorro del registro para moverlo a Perfil -->
+          <!-- No pedimos % de ahorro en registro -->
           <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear</button>
         </form>
       </div>
     </div>
 
-    <!-- App -->
+    <!-- APP -->
     <div id="mainView" class="hidden">
       <div class="flex items-center justify-between mt-4">
         <div>
@@ -114,7 +119,7 @@
                 </div>
 
                 <div id="autoDistribNote" class="mt-3 text-sm text-slate-600">
-                  Modo automático: se devuelve la inversión al inversor (si financió la empresa se divide 50/50) y la utilidad se reparte 50/50 entre Brandon y la Socia. El sistema sugerirá cuánto ahorrar/ir a deudas según la configuración.
+                  Modo automático: se devuelve la inversión al inversor (si financió la empresa se divide 50/50) y la utilidad se reparte 50/50 entre Brandon y la Socia. Si la empresa no tiene fondos, el costo se reparte 50/50 entre Brandon y Socia automáticamente.
                 </div>
                 <p id="ventaResumen" class="text-sm text-slate-600 mt-2"></p>
                 <p id="sugerenciaAhorro" class="text-xs text-slate-600 mt-1"></p>
@@ -234,7 +239,7 @@
           </div>
         </section>
 
-        <!-- MOVIMIENTOS -->
+                <!-- MOVIMIENTOS -->
         <section id="tab-movimientos" class="tab hidden mt-4">
           <div class="grid md:grid-cols-2 gap-4">
             <form id="formMovimiento" class="bg-white p-4 rounded shadow space-y-2">
@@ -292,17 +297,17 @@
   <!-- Firebase SDKs & App logic (único bloque con firebaseConfig) -->
   <script type="module">
     // =========================
-    // === AQUI: FIREBASE CONFIG (usa la tuya, la dejé como estaba) ===
+    // === AQUI: FIREBASE CONFIG (usa la tuya) ===
     // =========================
-   const firebaseConfig = {
-    apiKey: "AIzaSyCTFSlLoKv6KKujTqjMeMjNc-AlKQ2-rng",
-    authDomain: "duostyle01-611b9.firebaseapp.com",
-    projectId: "duostyle01-611b9",
-    storageBucket: "duostyle01-611b9.firebasestorage.app",
-    messagingSenderId: "4630065257",
-    appId: "1:4630065257:web:11b7b0a0ac2fa776bbf2f8",
-    measurementId: "G-FW6QEJMZKT"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTFSlLoKv6KKujTqjMeMjNc-AlKQ2-rng",
+      authDomain: "duostyle01-611b9.firebaseapp.com",
+      projectId: "duostyle01-611b9",
+      storageBucket: "duostyle01-611b9.firebasestorage.app",
+      messagingSenderId: "4630065257",
+      appId: "1:4630065257:web:11b7b0a0ac2fa776bbf2f8",
+      measurementId: "G-FW6QEJMZKT"
+    };
     // =====================================================
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
@@ -317,10 +322,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-    // make db/auth accessible in console if needed
-    window.db = db;
-    window.auth = auth;
+    window.db = db; window.auth = auth;
 
     // ---- UI helpers
     const $ = sel => document.querySelector(sel);
@@ -329,10 +331,10 @@
 
     // ---- State
     let currentUser = null;
-    let companyId = null; // una sola empresa por ahora
+    let companyId = null;
     let unsubscribers = [];
 
-    // ---- Auth handlers
+    // ---- AUTH handlers
     $("#loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = $("#loginEmail").value.trim();
@@ -345,7 +347,7 @@
       const name = $("#regName").value.trim();
       const email = $("#regEmail").value.trim();
       const pass = $("#regPass").value.trim();
-      const ahorroPct = 0; // no pedir en registro
+      const ahorroPct = 0;
 
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(cred.user, { displayName: name });
@@ -353,16 +355,14 @@
         displayName: name, email, ahorroSugeridoPct: ahorroPct
       });
 
-      // Crear empresa por defecto si no existe
+      // create company doc
       companyId = `${cred.user.uid}-company`;
       await setDoc(doc(db, "companies", companyId), {
         name: "Joyería — Empresa",
         owners: [{ uid: cred.user.uid, name }],
-        // campo empresa: porcentaje obligatorio para deudas (default 10%)
         mandatoryDebtPct: 0.10
       });
 
-      // Estado de cuentas inicial
       await setDoc(doc(db, "companies", companyId, "state", "balances"), {
         cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0, inversiones: 0, deudasTotales: 0
       });
@@ -370,10 +370,9 @@
 
     $("#btnLogout").addEventListener("click", () => signOut(auth));
 
-    // onAuth change -> set companyId, subscribe to collections
+    // onAuthStateChanged -> setup subscriptions and recompute
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
-      // cleanup
       unsubscribers.forEach(u => u && u());
       unsubscribers = [];
       if (!user) {
@@ -384,7 +383,6 @@
       $("#authView").classList.add("hidden");
       $("#mainView").classList.remove("hidden");
 
-      // Detectar/crear companyId por defecto
       companyId = `${user.uid}-company`;
       const compRef = doc(db, "companies", companyId);
       const snap = await getDoc(compRef);
@@ -400,22 +398,21 @@
       }
       $("#companyName").textContent = (await getDoc(compRef)).data().name;
 
-      // Suscripciones y setups
-      subscribeKPIs();      // muestra balances (se actualiza cuando recomputeBalances escribe)
-      subscribeVentas();
-      subscribeGastos();
-      subscribeDeudas();
-      subscribeMetas();
-      subscribeMovimientos();
-      // setup UI handlers
+      // setup UI & subs
       setupTabs();
       setupVentaFormHints();
       setupCharts();
       setupVentaToggle();
       setupPerfilButton();
 
-      // Keep realtime recompute: whenever core collections change, recompute balances
-      // (we subscribe to collections and recompute on snapshot)
+      subscribeKPIs();
+      subscribeVentas();
+      subscribeGastos();
+      subscribeDeudas();
+      subscribeMetas();
+      subscribeMovimientos();
+
+      // listen collections to trigger recompute balances
       const qSales = query(collection(db, "companies", companyId, "sales"), orderBy("createdAt","desc"));
       const qExp = query(collection(db, "companies", companyId, "expenses"), orderBy("createdAt","desc"));
       const qDeb = query(collection(db, "companies", companyId, "debts"), orderBy("createdAt","desc"));
@@ -428,7 +425,6 @@
       unsubscribers.push(onSnapshot(qMov, () => recomputeBalances()));
       unsubscribers.push(onSnapshot(qGoals, () => recomputeBalances()));
 
-      // initial compute
       await recomputeBalances();
     });
 
@@ -445,7 +441,7 @@
       });
     }
 
-    // ---- Show KPIs (reads balances doc)
+    // ---- KPIs (reads balances doc)
     function subscribeKPIs() {
       const ref = doc(db, "companies", companyId, "state", "balances");
       const unsub = onSnapshot(ref, snap => {
@@ -459,15 +455,13 @@
     }
 
     // ---------------------------
-    // UTIL: RECOMPUTE BALANCES FROM RECORDS (robusto)
+    // RECOMPUTE BALANCES (robusto) - usa paidBy / paidDistribution cuando exista
     // ---------------------------
     async function recomputeBalances() {
-      // This function reads sales, expenses, debts, movements and goals
-      // and rebuilds balances from zero. This avoids incremental drift when editing/deleting.
       try {
         const base = { cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0, inversiones: 0, deudasTotales: 0 };
 
-        // 1) Sales
+        // SALES
         const salesSnap = await getDocs(collection(db, "companies", companyId, "sales"));
         salesSnap.forEach(snap => {
           const s = snap.data();
@@ -475,28 +469,18 @@
           const cost = Number(s.costo || s.cost || 0);
           const utilidad = Number(s.utilidad || (price - cost) || 0);
           const a = s.asignaciones || {};
-          const manual = !!a.manualMode;
 
           // price enters company
           base.cajaEmpresa += price;
 
-          if (manual) {
-            // manual assigns are explicit: reinversion, brandon, socia, pagoDeuda
-            const reinv = Number(a.reinversion || 0);
-            const br = Number(a.brandon || 0);
-            const so = Number(a.socia || 0);
-            const pd = Number(a.pagoDeuda || 0);
-            // apply manual: company pays reinv, brandon, socia, pagoDeuda (reduces deudas)
-            base.cajaEmpresa -= reinv;
-            base.inversiones += reinv;
-            base.cajaEmpresa -= br;
-            base.cajaBrandon += br;
-            base.cajaEmpresa -= so;
-            base.cajaSocia += so;
-            base.cajaEmpresa -= pd;
-            base.deudasTotales -= pd; // payments reduce total debts
+          // If record contains paidBy (explicit payment distribution), use it
+          if (a.paidBy) {
+            const pb = a.paidBy;
+            base.cajaEmpresa -= Number(pb.empresa || 0);
+            base.cajaBrandon += Number(pb.brandon || 0);
+            base.cajaSocia += Number(pb.socia || 0);
           } else {
-            // automatic: return the cost to investor, split utility 50/50
+            // fallback: earlier logic based on financiadoPor
             const financedBy = a.financiadoPor || "empresa";
             if (financedBy === "empresa") {
               base.cajaEmpresa -= cost;
@@ -509,34 +493,44 @@
               base.cajaEmpresa -= cost;
               base.cajaSocia += cost;
             }
+          }
 
-            if (utilidad > 0) {
-              base.cajaEmpresa -= utilidad;
-              base.cajaBrandon += utilidad/2;
-              base.cajaSocia += utilidad/2;
-            }
+          // utilities split and optional fields (reinversion / pagoDeuda)
+          if (utilidad > 0) {
+            // If explicit util split in asignaciones (rare), follow it; else 50/50
+            base.cajaEmpresa -= utilidad;
+            base.cajaBrandon += utilidad/2;
+            base.cajaSocia += utilidad/2;
+          }
 
-            // optional manual fields in asignaciones still applied
-            const reinv = Number(a.reinversion || 0);
-            const pd = Number(a.pagoDeuda || 0);
-            base.cajaEmpresa -= reinv;
-            base.inversiones += reinv;
-            base.cajaEmpresa -= pd;
-            base.deudasTotales -= pd;
+          // apply optional reinversion / pagoDeuda stored in asignaciones
+          if (a.reinversion) {
+            base.cajaEmpresa -= Number(a.reinversion || 0);
+            base.inversiones += Number(a.reinversion || 0);
+          }
+          if (a.pagoDeuda) {
+            base.cajaEmpresa -= Number(a.pagoDeuda || 0);
+            base.deudasTotales -= Number(a.pagoDeuda || 0);
           }
         });
 
-        // 2) Expenses: subtract from payer
+        // EXPENSES: prefer stored paidDistribution
         const expSnap = await getDocs(collection(db, "companies", companyId, "expenses"));
         expSnap.forEach(snap => {
           const g = snap.data();
           const monto = Number(g.monto || 0);
-          if (g.pagadoPor === "empresa") base.cajaEmpresa -= monto;
-          if (g.pagadoPor === "brandon") base.cajaBrandon -= monto;
-          if (g.pagadoPor === "socia") base.cajaSocia -= monto;
+          if (g.paidDistribution) {
+            base.cajaEmpresa -= Number(g.paidDistribution.empresa||0);
+            base.cajaBrandon -= Number(g.paidDistribution.brandon||0);
+            base.cajaSocia -= Number(g.paidDistribution.socia||0);
+          } else {
+            if (g.pagadoPor === "empresa") base.cajaEmpresa -= monto;
+            if (g.pagadoPor === "brandon") base.cajaBrandon -= monto;
+            if (g.pagadoPor === "socia") base.cajaSocia -= monto;
+          }
         });
 
-        // 3) Debts: sum current saldo
+        // DEBTS: sum saldo
         const debtsSnap = await getDocs(collection(db, "companies", companyId, "debts"));
         debtsSnap.forEach(snap => {
           const d = snap.data();
@@ -544,7 +538,7 @@
           base.deudasTotales += saldo;
         });
 
-        // 4) Movements: apply each ingreso/egreso
+        // MOVEMENTS
         const movSnap = await getDocs(collection(db, "companies", companyId, "movements"));
         movSnap.forEach(snap => {
           const m = snap.data();
@@ -558,7 +552,7 @@
           if (m.cuenta === "deudasTotales") base.deudasTotales += delta;
         });
 
-        // 5) Goals: subtract acumulated amounts (they are "locked" money)
+        // GOALS: acumulado reduce corresponding cash
         const goalsSnap = await getDocs(collection(db, "companies", companyId, "goals"));
         goalsSnap.forEach(snap => {
           const g = snap.data();
@@ -568,10 +562,10 @@
           if (g.tipo === "socia") base.cajaSocia -= acum;
         });
 
-        // Normalize small floating rounding errors
+        // normalize
         for (let k of Object.keys(base)) base[k] = Number(base[k].toFixed(2));
 
-        // Write absolute balances to balances doc (overwrite)
+        // write absolute balances
         const ref = doc(db, "companies", companyId, "state", "balances");
         await setDoc(ref, base, { merge: true });
 
@@ -580,7 +574,7 @@
       }
     }
 
-    // ---- keep legacy adjustBalances for simple ops but recompute after critical ops
+    // ---- legacy incremental adjust (used rarely) - recompute after critical ops
     async function adjustBalances({ cajaEmpresa=0, cajaBrandon=0, cajaSocia=0, deudasTotales=0, inversiones=0 }) {
       const ref = doc(db, "companies", companyId, "state", "balances");
       await setDoc(ref, {
@@ -593,7 +587,7 @@
     }
 
     // ---------------------------
-    // VENTAS (create / edit / delete)
+    // VENTAS: compute paidBy when creating/updating -> store in asignaciones.paidBy
     // ---------------------------
     function setupVentaFormHints() {
       const costo = $("#ventaCosto");
@@ -630,7 +624,6 @@
         } else {
           $("#manualDistribFields").classList.add("hidden");
           $("#autoDistribNote").classList.remove("hidden");
-          // limpiar
           $("#asigReinv").value = "";
           $("#asigBrandon").value = "";
           $("#asigSocia").value = "";
@@ -639,7 +632,40 @@
       });
     }
 
-    // Submit handler supports create & edit (editingSaleId)
+    // Helper: compute paidBy distribution based on who financed and current company caja
+    async function computePaidBy(financiadoPor, amount) {
+      // returns { empresa: x, brandon: y, socia: z } summing to amount
+      try {
+        const balSnap = await getDoc(doc(db, "companies", companyId, "state", "balances"));
+        const balances = balSnap.exists() ? balSnap.data() : { cajaEmpresa:0, cajaBrandon:0, cajaSocia:0 };
+        const empresaCaja = Number(balances.cajaEmpresa || 0);
+
+        if (financiadoPor !== "empresa") {
+          // if a partner financed, they cover full cost themselves (we still check if they have money? we'll record paidBy regardless)
+          if (financiadoPor === "brandon") return { empresa: 0, brandon: amount, socia: 0 };
+          if (financiadoPor === "socia") return { empresa: 0, brandon: 0, socia: amount };
+        }
+
+        // financed by empresa
+        if (empresaCaja >= amount) {
+          return { empresa: amount, brandon: 0, socia: 0 };
+        } else {
+          // empresa insufficient -> split shortage 50/50 between partners
+          const coveredByEmpresa = Math.max(0, empresaCaja);
+          const shortage = amount - coveredByEmpresa;
+          const share = Number((shortage/2).toFixed(2));
+          // If empresa had some money, it covers that part
+          return { empresa: coveredByEmpresa, brandon: share, socia: share };
+        }
+      } catch (err) {
+        console.error("computePaidBy error:", err);
+        // fallback: split 50/50
+        const share = Number((amount/2).toFixed(2));
+        return { empresa: 0, brandon: share, socia: share };
+      }
+    }
+
+    // Submit venta: create or update with paidBy
     $("#formVenta").addEventListener("submit", async (e) => {
       e.preventDefault();
       const editingId = $("#editingSaleId").value || "";
@@ -667,31 +693,31 @@
       if (precio <= 0) { alert("El precio debe ser mayor a 0"); return; }
       if (costo < 0) { alert("El costo no puede ser negativo"); return; }
 
+      // Compute paidBy for the cost: who actually provided the capital for the cost
+      const paidBy = await computePaidBy(financiadoPor, costo);
+      asignaciones.paidBy = paidBy; // store for audit and recompute
+
       if (editingId) {
-        // update existing sale
-        const ref = doc(db, "companies", companyId, "sales", editingId);
-        await updateDoc(ref, {
+        await updateDoc(doc(db, "companies", companyId, "sales", editingId), {
           date, producto, costo, precio, utilidad, margen, notas, asignaciones, updatedAt: serverTimestamp()
         });
-        // clear edit
-        $("#editingSaleId").value = "";
       } else {
-        // create new sale
         await addDoc(collection(db, "companies", companyId, "sales"), {
           date, producto, costo, precio, utilidad, margen, notas, asignaciones, createdAt: serverTimestamp()
         });
       }
 
-      // After create/update we recompute balances (robust)
+      // after create/update, recompute balances (robust)
       await recomputeBalances();
 
-      // reset form
+      // reset
+      $("#editingSaleId").value = "";
       e.target.reset();
       $("#manualDistribFields").classList.add("hidden");
       $("#autoDistribNote").classList.remove("hidden");
     });
 
-    // render sales table and attach edit/delete using recompute approach
+    // Render sales table + handlers
     function subscribeVentas() {
       const qSales = query(collection(db, "companies", companyId, "sales"), orderBy("createdAt","desc"));
       const unsub = onSnapshot(qSales, (snap) => {
@@ -715,7 +741,6 @@
           tbody.appendChild(tr);
         });
 
-        // delete handlers: simply delete the doc and recompute
         $$(".del-sale").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
@@ -725,7 +750,6 @@
           };
         });
 
-        // edit handlers: prefill form (no reversing; we will update on submit)
         $$(".edit-sale").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
@@ -733,7 +757,6 @@
             const snap = await getDoc(ref);
             if (!snap.exists()) return alert("Documento no encontrado.");
             const data = snap.data();
-            // prefill form and set editing id
             $("#editingSaleId").value = id;
             $("#ventaFecha").value = data.date || "";
             $("#ventaProducto").value = data.producto || "";
@@ -758,18 +781,17 @@
               $("#asigBrandon").value = "";
               $("#asigSocia").value = "";
             }
-            // switch to ventas tab if not there (optional)
             document.querySelector('[data-tab="ventas"]').click();
           };
         });
 
-        refreshCharts(); // actualizar estadísticas
+        refreshCharts();
       });
       unsubscribers.push(unsub);
     }
 
     // ---------------------------
-    // GASTOS (create / edit / delete)
+    // GASTOS: compute paidDistribution on create/edit similar to sales
     // ---------------------------
     $("#formGasto").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -781,14 +803,17 @@
       const descripcion = $("#gastoDesc").value.trim();
       const pagadoPor = $("#gastoPagadoPor").value;
 
+      // compute paidDistribution (if pagadoPor === 'empresa', may split)
+      const paidDistribution = await computePaidBy(pagadoPor, monto);
+
       if (editingId) {
         await updateDoc(doc(db, "companies", companyId, "expenses", editingId), {
-          date, categoria, monto, descripcion, pagadoPor, updatedAt: serverTimestamp()
+          date, categoria, monto, descripcion, pagadoPor, paidDistribution, updatedAt: serverTimestamp()
         });
         $("#editingGastoId").value = "";
       } else {
         await addDoc(collection(db, "companies", companyId, "expenses"), {
-          date, categoria, monto, descripcion, pagadoPor, createdAt: serverTimestamp()
+          date, categoria, monto, descripcion, pagadoPor, paidDistribution, createdAt: serverTimestamp()
         });
       }
 
@@ -833,7 +858,6 @@
             const snap = await getDoc(ref);
             if (!snap.exists()) return;
             const g = snap.data();
-            // prefill and set editing id
             $("#editingGastoId").value = id;
             $("#gastoFecha").value = g.date || "";
             $("#gastoCat").value = g.categoria || "";
@@ -850,7 +874,7 @@
     }
 
     // ---------------------------
-    // DEUDAS
+    // DEUDAS (same as before but recompute after edits)
     // ---------------------------
     $("#formDeuda").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -905,9 +929,8 @@
             if (abono <= 0) return;
             const ref = doc(db, "companies", companyId, "debts", id);
             const snap = await getDoc(ref);
-            const saldo = snap.data().saldo - abono;
+            const saldo = (snap.data().saldo || 0) - abono;
             await updateDoc(ref, { saldo: Math.max(0, saldo) });
-            // assume payment from company caja
             await recomputeBalances();
             inp.value = "";
           };
@@ -929,7 +952,6 @@
             const snap = await getDoc(ref);
             if (!snap.exists()) return;
             const d = snap.data();
-            // prefill for edit
             $("#editingDeudaId").value = id;
             $("#deudaTipo").value = d.tipo || "a_proveedor";
             $("#deudaAcreedor").value = d.acreedor || "";
@@ -1004,7 +1026,6 @@
             const snap = await getDoc(ref);
             const acum = (snap.data().acumulado || 0) + abono;
             await updateDoc(ref, { acumulado: acum });
-            // recompute balances to reflect the withdrawal
             await recomputeBalances();
             inp.value = "";
           };
@@ -1026,7 +1047,6 @@
             const snap = await getDoc(ref);
             if (!snap.exists()) return;
             const g = snap.data();
-            // prefill edit
             $("#editingMetaId").value = id;
             $("#metaTipo").value = g.tipo || "negocio";
             $("#metaNombre").value = g.nombre || "";
@@ -1048,7 +1068,7 @@
       const editingId = $("#editingMovId").value || "";
 
       const tipo = $("#movTipo").value; // ingreso / egreso
-      const cuenta = $("#movCuenta").value; // cajaEmpresa, cajaBrandon...
+      const cuenta = $("#movCuenta").value;
       const fecha = $("#movFecha").value || new Date().toISOString().slice(0,10);
       const monto = Number($("#movMonto").value||0);
       const desc = $("#movDesc").value || "";
@@ -1122,11 +1142,10 @@
     }
 
     // ---------------------------
-    // ESTADÍSTICAS (Chart.js) - destroy existing charts to avoid duplication
+    // CHARTS (destroy previous to avoid repeated growth)
     // ---------------------------
     let chartIG = null, chartUtilidad = null;
     function setupCharts() {
-      // destroy previous if exist
       try { if (chartIG) chartIG.destroy(); } catch(e){}
       try { if (chartUtilidad) chartUtilidad.destroy(); } catch(e){}
 
@@ -1155,7 +1174,6 @@
     }
 
     async function refreshCharts() {
-      // This uses current collections to build stats
       try {
         const today = new Date();
         const from = new Date(today.getTime() - 90*24*3600*1000);
@@ -1176,7 +1194,6 @@
           byDateOut[key] = (byDateOut[key]||0) + Number(d.monto||0);
         });
 
-        // build labels
         const labels = [];
         for (let t=from; t<=today; t = new Date(t.getTime()+24*3600*1000)) labels.push(fmt(t));
         const ingresos = labels.map(l => byDateIn[l]||0);
@@ -1187,7 +1204,6 @@
         chartIG.data.datasets[1].data = gastos;
         chartIG.update();
 
-        // Utilidad por venta (últimas 30)
         const ventas = [];
         salesSnap.forEach(s => ventas.push(s.data()));
         ventas.sort((a,b)=> (a.date < b.date ? -1:1));
@@ -1201,7 +1217,7 @@
       }
     }
 
-    // ---- Cambiar empresa (placeholder MVP)
+    // ---- Cambiar empresa (MVP)
     $("#btnSelectCompany").addEventListener("click", async () => {
       const name = prompt("Nombre de empresa", "Joyería — Empresa");
       if (!name) return;
@@ -1209,7 +1225,7 @@
       $("#companyName").textContent = name;
     });
 
-    // Perfil: configurar % ahorro personal y % deuda obligatorio (empresa)
+    // Perfil: ahorro y porcentaje deuda obligatorio
     function setupPerfilButton() {
       $("#btnPerfil").addEventListener("click", async () => {
         try {
@@ -1245,14 +1261,9 @@
       });
     }
 
-    // ---------------------------
-    // Helpers: ensure charts update periodically and when data changes
-    // ---------------------------
-    // Recompute charts after collections change (already many listeners call refreshCharts)
-    // We'll set periodic refresh to ensure UI stays responsive
+    // Small periodic refresh
     setInterval(() => { try { refreshCharts(); } catch(e){} }, 30_000);
 
-    // End of module
   </script>
 </body>
 </html>
