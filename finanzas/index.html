@@ -180,106 +180,38 @@
         </section>
 
         
-        <!-- DEUDAS -->
+       <!-- DEUDAS -->
 <section id="tab-deudas" class="tab hidden mt-4">
   <div class="grid md:grid-cols-2 gap-4">
+
+    <!-- FORMULARIO CREAR / EDITAR DEUDA -->
     <form id="formDeuda" class="bg-white p-4 rounded shadow space-y-2">
       <h3 class="font-semibold text-lg">Nueva Deuda</h3>
 
-      <select id="deudaTipo" class="w-full border rounded p-2">
-        <option value="a_proveedor">A proveedor</option>
-        <option value="de_la_empresa">De la empresa</option>
-        <option value="personal_brandon">Personal Brandon</option>
-        <option value="personal_socia">Personal Socia</option>
+      <!-- Seleccionar quién debe -->
+      <label class="block text-sm font-medium">Quién tiene la deuda</label>
+      <select id="deudaDeudor" class="w-full border rounded p-2" required>
+        <option value="empresa">Empresa</option>
+        <option value="brandon">Brandon</option>
+        <option value="socia">Socia</option>
       </select>
 
-      <input
-        type="text"
-        id="deudaAcreedor"
-        placeholder="Acreedor/Descripción"
-        required
-        class="w-full border rounded p-2"
-      />
+      <!-- Seleccionar a quién se le debe -->
+      <label class="block text-sm font-medium">A quién se le debe</label>
+      <select id="deudaAcreedor" class="w-full border rounded p-2" required>
+        <option value="proveedor">Proveedor</option>
+        <option value="empresa">Empresa</option>
+        <option value="brandon">Brandon</option>
+        <option value="socia">Socia</option>
+      </select>
 
-      <input
-        type="number"
-        id="deudaMonto"
-        placeholder="Monto"
-        step="0.01"
-        min="0.01"
-        required
-        class="w-full border rounded p-2"
-      />
+      <!-- Campos básicos -->
+      <input type="number" id="deudaMonto" placeholder="Monto" step="0.01" min="0" required class="w-full border rounded p-2">
+      <textarea id="deudaNotas" placeholder="Notas" class="w-full border rounded p-2"></textarea>
 
-      <textarea
-        id="deudaNotas"
-        placeholder="Notas"
-        class="w-full border rounded p-2"
-      ></textarea>
-
-      <input type="hidden" id="editingDeudaId" value="" />
-
-      <!-- IMPORTANTE: type=submit -->
-      <button
-        type="submit"
-        id="btnCrearDeuda"
-        class="w-full bg-emerald-600 text-white py-2 rounded"
-      >
-        Crear Deuda
-      </button>
-
-      <p id="deudaMsg" class="text-sm text-slate-500"></p>
+      <input type="hidden" id="editingDeudaId" value="">
+      <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear Deuda</button>
     </form>
-
-    <div class="bg-white p-4 rounded shadow overflow-auto">
-      <h3 class="font-semibold text-lg mb-2">Deudas</h3>
-      <table class="w-full text-sm">
-        <thead class="text-left">
-          <tr>
-            <th>Acreedor</th>
-            <th>Tipo</th>
-            <th>Saldo</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tbDeudas"></tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-
-     <!-- ======================= DEUDAS ======================= -->
-<section id="tab-deudas" class="tab hidden mt-4">
-  <div class="grid md:grid-cols-2 gap-4">
-
-    <!-- FORMULARIO CREAR/EDITAR DEUDA -->
-    <form id="formDeuda" class="bg-white p-4 rounded shadow space-y-2">
-  <h3 class="font-semibold text-lg">Nueva Deuda</h3>
-
-  <!-- Quién debe -->
-  <label class="block text-sm font-medium">Deudor</label>
-  <select id="deudaDeudor" class="w-full border rounded p-2">
-    <option value="empresa">Empresa</option>
-    <option value="brandon">Brandon</option>
-    <option value="socia">Socia</option>
-  </select>
-
-  <!-- A quién se le debe -->
-  <label class="block text-sm font-medium">Acreedor</label>
-  <select id="deudaAcreedor" class="w-full border rounded p-2">
-    <option value="proveedor">Proveedor</option>
-    <option value="empresa">Empresa</option>
-    <option value="brandon">Brandon</option>
-    <option value="socia">Socia</option>
-  </select>
-
-  <input type="number" id="deudaMonto" placeholder="Monto" step="0.01" min="0" required class="w-full border rounded p-2">
-  <textarea id="deudaNotas" placeholder="Notas" class="w-full border rounded p-2"></textarea>
-  <input type="hidden" id="editingDeudaId" value="">
-  <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear Deuda</button>
-</form>
-
 
     <!-- LISTADO DE DEUDAS -->
     <div class="bg-white p-4 rounded shadow overflow-auto">
@@ -287,10 +219,7 @@
       <table class="w-full text-sm">
         <thead class="text-left">
           <tr>
-            <th>Deudor</th>
-            <th>Acreedor</th>
-            <th>Saldo</th>
-            <th>Acciones</th>
+            <th>Deudor</th><th>Acreedor</th><th>Saldo</th><th>Acciones</th>
           </tr>
         </thead>
         <tbody id="tbDeudas"></tbody>
@@ -300,92 +229,132 @@
 </section>
 
 <script>
-/* ==================== CREAR O EDITAR DEUDA ==================== */
-$("#formDeuda").addEventListener("submit", async (e) => {
+
+// --- JS PARA FORMULARIO DE DEUDAS ---
+
+// Crear/editar deudas
+document.getElementById("formDeuda").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const editingId = $("#editingDeudaId").value || "";
-  const deudor = $("#deudaDeudor").value;
-  const acreedor = $("#deudaAcreedor").value;
-  const monto = Number($("#deudaMonto").value || 0);
-  const notas = $("#deudaNotas").value.trim();
+  const editingId = document.getElementById("editingDeudaId").value || "";
+  const deudor = document.getElementById("deudaDeudor").value;
+  const acreedor = document.getElementById("deudaAcreedor").value;
+  const monto = Number(document.getElementById("deudaMonto").value || 0);
+  const notas = document.getElementById("deudaNotas").value.trim();
 
   if (monto <= 0) {
     alert("El monto debe ser mayor a 0");
     return;
   }
 
-  const data = {
-    deudor, acreedor, monto, notas,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  };
+  try {
+    if (editingId) {
+      await updateDoc(doc(db, "companies", companyId, "debts", editingId), {
+        deudor, acreedor, monto, notas, updatedAt: serverTimestamp()
+      });
+    } else {
+      await addDoc(collection(db, "companies", companyId, "debts"), {
+        deudor, acreedor, monto, notas, createdAt: serverTimestamp()
+      });
+    }
 
-  if (editingId) {
-    await updateDoc(doc(db, "companies", companyId, "deudas", editingId), data);
-  } else {
-    await addDoc(collection(db, "companies", companyId, "deudas"), data);
+    document.getElementById("formDeuda").reset();
+    document.getElementById("editingDeudaId").value = "";
+    cargarDeudas();
+
+  } catch (err) {
+    console.error("Error guardando deuda:", err);
+    alert("Error al guardar la deuda");
   }
-
-  e.target.reset();
-  $("#editingDeudaId").value = "";
 });
 
-/* ==================== MOSTRAR DEUDAS EN TABLA ==================== */
-onSnapshot(collection(db, "companies", companyId, "deudas"), (qs) => {
-  const tb = $("#tbDeudas");
-  tb.innerHTML = "";
-  qs.forEach((d) => {
-    const deuda = d.data();
+// Listar deudas
+async function cargarDeudas() {
+  const q = query(collection(db, "companies", companyId, "debts"));
+  const snapshot = await getDocs(q);
+
+  const tbody = document.getElementById("tbDeudas");
+  tbody.innerHTML = "";
+
+  snapshot.forEach((docSnap) => {
+    const d = docSnap.data();
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
-      <td>${deuda.deudor}</td>
-      <td>${deuda.acreedor}</td>
-      <td>$${deuda.monto.toLocaleString()}</td>
+      <td>${d.deudor}</td>
+      <td>${d.acreedor}</td>
+      <td>$${d.monto.toLocaleString()}</td>
       <td>
-        <button onclick="abonarDeuda('${d.id}', ${deuda.monto}, '${deuda.deudor}')" 
-          class="text-blue-600">Abonar</button>
+        <button onclick="editarDeuda('${docSnap.id}', '${d.deudor}', '${d.acreedor}', ${d.monto}, '${d.notas||""}')" class="text-blue-600">Editar</button>
+        <button onclick="abonarDeuda('${docSnap.id}', ${d.monto}, '${d.deudor}')" class="text-green-600 ml-2">Abonar</button>
       </td>
     `;
-    tb.appendChild(tr);
+    tbody.appendChild(tr);
   });
-});
+}
 
-/* ==================== FUNCIÓN PARA ABONAR ==================== */
-async function abonarDeuda(id, saldo, deudor) {
-  const abono = Number(prompt("Ingrese el monto del abono:", saldo));
-  if (!abono || abono <= 0) return;
+// Editar deuda
+function editarDeuda(id, deudor, acreedor, monto, notas) {
+  document.getElementById("editingDeudaId").value = id;
+  document.getElementById("deudaDeudor").value = deudor;
+  document.getElementById("deudaAcreedor").value = acreedor;
+  document.getElementById("deudaMonto").value = monto;
+  document.getElementById("deudaNotas").value = notas;
+}
 
-  if (abono > saldo) {
-    alert("El abono no puede ser mayor que el saldo.");
+// --- ABONAR DEUDA ---
+async function abonarDeuda(id, saldoActual, deudor) {
+  const abono = Number(prompt("Monto a abonar:") || 0);
+  if (abono <= 0 || abono > saldoActual) {
+    alert("Monto inválido");
     return;
   }
 
-  // lógica: si paga la empresa pero no tiene dinero → se divide 50/50
-  if (deudor === "empresa") {
-    const empresaCaja = await getBalance("empresa"); // 🔹 tu función ya existente que da saldo
-    if (empresaCaja >= abono) {
-      await updateBalance("empresa", -abono);
+  try {
+    // si el deudor es la empresa y la caja está en 0, dividir 50/50 entre Brandon y Socia
+    let fuente = deudor;
+    if (deudor === "empresa") {
+      const empresaCaja = await getEmpresaCaja(); // función que ya tienes para consultar saldo
+      if (empresaCaja <= 0) {
+        fuente = "50/50";
+        await registrarMovimiento("brandon", -abono/2, "Abono deuda empresa");
+        await registrarMovimiento("socia", -abono/2, "Abono deuda empresa");
+      } else {
+        await registrarMovimiento("empresa", -abono, "Abono deuda empresa");
+      }
     } else {
-      const mitad = abono / 2;
-      await updateBalance("brandon", -mitad);
-      await updateBalance("socia", -mitad);
+      await registrarMovimiento(deudor, -abono, "Abono deuda personal");
     }
-  } else if (deudor === "brandon") {
-    await updateBalance("brandon", -abono);
-  } else if (deudor === "socia") {
-    await updateBalance("socia", -abono);
+
+    // actualizar saldo de la deuda
+    await updateDoc(doc(db, "companies", companyId, "debts", id), {
+      monto: saldoActual - abono,
+      updatedAt: serverTimestamp()
+    });
+
+    cargarDeudas();
+
+  } catch (err) {
+    console.error("Error abonando deuda:", err);
+    alert("Error al abonar deuda");
   }
-
-  // actualizar saldo de deuda
-  await updateDoc(doc(db, "companies", companyId, "deudas", id), {
-    monto: saldo - abono,
-    updatedAt: serverTimestamp()
-  });
-
-  await recomputeBalances(); // 🔹 recalcular todo
 }
+
+// Helpers (tienes que tener ya estas funciones en tu app)
+async function getEmpresaCaja() {
+  const snap = await getDoc(doc(db, "companies", companyId, "balances", "empresa"));
+  return snap.exists() ? (snap.data().saldo || 0) : 0;
+}
+async function registrarMovimiento(cuenta, monto, concepto) {
+  await addDoc(collection(db, "companies", companyId, "movimientos"), {
+    cuenta, monto, concepto, createdAt: serverTimestamp()
+  });
+}
+
+// cargar lista al iniciar
+cargarDeudas();
 </script>
+
 
 
 
