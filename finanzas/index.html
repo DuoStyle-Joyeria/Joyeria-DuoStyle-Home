@@ -523,136 +523,142 @@
       }
     }
 
+   
     // ------------------------------------------------
-    // recomputeBalances: recalcula todo desde cero (movimientos, ventas, gastos, deudas, metas)
-    // ------------------------------------------------
-    async function recomputeBalances() {
-      try {
-        // base: iniciar todo en 0
-        const base = { cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0, inversiones: 0, deudasTotales: 0 };
+// recomputeBalances: recalcula todo desde cero (movimientos, ventas, gastos, deudas, metas)
+// ------------------------------------------------
 
-        // 1) Movements (aplican directamente: ingresos +, egresos -)
-        const movSnap = await getDocs(collection(db, "companies", companyId, "movements"));
-        movSnap.forEach(snap => {
-          const m = snap.data();
-          const monto = Number(m.monto || 0);
-          const sign = (m.tipo === "ingreso") ? 1 : -1;
-          const delta = sign * monto;
-          if (m.cuenta === "cajaEmpresa") base.cajaEmpresa += delta;
-          if (m.cuenta === "cajaBrandon") base.cajaBrandon += delta;
-          if (m.cuenta === "cajaSocia") base.cajaSocia += delta;
-          if (m.cuenta === "inversiones") base.inversiones += delta;
-          if (m.cuenta === "deudasTotales") base.deudasTotales += delta;
-        });
+async function recomputeBalances() {
+  try {
+    // base: iniciar todo en 0
+    const base = { cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0, inversiones: 0, deudasTotales: 0 };
 
-        // 2) Sales (usar asignaciones.paidBy si existe; evita duplicar restas)
-        const salesSnap = await getDocs(collection(db, "companies", companyId, "sales"));
-        salesSnap.forEach(snap => {
-          const s = snap.data();
-          const price = Number(s.precio || 0);
-          const cost = Number(s.costo || 0);
-          const utilidad = Number(s.utilidad || (price - cost) || 0);
-          const a = s.asignaciones || {};
-
-          // 2.1 Ingreso por la venta: todo entra inicialmente a cajaEmpresa
-          base.cajaEmpresa += price;
-
-          // 2.2 Reembolso de COSTO: usar paidBy (la función computePaidBy genera movimientos para socios en el momento de crear la venta;
-          // aquí sólo aplicamos los montos desde el objeto paidBy si existe)
-          const pb = a.paidBy || {};
-          if (Object.keys(pb).length) {
-            // restar la porción que cubrió la empresa y acreditar a quien aportó
-            const empresaPortion = Number(pb.empresa || 0);
-            const brandonPortion = Number(pb.brandon || 0);
-            const sociaPortion = Number(pb.socia || 0);
-
-            base.cajaEmpresa -= empresaPortion;
-            base.cajaBrandon += brandonPortion;
-            base.cajaSocia += sociaPortion;
-          } else {
-            // fallback: usar financiadoPor simple (para documentos viejos)
-            const financedBy = a.financiadoPor || "empresa";
-            if (financedBy === "brandon") base.cajaBrandon += cost;
-            else if (financedBy === "socia") base.cajaSocia += cost;
-            else base.cajaEmpresa -= cost; // si fue empresa y no hay paidBy, restamos el costo a la empresa
-          }
-
-          // 2.3 Distribución de utilidad
-          if (a.manualMode) {
-            // modo manual: aplicar asignaciones directas (no auto 50/50)
-            if (a.reinversion) {
-              base.cajaEmpresa -= Number(a.reinversion || 0);
-              base.inversiones += Number(a.reinversion || 0);
-            }
-            if (a.brandon) base.cajaBrandon += Number(a.brandon || 0);
-            if (a.socia) base.cajaSocia += Number(a.socia || 0);
-            if (a.pagoDeuda) {
-              base.cajaEmpresa -= Number(a.pagoDeuda || 0);
-              base.deudasTotales -= Number(a.pagoDeuda || 0);
-            }
-          } else {
-            // modo automático: utilidad repartida 50/50 entre Brandon y Socia; empresa paga esa utilidad (la salida viene de la cajaEmpresa que recibió el price)
-            if (utilidad > 0) {
-              base.cajaEmpresa -= utilidad; // salida de empresa
-              base.cajaBrandon += utilidad/2;
-              base.cajaSocia += utilidad/2;
-            }
-            // si utilidad negativa (pérdida), se aplica a empresa (ya absorbida por price - cost)
-          }
-        });
-
-        // 3) Expenses: usar paidDistribution si existe (evita duplicado)
-        const expSnap = await getDocs(collection(db, "companies", companyId, "expenses"));
-        expSnap.forEach(snap => {
-          const g = snap.data();
-          const monto = Number(g.monto || 0);
-          if (g.paidDistribution) {
-            base.cajaEmpresa -= Number(g.paidDistribution.empresa||0);
-            base.cajaBrandon -= Number(g.paidDistribution.brandon||0);
-            base.cajaSocia -= Number(g.paidDistribution.socia||0);
-          } else {
-            if (g.pagadoPor === "empresa") base.cajaEmpresa -= monto;
-            if (g.pagadoPor === "brandon") base.cajaBrandon -= monto;
-            if (g.pagadoPor === "socia") base.cajaSocia -= monto;
-          }
-        });
-
-        // 4) Debts (sum saldos)
-        const debtsSnap = await getDocs(collection(db, "companies", companyId, "debts"));
-        debtsSnap.forEach(snap => {
-          const d = snap.data();
-          const saldo = Number(d.saldo || d.montoInicial || 0);
-          base.deudasTotales += saldo;
-        });
-
-        // 5) Goals: acumulado reduce cash de cada ente (las metas aportadas ya se consideraron como movimientos cuando se abonaron; esto evita doble)
-        const goalsSnap = await getDocs(collection(db, "companies", companyId, "goals"));
-        goalsSnap.forEach(snap => {
-          const g = snap.data();
-          const acum = Number(g.acumulado || 0);
-          if (g.tipo === "negocio") base.cajaEmpresa -= acum;
-          if (g.tipo === "brandon") base.cajaBrandon -= acum;
-          if (g.tipo === "socia") base.cajaSocia -= acum;
-        });
-
-        // Normalize floats
-        for (let k of Object.keys(base)) base[k] = Number(base[k].toFixed(2));
-
-        // IMPORTANT: Evitar cajaEmpresa negativa — si queda negativa, repartir déficit 50/50 entre Brandon y Socia (regla solicitada)
-        if (base.cajaEmpresa < 0) {
-          const deficit = -base.cajaEmpresa;
-          base.cajaEmpresa = 0;
-          const halfDef = Number((deficit/2).toFixed(2));
-          base.cajaBrandon -= halfDef;
-          base.cajaSocia -= halfDef;
-        }
-
-        // Guardar balances absolutos
-        await setDoc(doc(db, "companies", companyId, "state", "balances"), base, { merge: true });
-      } catch (err) {
-        console.error("recomputeBalances error:", err);
-      }
+    // helper: derive paidBy si no existe en documento (fallback)
+    function derivePaidBy(asig, cost) {
+      if (!asig) return { empresa: 0, brandon: 0, socia: 0 };
+      if (asig.paidBy) return {
+        empresa: Number(asig.paidBy.empresa || 0),
+        brandon: Number(asig.paidBy.brandon || 0),
+        socia: Number(asig.paidBy.socia || 0)
+      };
+      const fp = asig.financiadoPor || "empresa";
+      if (fp === "brandon") return { empresa: 0, brandon: Number(cost), socia: 0 };
+      if (fp === "socia") return { empresa: 0, brandon: 0, socia: Number(cost) };
+      return { empresa: Number(cost), brandon: 0, socia: 0 };
     }
+
+    // 1) Movements (aplican directamente)
+    const movSnap = await getDocs(collection(db, "companies", companyId, "movements"));
+    movSnap.forEach(snap => {
+      const m = snap.data();
+      const monto = Number(m.monto || 0);
+      const sign = (m.tipo === "ingreso") ? 1 : -1;
+      const delta = sign * monto;
+      if (m.cuenta === "cajaEmpresa") base.cajaEmpresa += delta;
+      if (m.cuenta === "cajaBrandon") base.cajaBrandon += delta;
+      if (m.cuenta === "cajaSocia") base.cajaSocia += delta;
+      if (m.cuenta === "inversiones") base.inversiones += delta;
+      if (m.cuenta === "deudasTotales") base.deudasTotales += delta;
+    });
+
+    // 2) Sales: distribuimos el reembolso del costo y la utilidad correctamente
+    const salesSnap = await getDocs(collection(db, "companies", companyId, "sales"));
+    salesSnap.forEach(snap => {
+      const s = snap.data();
+      const price = Number(s.precio || 0);
+      const cost = Number(s.costo || 0);
+      const utilidad = Number(s.utilidad || (price - cost) || 0);
+      const a = s.asignaciones || {};
+
+      // derivar quién pagó el costo (paidBy) o fallback
+      const pb = derivePaidBy(a, cost);
+
+      if (a.manualMode) {
+        // Modo manual: respetar lo que el usuario haya puesto
+        if (a.reinversion) base.inversiones += Number(a.reinversion || 0);
+        if (a.brandon) base.cajaBrandon += Number(a.brandon || 0);
+        if (a.socia) base.cajaSocia += Number(a.socia || 0);
+        if (a.pagoDeuda) base.deudasTotales -= Number(a.pagoDeuda || 0);
+      } else {
+        // Modo automático:
+        // 1) Reembolsos: acreditar a quienes adelantaron el costo
+        if (pb.brandon && pb.brandon > 0) base.cajaBrandon += Number(pb.brandon);
+        if (pb.socia && pb.socia > 0) base.cajaSocia += Number(pb.socia);
+        // si empresa aportó parte del costo, esa porción se reparte 50/50 a socios
+        if (pb.empresa && pb.empresa > 0) {
+          const halfInv = Number((pb.empresa / 2).toFixed(2));
+          base.cajaBrandon += halfInv;
+          base.cajaSocia += halfInv;
+        }
+        // 2) Reparto de utilidad 50/50
+        if (utilidad > 0) {
+          const halfU = Number((utilidad / 2).toFixed(2));
+          base.cajaBrandon += halfU;
+          base.cajaSocia += halfU;
+        }
+      }
+
+      // reinversiones/pagoDeuda opcionales (también aplicables en automático si están presentes)
+      if (!a.manualMode) {
+        if (a.reinversion) { base.inversiones += Number(a.reinversion || 0); }
+        if (a.pagoDeuda) { base.deudasTotales -= Number(a.pagoDeuda || 0); }
+      }
+    });
+
+    // 3) Expenses
+    const expSnap = await getDocs(collection(db, "companies", companyId, "expenses"));
+    expSnap.forEach(snap => {
+      const g = snap.data();
+      const monto = Number(g.monto || 0);
+      if (g.paidDistribution) {
+        base.cajaEmpresa -= Number(g.paidDistribution.empresa || 0);
+        base.cajaBrandon -= Number(g.paidDistribution.brandon || 0);
+        base.cajaSocia -= Number(g.paidDistribution.socia || 0);
+      } else {
+        if (g.pagadoPor === "empresa") base.cajaEmpresa -= monto;
+        if (g.pagadoPor === "brandon") base.cajaBrandon -= monto;
+        if (g.pagadoPor === "socia") base.cajaSocia -= monto;
+      }
+    });
+
+    // 4) Debts (sum saldos)
+    const debtsSnap = await getDocs(collection(db, "companies", companyId, "debts"));
+    debtsSnap.forEach(snap => {
+      const d = snap.data();
+      const saldo = Number(d.saldo || d.montoInicial || 0);
+      base.deudasTotales += saldo;
+    });
+
+    // 5) Goals
+    const goalsSnap = await getDocs(collection(db, "companies", companyId, "goals"));
+    goalsSnap.forEach(snap => {
+      const g = snap.data();
+      const acum = Number(g.acumulado || 0);
+      if (g.tipo === "negocio") base.cajaEmpresa -= acum;
+      if (g.tipo === "brandon") base.cajaBrandon -= acum;
+      if (g.tipo === "socia") base.cajaSocia -= acum;
+    });
+
+    // normalizar floats
+    for (let k of Object.keys(base)) base[k] = Number(base[k].toFixed(2));
+
+    // evitar cajaEmpresa negativa: repartir déficit 50/50 entre Brandon y Socia
+    if (base.cajaEmpresa < 0) {
+      const deficit = -base.cajaEmpresa;
+      base.cajaEmpresa = 0;
+      const halfDef = Number((deficit / 2).toFixed(2));
+      base.cajaBrandon -= halfDef;
+      base.cajaSocia -= halfDef;
+    }
+
+    // guardar balances absolutos
+    await setDoc(doc(db, "companies", companyId, "state", "balances"), base, { merge: true });
+
+  } catch (err) {
+    console.error("recomputeBalances error:", err);
+  }
+}
+
 
     // small helper: adjustBalances incremental (kept for rare direct ops)
     async function adjustBalances({ cajaEmpresa=0, cajaBrandon=0, cajaSocia=0, deudasTotales=0, inversiones=0 }) {
