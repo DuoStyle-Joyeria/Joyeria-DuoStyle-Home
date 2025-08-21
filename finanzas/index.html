@@ -718,56 +718,66 @@ async function recomputeBalances() {
       });
     }
 
-    $("#formVenta").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const editingId = $("#editingSaleId").value || "";
-      const date = $("#ventaFecha").value || new Date().toISOString().slice(0,10);
-      const producto = $("#ventaProducto").value.trim();
-      const costo = Number($("#ventaCosto").value||0);
-      const precio = Number($("#ventaPrecio").value||0);
-      const notas = $("#ventaNotas").value.trim();
-      const utilidad = precio - costo;
-      const margen = precio ? utilidad / precio : 0;
-      const financiadoPor = $("#ventaFinanciadaPor").value;
-      const manualMode = $("#ventaManualToggle").checked;
+   $("#formVenta").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const editingId = $("#editingSaleId").value || "";
+  const date = $("#ventaFecha").value || new Date().toISOString().slice(0,10);
+  const producto = $("#ventaProducto").value.trim();
+  const costo = Number($("#ventaCosto").value||0);
+  const precio = Number($("#ventaPrecio").value||0);
+  const notas = $("#ventaNotas").value.trim();
+  const utilidad = precio - costo;
+  const margen = precio ? utilidad / precio : 0;
+  const financiadoPor = $("#ventaFinanciadaPor").value;
+  const manualMode = $("#ventaManualToggle").checked;
 
-      const asig = {
-        manualMode,
-        financiadoPor,
-        reinversion: Number($("#asigReinv").value||0),
-        brandon: Number($("#asigBrandon").value||0),
-        socia: Number($("#asigSocia").value||0),
-        pagoDeuda: Number($("#asigPagoDeuda").value||0)
-      };
+  const asig = {
+    manualMode,
+    financiadoPor,
+    reinversion: Number($("#asigReinv").value||0),
+    brandon: Number($("#asigBrandon").value||0),
+    socia: Number($("#asigSocia").value||0),
+    pagoDeuda: Number($("#asigPagoDeuda").value||0)
+  };
 
-      if (precio <= 0) { alert("El precio debe ser mayor a 0"); return; }
-      if (costo < 0) { alert("El costo no puede ser negativo"); return; }
+  if (precio <= 0) { alert("El precio debe ser mayor a 0"); return; }
+  if (costo < 0) { alert("El costo no puede ser negativo"); return; }
 
-      // compute paidBy and create movements only if this is a NEW sale
-      const createMovs = !editingId;
-      const paidBy = await computePaidBy(financiadoPor, costo, createMovs);
-      asig.paidBy = paidBy;
+  // --- compute paidBy ---
+  const createMovs = !editingId;
+  let paidBy = await computePaidBy(financiadoPor, costo, createMovs);
 
-      if (editingId) {
-        await updateDoc(doc(db, "companies", companyId, "sales", editingId), {
-          date, producto, costo, precio, utilidad, margen, notas,
-          asignaciones: asig, updatedAt: serverTimestamp()
-        });
-      } else {
-        await addDoc(collection(db, "companies", companyId, "sales"), {
-          date, producto, costo, precio, utilidad, margen, notas,
-          asignaciones: asig, createdAt: serverTimestamp()
-        });
-      }
+  // 🔹 Corrección clave:
+  // si la inversión la hizo la EMPRESA, no se devuelve el costo.
+  // El costo ya se descuenta de la cajaEmpresa en recomputeBalances,
+  // por lo tanto anulamos esa devolución.
+  if (financiadoPor === "empresa") {
+    paidBy = { empresa: 0, brandon: 0, socia: 0 };
+  }
 
-      // recompute balances robustly after operation
-      await recomputeBalances();
+  asig.paidBy = paidBy;
 
-      $("#editingSaleId").value = "";
-      e.target.reset();
-      $("#manualDistribFields").classList.add("hidden");
-      $("#autoDistribNote").classList.remove("hidden");
+  if (editingId) {
+    await updateDoc(doc(db, "companies", companyId, "sales", editingId), {
+      date, producto, costo, precio, utilidad, margen, notas,
+      asignaciones: asig, updatedAt: serverTimestamp()
     });
+  } else {
+    await addDoc(collection(db, "companies", companyId, "sales"), {
+      date, producto, costo, precio, utilidad, margen, notas,
+      asignaciones: asig, createdAt: serverTimestamp()
+    });
+  }
+
+  // recompute balances robustly after operation
+  await recomputeBalances();
+
+  $("#editingSaleId").value = "";
+  e.target.reset();
+  $("#manualDistribFields").classList.add("hidden");
+  $("#autoDistribNote").classList.remove("hidden");
+});
+
 
     // ---------------------------
     // GASTOS (submit)
