@@ -265,8 +265,7 @@
     document.getElementById("editingDeudaId").value = "";
     e.target.reset();
 
-    await recomputeBalances();
-    loadDeudas();
+    await loadDeudas();
   });
 
   // Cargar deudas en tabla
@@ -294,28 +293,35 @@
   async function abonarDeuda(id) {
     const abono = Number(prompt("Monto a abonar:"));
     if (!abono || abono <= 0) return;
+
     const ref = doc(db, "companies", companyId, "debts", id);
     const snap = await getDoc(ref);
     if (!snap.exists()) return;
     const d = snap.data();
 
-    // Lógica de abono según quién debe
+    let restante = abono;
+
+    // DESCONTAR del deudor
     if (d.deudor === "empresa") {
-      if (globalBalances.empresa >= abono) {
-        globalBalances.empresa -= abono;
+      if (globalBalances.empresa >= restante) {
+        globalBalances.empresa -= restante;
+        restante = 0;
       } else {
-        const restante = abono - globalBalances.empresa;
+        restante -= globalBalances.empresa;
         globalBalances.empresa = 0;
         globalBalances.brandon -= restante / 2;
         globalBalances.socia -= restante / 2;
+        restante = 0;
       }
     } else if (d.deudor === "brandon") {
-      globalBalances.brandon -= abono;
+      globalBalances.brandon -= restante;
+      restante = 0;
     } else if (d.deudor === "socia") {
-      globalBalances.socia -= abono;
+      globalBalances.socia -= restante;
+      restante = 0;
     }
 
-    // Acreedor recibe el dinero
+    // SUMAR al acreedor
     if (d.acreedor === "empresa") {
       globalBalances.empresa += abono;
     } else if (d.acreedor === "brandon") {
@@ -339,7 +345,11 @@
     await recomputeBalances();
     loadDeudas();
   }
+
+  // inicializar tabla al cargar
+  loadDeudas();
 </script>
+
 
 
         <!-- METAS -->
