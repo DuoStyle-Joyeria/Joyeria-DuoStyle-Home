@@ -179,37 +179,170 @@
           </div>
         </section>
 
-        <!-- DEUDAS -->
-        <section id="tab-deudas" class="tab hidden mt-4">
-          <div class="grid md:grid-cols-2 gap-4">
-            <form id="formDeuda" class="bg-white p-4 rounded shadow space-y-2">
-              <h3 class="font-semibold text-lg">Nueva Deuda</h3>
-              <select id="deudaTipo" class="w-full border rounded p-2">
-                <option value="a_proveedor">A proveedor</option>
-                <option value="de_la_empresa">De la empresa</option>
-                <option value="personal_brandon">Personal Brandon</option>
-                <option value="personal_socia">Personal Socia</option>
-              </select>
-              <input type="text" id="deudaAcreedor" placeholder="Acreedor/Descripción" required class="w-full border rounded p-2">
-              <input type="number" id="deudaMonto" placeholder="Monto" step="0.01" min="0" required class="w-full border rounded p-2">
-              <textarea id="deudaNotas" placeholder="Notas" class="w-full border rounded p-2"></textarea>
-              <input type="hidden" id="editingDeudaId" value="">
-              <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear Deuda</button>
-            </form>
+        
+        <!-- ===================== -->
+<!-- SECCIÓN DE DEUDAS -->
+<!-- ===================== -->
+<div id="deudas" class="hidden">
+  <h2 class="text-xl font-bold mb-4">Deudas</h2>
 
-            <div class="bg-white p-4 rounded shadow overflow-auto">
-              <h3 class="font-semibold text-lg mb-2">Deudas</h3>
-              <table class="w-full text-sm">
-                <thead class="text-left">
-                  <tr>
-                    <th>Acreedor</th><th>Tipo</th><th>Saldo</th><th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="tbDeudas"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+  <!-- Crear nueva deuda -->
+  <form id="formDeuda" class="space-y-2 bg-gray-100 p-4 rounded">
+    <div class="grid grid-cols-2 gap-2">
+      <select id="deudor" class="border p-2 rounded">
+        <option value="empresa">Empresa</option>
+        <option value="brandon">Brandon</option>
+        <option value="valeria">Valeria</option>
+      </select>
+      <select id="acreedor" class="border p-2 rounded">
+        <option value="empresa">Empresa</option>
+        <option value="brandon">Brandon</option>
+        <option value="valeria">Valeria</option>
+      </select>
+    </div>
+    <input type="text" id="deudaDesc" placeholder="Descripción" class="w-full border p-2 rounded">
+    <input type="number" id="deudaMonto" placeholder="Monto" class="w-full border p-2 rounded">
+    <textarea id="deudaNotas" placeholder="Notas" class="w-full border p-2 rounded"></textarea>
+    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Crear Deuda</button>
+  </form>
+
+  <!-- Lista de deudas -->
+  <h3 class="font-semibold mt-6">Deudas</h3>
+  <table class="w-full text-sm border mt-2">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="p-2">Deudor</th>
+        <th class="p-2">Acreedor</th>
+        <th class="p-2">Descripción</th>
+        <th class="p-2">Saldo</th>
+        <th class="p-2">Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="listaDeudas"></tbody>
+  </table>
+</div>
+
+<script>
+  const listaDeudas = $("#listaDeudas");
+
+  // Crear deuda
+  $("#formDeuda").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const deudor = $("#deudor").value;
+    const acreedor = $("#acreedor").value;
+    const desc = $("#deudaDesc").value.trim();
+    const monto = Number($("#deudaMonto").value || 0);
+    const notas = $("#deudaNotas").value.trim();
+
+    if (!monto || deudor === acreedor) {
+      alert("Monto inválido o deudor = acreedor");
+      return;
+    }
+
+    await addDoc(collection(db, "companies", companyId, "debts"), {
+      deudor, acreedor, desc, monto, notas,
+      createdAt: serverTimestamp()
+    });
+
+    // actualizar balances
+    if (deudor === "empresa") {
+      await updateBalance("empresa", monto);
+    } else if (deudor === "brandon") {
+      await updateBalance("brandon", monto);
+    } else if (deudor === "valeria") {
+      await updateBalance("valeria", monto);
+    }
+
+    if (acreedor === "empresa") {
+      await updateBalance("empresa", -monto);
+    } else if (acreedor === "brandon") {
+      await updateBalance("brandon", -monto);
+    } else if (acreedor === "valeria") {
+      await updateBalance("valeria", -monto);
+    }
+
+    e.target.reset();
+    await renderDeudas();
+    await recomputeBalances();
+  });
+
+  // Renderizar deudas
+  async function renderDeudas() {
+    const q = query(collection(db, "companies", companyId, "debts"));
+    const snap = await getDocs(q);
+    listaDeudas.innerHTML = "";
+    snap.forEach((docu) => {
+      const d = docu.data();
+      listaDeudas.innerHTML += `
+        <tr>
+          <td class="p-2">${d.deudor}</td>
+          <td class="p-2">${d.acreedor}</td>
+          <td class="p-2">${d.desc}</td>
+          <td class="p-2">$${d.monto.toLocaleString()}</td>
+          <td class="p-2">
+            <button onclick="abonarDeuda('${docu.id}', ${d.monto}, '${d.deudor}', '${d.acreedor}')"
+              class="text-green-600">Abonar</button>
+            <button onclick="eliminarDeuda('${docu.id}')"
+              class="text-red-600 ml-2">Eliminar</button>
+          </td>
+        </tr>`;
+    });
+  }
+
+  // Abonar deuda
+  async function abonarDeuda(id, saldo, deudor, acreedor) {
+    let abono = prompt("Monto del abono:", saldo);
+    if (!abono) return;
+    abono = Number(abono);
+    if (abono <= 0 || abono > saldo) {
+      alert("Abono inválido");
+      return;
+    }
+
+    // Si el deudor es la empresa y no tiene fondos → repartir 50/50 entre socios
+    if (deudor === "empresa") {
+      const empresaSnap = await getDoc(doc(db, "companies", companyId, "balances", "empresa"));
+      const saldoEmpresa = empresaSnap.exists() ? empresaSnap.data().monto : 0;
+
+      if (saldoEmpresa >= abono) {
+        await updateBalance("empresa", -abono);
+      } else {
+        const mitad = abono / 2;
+        await updateBalance("brandon", -mitad);
+        await updateBalance("valeria", -mitad);
+      }
+      await updateBalance(acreedor, abono);
+    } else {
+      // Caso normal: descuenta al deudor directamente
+      await updateBalance(deudor, -abono);
+      await updateBalance(acreedor, abono);
+    }
+
+    // actualizar deuda
+    if (abono === saldo) {
+      await deleteDoc(doc(db, "companies", companyId, "debts", id));
+    } else {
+      await updateDoc(doc(db, "companies", companyId, "debts", id), {
+        monto: saldo - abono,
+        updatedAt: serverTimestamp()
+      });
+    }
+
+    await renderDeudas();
+    await recomputeBalances();
+  }
+
+  // Eliminar deuda
+  async function eliminarDeuda(id) {
+    if (confirm("¿Eliminar deuda?")) {
+      await deleteDoc(doc(db, "companies", companyId, "debts", id));
+      await renderDeudas();
+    }
+  }
+
+  renderDeudas();
+</script>
+
 
         <!-- METAS -->
         <section id="tab-metas" class="tab hidden mt-4">
