@@ -178,7 +178,6 @@
             </div>
           </div>
         </section>
-        
 
         <!-- DEUDAS -->
 <section id="tab-deudas" class="tab hidden mt-4">
@@ -188,17 +187,25 @@
     <form id="formDeuda" class="bg-white p-4 rounded shadow space-y-2">
       <h3 class="font-semibold text-lg">Nueva Deuda</h3>
 
-      <!-- Tipo de deuda -->
-      <select id="deudaTipo" class="w-full border rounded p-2">
-        <option value="a_proveedor">A proveedor</option>
-        <option value="de_la_empresa">De la empresa</option>
-        <option value="personal_brandon">Personal Brandon</option>
-        <option value="personal_socia">Personal Socia</option>
-        <option value="entre_socios">Entre socios</option>
+      <!-- Quién debe -->
+      <label class="block text-sm font-medium">Quién debe:</label>
+      <select id="deudaDeudor" class="w-full border rounded p-2">
+        <option value="empresa">Empresa</option>
+        <option value="brandon">Brandon</option>
+        <option value="socia">Socia</option>
       </select>
 
-      <!-- Acreedor -->
-      <input type="text" id="deudaAcreedor" placeholder="Acreedor/Descripción" required class="w-full border rounded p-2">
+      <!-- A quién se le debe -->
+      <label class="block text-sm font-medium">A quién se le debe:</label>
+      <select id="deudaAcreedorTipo" class="w-full border rounded p-2">
+        <option value="proveedor">Proveedor</option>
+        <option value="empresa">Empresa</option>
+        <option value="brandon">Brandon</option>
+        <option value="socia">Socia</option>
+      </select>
+
+      <!-- Nombre o descripción -->
+      <input type="text" id="deudaDescripcion" placeholder="Descripción (ej: proveedor X)" required class="w-full border rounded p-2">
 
       <!-- Monto -->
       <input type="number" id="deudaMonto" placeholder="Monto" step="0.01" min="0" required class="w-full border rounded p-2">
@@ -218,8 +225,8 @@
       <table class="w-full text-sm">
         <thead class="text-left">
           <tr>
+            <th>Deudor</th>
             <th>Acreedor</th>
-            <th>Tipo</th>
             <th>Saldo</th>
             <th>Acciones</th>
           </tr>
@@ -235,24 +242,17 @@
   document.getElementById("formDeuda").addEventListener("submit", async (e) => {
     e.preventDefault();
     const editingId = document.getElementById("editingDeudaId").value || "";
-    const tipo = document.getElementById("deudaTipo").value;
-    const acreedor = document.getElementById("deudaAcreedor").value.trim();
+    const deudor = document.getElementById("deudaDeudor").value;
+    const acreedor = document.getElementById("deudaAcreedorTipo").value;
+    const descripcion = document.getElementById("deudaDescripcion").value.trim();
     const monto = Number(document.getElementById("deudaMonto").value || 0);
     const notas = document.getElementById("deudaNotas").value.trim();
 
     if (monto <= 0) { alert("El monto debe ser mayor a 0"); return; }
 
-    // 📌 Ajuste especial: si es deuda de la empresa y caja=0, se reparte 50/50
-    if (tipo === "de_la_empresa" && globalBalances.empresa <= 0) {
-      globalBalances.brandon -= monto / 2;
-      globalBalances.socia -= monto / 2;
-    } else if (tipo === "de_la_empresa") {
-      globalBalances.empresa -= monto;
-    }
-
-    // Guardar en Firestore
     const deudaData = {
-      tipo, acreedor, monto, saldo: monto, notas,
+      deudor, acreedor, descripcion,
+      monto, saldo: monto, notas,
       createdAt: serverTimestamp()
     };
 
@@ -278,8 +278,8 @@
       const d = docSnap.data();
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${d.acreedor}</td>
-        <td>${d.tipo}</td>
+        <td>${d.deudor}</td>
+        <td>${d.acreedor} (${d.descripcion || ""})</td>
         <td>$${d.saldo.toLocaleString()}</td>
         <td>
           <button onclick="abonarDeuda('${docSnap.id}')" class="text-emerald-600">Abonar</button> |
@@ -298,8 +298,36 @@
     const snap = await getDoc(ref);
     if (!snap.exists()) return;
     const d = snap.data();
+
+    // Lógica de abono según quién debe
+    if (d.deudor === "empresa") {
+      if (globalBalances.empresa >= abono) {
+        globalBalances.empresa -= abono;
+      } else {
+        const restante = abono - globalBalances.empresa;
+        globalBalances.empresa = 0;
+        globalBalances.brandon -= restante / 2;
+        globalBalances.socia -= restante / 2;
+      }
+    } else if (d.deudor === "brandon") {
+      globalBalances.brandon -= abono;
+    } else if (d.deudor === "socia") {
+      globalBalances.socia -= abono;
+    }
+
+    // Acreedor recibe el dinero
+    if (d.acreedor === "empresa") {
+      globalBalances.empresa += abono;
+    } else if (d.acreedor === "brandon") {
+      globalBalances.brandon += abono;
+    } else if (d.acreedor === "socia") {
+      globalBalances.socia += abono;
+    }
+    // si es proveedor, no entra a ninguna caja
+
     const nuevoSaldo = d.saldo - abono;
     await updateDoc(ref, { saldo: Math.max(0, nuevoSaldo) });
+
     await recomputeBalances();
     loadDeudas();
   }
