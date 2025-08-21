@@ -546,7 +546,7 @@ async function recomputeBalances() {
       if (fp === "socia") return { empresa: 0, brandon: 0, socia: Number(cost) };
       return { empresa: Number(cost), brandon: 0, socia: 0 };
     }
-
+   /*
     // 1) Movements (aplican directamente)
     const movSnap = await getDocs(collection(db, "companies", companyId, "movements"));
     movSnap.forEach(snap => {
@@ -559,7 +559,8 @@ async function recomputeBalances() {
       if (m.cuenta === "cajaSocia") base.cajaSocia += delta;
       if (m.cuenta === "inversiones") base.inversiones += delta;
       if (m.cuenta === "deudasTotales") base.deudasTotales += delta;
-    });
+    }); 
+    */
 
     // 2) Sales: distribuimos el reembolso del costo y la utilidad correctamente
     const salesSnap = await getDocs(collection(db, "companies", companyId, "sales"));
