@@ -255,30 +255,31 @@
 
     <!-- FORMULARIO CREAR/EDITAR DEUDA -->
     <form id="formDeuda" class="bg-white p-4 rounded shadow space-y-2">
-      <h3 class="font-semibold text-lg">Nueva Deuda</h3>
+  <h3 class="font-semibold text-lg">Nueva Deuda</h3>
 
-      <!-- QUIÉN DEBE -->
-      <label class="block text-sm font-medium">Deudor</label>
-      <select id="deudaDeudor" class="w-full border rounded p-2">
-        <option value="empresa">Empresa</option>
-        <option value="brandon">Brandon</option>
-        <option value="socia">Socia</option>
-      </select>
+  <!-- Quién debe -->
+  <label class="block text-sm font-medium">Deudor</label>
+  <select id="deudaDeudor" class="w-full border rounded p-2">
+    <option value="empresa">Empresa</option>
+    <option value="brandon">Brandon</option>
+    <option value="socia">Socia</option>
+  </select>
 
-      <!-- A QUIÉN SE LE DEBE -->
-      <label class="block text-sm font-medium">Acreedor</label>
-      <select id="deudaAcreedor" class="w-full border rounded p-2">
-        <option value="proveedor">Proveedor</option>
-        <option value="empresa">Empresa</option>
-        <option value="brandon">Brandon</option>
-        <option value="socia">Socia</option>
-      </select>
+  <!-- A quién se le debe -->
+  <label class="block text-sm font-medium">Acreedor</label>
+  <select id="deudaAcreedor" class="w-full border rounded p-2">
+    <option value="proveedor">Proveedor</option>
+    <option value="empresa">Empresa</option>
+    <option value="brandon">Brandon</option>
+    <option value="socia">Socia</option>
+  </select>
 
-      <input type="number" id="deudaMonto" placeholder="Monto" step="0.01" min="0" required class="w-full border rounded p-2">
-      <textarea id="deudaNotas" placeholder="Notas" class="w-full border rounded p-2"></textarea>
-      <input type="hidden" id="editingDeudaId" value="">
-      <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear Deuda</button>
-    </form>
+  <input type="number" id="deudaMonto" placeholder="Monto" step="0.01" min="0" required class="w-full border rounded p-2">
+  <textarea id="deudaNotas" placeholder="Notas" class="w-full border rounded p-2"></textarea>
+  <input type="hidden" id="editingDeudaId" value="">
+  <button class="w-full bg-emerald-600 text-white py-2 rounded">Crear Deuda</button>
+</form>
+
 
     <!-- LISTADO DE DEUDAS -->
     <div class="bg-white p-4 rounded shadow overflow-auto">
