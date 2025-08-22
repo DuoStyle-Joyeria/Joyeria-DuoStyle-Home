@@ -88,7 +88,7 @@
           <button data-tab="estadisticas" class="tab-btn px-3 py-2 rounded border">Estadísticas</button>
         </div>
 
-                <!-- VENTAS -->
+        <!-- VENTAS -->
         <section id="tab-ventas" class="tab mt-4">
           <div class="grid md:grid-cols-2 gap-4">
             <form id="formVenta" class="bg-white p-4 rounded shadow space-y-2">
@@ -179,246 +179,89 @@
           </div>
         </section>
 
-        
-
-        
-    
         <!-- DEUDAS -->
-<section id="tab-deudas" class="tab hidden mt-4">
-  <div class="grid md:grid-cols-2 gap-4">
-    <form id="formDeuda" class="bg-white p-4 rounded shadow space-y-2">
-      <h3 class="font-semibold text-lg">Nueva Deuda</h3>
+        <section id="tab-deudas" class="tab hidden mt-4">
+          <div class="grid md:grid-cols-2 gap-4">
+            <form id="formDeuda" class="bg-white p-4 rounded shadow space-y-2">
+              <h3 class="font-semibold text-lg">Nueva Deuda</h3>
 
-      <!-- QUIÉN DEBE -->
-      <label class="block text-sm font-medium">Quién debe:</label>
-      <select id="deudaDeudor" class="w-full border rounded p-2">
-        <option value="empresa">Empresa</option>
-        <option value="brandon">Brandon</option>
-        <option value="socia">Socia</option>
-      </select>
+              <select id="deudaTipo" class="w-full border rounded p-2">
+                <option value="a_proveedor">A proveedor</option>
+                <option value="de_la_empresa">De la empresa</option>
+                <option value="personal_brandon">Personal Brandon</option>
+                <option value="personal_socia">Personal Socia</option>
+              </select>
 
-      <!-- A QUIÉN SE LE DEBE -->
-      <label class="block text-sm font-medium">A quién se le debe:</label>
-      <select id="deudaAcreedorTipo" class="w-full border rounded p-2">
-        <option value="proveedor">Proveedor</option>
-        <option value="brandon">Brandon</option>
-        <option value="socia">Socia</option>
-      </select>
+              <!-- selector: quién debe (deudor) -->
+              <label class="text-sm">Quién debe</label>
+              <select id="deudaDeudor" class="w-full border rounded p-2">
+                <option value="empresa">Empresa</option>
+                <option value="brandon">Brandon</option>
+                <option value="socia">Socia</option>
+              </select>
 
-      <input
-        type="text"
-        id="deudaAcreedor"
-        placeholder="Descripción / Nombre del acreedor"
-        required
-        class="w-full border rounded p-2"
-      />
+              <!-- selector: a quién se debe (tipo acreedor) -->
+              <label class="text-sm">A quién se le debe (tipo)</label>
+              <select id="deudaAcreedorTipo" class="w-full border rounded p-2">
+                <option value="proveedor">Proveedor</option>
+                <option value="empresa">Empresa</option>
+                <option value="brandon">Brandon</option>
+                <option value="socia">Socia</option>
+              </select>
 
-      <input
-        type="number"
-        id="deudaMonto"
-        placeholder="Monto"
-        step="0.01"
-        min="0.01"
-        required
-        class="w-full border rounded p-2"
-      />
+              <input
+                type="text"
+                id="deudaAcreedor"
+                placeholder="Acreedor/Descripción (nombre libre)"
+                required
+                class="w-full border rounded p-2"
+              />
 
-      <textarea
-        id="deudaNotas"
-        placeholder="Notas"
-        class="w-full border rounded p-2"
-      ></textarea>
+              <input
+                type="number"
+                id="deudaMonto"
+                placeholder="Monto"
+                step="0.01"
+                min="0.01"
+                required
+                class="w-full border rounded p-2"
+              />
 
-      <input type="hidden" id="editingDeudaId" value="" />
+              <textarea
+                id="deudaNotas"
+                placeholder="Notas"
+                class="w-full border rounded p-2"
+              ></textarea>
 
-      <button
-        type="submit"
-        id="btnCrearDeuda"
-        class="w-full bg-emerald-600 text-white py-2 rounded"
-      >
-        Guardar Deuda
-      </button>
+              <input type="hidden" id="editingDeudaId" value="" />
 
-      <p id="deudaMsg" class="text-sm text-slate-500"></p>
-    </form>
+              <button
+                type="submit"
+                id="btnCrearDeuda"
+                class="w-full bg-emerald-600 text-white py-2 rounded"
+              >
+                Crear Deuda
+              </button>
 
-    <div class="bg-white p-4 rounded shadow overflow-auto">
-      <h3 class="font-semibold text-lg mb-2">Deudas</h3>
-      <table class="w-full text-sm">
-        <thead class="text-left">
-          <tr>
-            <th>Deudor</th>
-            <th>Acreedor</th>
-            <th>Saldo</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tbDeudas"></tbody>
-      </table>
-    </div>
-  </div>
-</section>
+              <p id="deudaMsg" class="text-sm text-slate-500"></p>
+            </form>
 
-<script>
-// CREAR / EDITAR DEUDA
-document.getElementById("formDeuda").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const btn = document.getElementById("btnCrearDeuda");
-  btn.disabled = true;
-  const originalText = btn.textContent;
-  btn.textContent = "Guardando...";
-
-  try {
-    if (!companyId) throw new Error("companyId no definido.");
-
-    const editingId = document.getElementById("editingDeudaId").value || "";
-    const deudor = document.getElementById("deudaDeudor").value;
-    const acreedorTipo = document.getElementById("deudaAcreedorTipo").value;
-    const acreedor = document.getElementById("deudaAcreedor").value.trim();
-    const monto = Number(document.getElementById("deudaMonto").value);
-    const notas = document.getElementById("deudaNotas").value.trim();
-
-    if (!acreedor) throw new Error("Ingresa el acreedor/descripcion.");
-    if (isNaN(monto) || monto <= 0)
-      throw new Error("El monto debe ser mayor a 0.");
-
-    const payload = {
-      deudor,
-      acreedorTipo,
-      acreedor,
-      montoInicial: monto,
-      saldo: monto,
-      notas,
-      updatedAt: serverTimestamp(),
-    };
-
-    if (editingId) {
-      await updateDoc(doc(db, "companies", companyId, "debts", editingId), payload);
-      document.getElementById("editingDeudaId").value = "";
-    } else {
-      payload.createdAt = serverTimestamp();
-      await addDoc(collection(db, "companies", companyId, "debts"), payload);
-    }
-
-    await recomputeBalances();
-
-    document.getElementById("formDeuda").reset();
-    document.getElementById("deudaMsg").textContent = "Deuda guardada correctamente.";
-    setTimeout(() => (document.getElementById("deudaMsg").textContent = ""), 2000);
-  } catch (err) {
-    console.error("Guardar deuda:", err);
-    alert("No se pudo guardar la deuda: " + (err.message || err));
-  } finally {
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-});
-
-// LISTADO + ACCIONES
-function subscribeDeudas() {
-  const qDeb = query(
-    collection(db, "companies", companyId, "debts"),
-    orderBy("createdAt", "desc")
-  );
-
-  const unsub = onSnapshot(qDeb, (snap) => {
-    const tbody = document.getElementById("tbDeudas");
-    tbody.innerHTML = "";
-
-    snap.forEach((docu) => {
-      const d = docu.data();
-      const id = docu.id;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${d.deudor}</td>
-        <td>${d.acreedor} (${d.acreedorTipo})</td>
-        <td>${money(d.saldo)}</td>
-        <td class="whitespace-nowrap">
-          <input type="number" step="0.01" min="0" placeholder="Abono" class="border rounded p-1 w-28" id="abono-${id}">
-          <button data-id="${id}" class="btn-abonar text-emerald-700 underline ml-1">Abonar</button>
-          <button data-id="${id}" class="edit-deuda text-blue-600 underline ml-2">Editar</button>
-          <button data-id="${id}" class="del-deuda text-red-600 underline ml-2">Eliminar</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    // Abonar deuda
-    document.querySelectorAll(".btn-abonar").forEach((btn) => {
-      btn.onclick = async () => {
-        try {
-          const id = btn.dataset.id;
-          const ab = Number(document.getElementById(`abono-${id}`).value || 0);
-          if (isNaN(ab) || ab <= 0) return;
-
-          const ref = doc(db, "companies", companyId, "debts", id);
-          const snapD = await getDoc(ref);
-          if (!snapD.exists()) return;
-
-          const deuda = snapD.data();
-
-          // 💡 lógica especial si caja está en 0 → reparte entre socios
-          if (deuda.deudor === "empresa" && getEmpresaCaja() === 0) {
-            descontarCaja("brandon", ab / 2);
-            descontarCaja("socia", ab / 2);
-          } else {
-            descontarCaja(deuda.deudor, ab);
-          }
-
-          const saldo = Math.max(0, Number(deuda.saldo || 0) - ab);
-          await updateDoc(ref, { saldo, updatedAt: serverTimestamp() });
-
-          await recomputeBalances();
-          document.getElementById(`abono-${id}`).value = "";
-        } catch (err) {
-          console.error("Abonar deuda:", err);
-          alert("No se pudo abonar: " + (err.message || err));
-        }
-      };
-    });
-
-    // Eliminar deuda
-    document.querySelectorAll(".del-deuda").forEach((btn) => {
-      btn.onclick = async () => {
-        const id = btn.dataset.id;
-        if (!confirm("Eliminar deuda? Esto recalculará balances.")) return;
-        await deleteDoc(doc(db, "companies", companyId, "debts", id));
-        await recomputeBalances();
-      };
-    });
-
-    // Editar deuda
-    document.querySelectorAll(".edit-deuda").forEach((btn) => {
-      btn.onclick = async () => {
-        const id = btn.dataset.id;
-        const snap = await getDoc(doc(db, "companies", companyId, "debts", id));
-        if (!snap.exists()) return;
-
-        const d = snap.data();
-        document.getElementById("editingDeudaId").value = id;
-        document.getElementById("deudaDeudor").value = d.deudor || "empresa";
-        document.getElementById("deudaAcreedorTipo").value = d.acreedorTipo || "proveedor";
-        document.getElementById("deudaAcreedor").value = d.acreedor || "";
-        document.getElementById("deudaMonto").value = d.montoInicial || "";
-        document.getElementById("deudaNotas").value = d.notas || "";
-
-        const tabBtn = document.querySelector('[data-tab="deudas"]');
-        if (tabBtn) tabBtn.click();
-      };
-    });
-  });
-
-  unsubscribers.push(unsub);
-}
-
-subscribeDeudas();
-</script>
-
-
-
-
+            <div class="bg-white p-4 rounded shadow overflow-auto">
+              <h3 class="font-semibold text-lg mb-2">Deudas</h3>
+              <table class="w-full text-sm">
+                <thead class="text-left">
+                  <tr>
+                    <th>Acreedor</th>
+                    <th>Tipo</th>
+                    <th>Saldo</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tbDeudas"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
         <!-- METAS -->
         <section id="tab-metas" class="tab hidden mt-4">
@@ -455,18 +298,36 @@ subscribeDeudas();
         <section id="tab-movimientos" class="tab hidden mt-4">
           <div class="grid md:grid-cols-2 gap-4">
             <form id="formMovimiento" class="bg-white p-4 rounded shadow space-y-2">
-              <h3 class="font-semibold text-lg">Nuevo Movimiento (ingreso/egreso)</h3>
+              <h3 class="font-semibold text-lg">Nuevo Movimiento (ingreso/egreso/transferencia)</h3>
               <select id="movTipo" class="w-full border rounded p-2">
                 <option value="ingreso">Ingreso</option>
                 <option value="egreso">Egreso</option>
+                <option value="transferencia">Transferencia</option>
               </select>
-              <select id="movCuenta" class="w-full border rounded p-2">
-                <option value="cajaEmpresa">Caja Empresa</option>
-                <option value="cajaBrandon">Caja Brandon</option>
-                <option value="cajaSocia">Caja Socia</option>
-                <option value="inversiones">Inversiones</option>
-                <option value="deudasTotales">Deudas Totales</option>
-              </select>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-sm">Cuenta Origen</label>
+                  <select id="movCuenta" class="w-full border rounded p-2">
+                    <option value="cajaEmpresa">Caja Empresa</option>
+                    <option value="cajaBrandon">Caja Brandon</option>
+                    <option value="cajaSocia">Caja Socia</option>
+                    <option value="inversiones">Inversiones</option>
+                    <option value="deudasTotales">Deudas Totales</option>
+                  </select>
+                </div>
+                <div id="containerCuentaDestino" class="hidden">
+                  <label class="text-sm">Cuenta Destino (solo transferencia)</label>
+                  <select id="movCuentaDestino" class="w-full border rounded p-2">
+                    <option value="cajaEmpresa">Caja Empresa</option>
+                    <option value="cajaBrandon">Caja Brandon</option>
+                    <option value="cajaSocia">Caja Socia</option>
+                    <option value="inversiones">Inversiones</option>
+                    <option value="deudasTotales">Deudas Totales</option>
+                  </select>
+                </div>
+              </div>
+
               <input type="date" id="movFecha" class="w-full border rounded p-2">
               <input type="number" id="movMonto" placeholder="Monto" step="0.01" min="0" class="w-full border rounded p-2">
               <input type="text" id="movDesc" placeholder="Descripción" class="w-full border rounded p-2">
@@ -479,7 +340,7 @@ subscribeDeudas();
               <table class="w-full text-sm">
                 <thead class="text-left">
                   <tr>
-                    <th>Fecha</th><th>Tipo</th><th>Cuenta</th><th>Monto</th><th>Desc</th><th>Acciones</th>
+                    <th>Fecha</th><th>Tipo</th><th>Cuenta(s)</th><th>Monto</th><th>Desc</th><th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="tbMovimientos"></tbody>
@@ -500,14 +361,25 @@ subscribeDeudas();
               <canvas id="chartUtilidad" height="280"></canvas>
             </div>
           </div>
+
+          <div class="grid md:grid-cols-2 gap-4 mt-4">
+            <div class="bg-white p-4 rounded shadow">
+              <h3 class="font-semibold mb-2">Progreso Metas</h3>
+              <div id="statsMetasList" class="space-y-2 text-sm"></div>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+              <h3 class="font-semibold mb-2">Deudas - Saldo y avance</h3>
+              <div id="statsDeudasList" class="space-y-2 text-sm"></div>
+            </div>
+          </div>
         </section>
 
       </div>
     </div>
   </div>
 
-  <!-- =========================
-       SCRIPT: Firebase + Lógica (PARTE 1)
+    <!-- =========================
+       SCRIPT: Firebase + Lógica (PARTE 2)
        ========================= -->
   <script type="module">
     // --------- FIREBASE CONFIG (usa el tuyo, aquí dejo el que ya usabas) ----------
@@ -537,7 +409,7 @@ subscribeDeudas();
 
     // ---- Helpers UI
     const $ = s => document.querySelector(s);
-    const $$ = s => document.querySelectorAll(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
     const money = n => `$${Number(n||0).toLocaleString('es-CO', {maximumFractionDigits: 2})}`;
 
     // ---- State
@@ -612,6 +484,7 @@ subscribeDeudas();
       setupCharts();
       setupVentaToggle();
       setupPerfilButton();
+      setupMovTipoToggle(); // mueve UI de transferencia
 
       subscribeKPIs();
       subscribeVentas();
@@ -662,12 +535,11 @@ subscribeDeudas();
       unsubscribers.push(unsub);
     }
 
-        // ------------------------------------------------
+    // ------------------------------------------------
     // computePaidBy: decide quién pagó el costo y crear movs si needed
     // ------------------------------------------------
     async function computePaidBy(financiadoPor, amount, createMovements = false) {
       try {
-        // read current balances to know cuánto tiene la empresa
         const balSnap = await getDoc(doc(db, "companies", companyId, "state", "balances"));
         const balances = balSnap.exists() ? balSnap.data() : { cajaEmpresa:0, cajaBrandon:0, cajaSocia:0 };
         const empresaCaja = Number(balances.cajaEmpresa || 0);
@@ -675,30 +547,23 @@ subscribeDeudas();
         let pb = { empresa: 0, brandon: 0, socia: 0 };
 
         if (financiadoPor === "brandon") {
-          // Brandon financia -> full a Brandon
           pb.brandon = Number(amount);
         } else if (financiadoPor === "socia") {
-          // Socia financia -> full a Socia
           pb.socia = Number(amount);
-        } else { // financiadoPor === 'empresa'
-          // Si la empresa tiene suficiente, cubre todo
+        } else {
           if (empresaCaja >= amount) {
             pb.empresa = Number(amount);
           } else {
-            // Empresa cubre lo que tenga, el resto se divide 50/50 entre Brandon y Socia
             pb.empresa = Number(Math.max(0, empresaCaja).toFixed(2));
             const shortage = Number((amount - pb.empresa).toFixed(2));
             const half = Number((shortage/2).toFixed(2));
             pb.brandon = half;
             pb.socia = half;
-            // ajuste de resto por centavos
             const remainder = Number((shortage - (half*2)).toFixed(2));
             if (remainder !== 0) pb.brandon = Number((pb.brandon + remainder).toFixed(2));
           }
         }
 
-        // Create movements to reflect partners' advances (egreso) if requested and there are advances
-        // Nota: para la parte de empresa no creamos movimiento aquí; las entradas/salidas de empresa vienen de la venta/gasto y del recompute.
         if (createMovements) {
           const moves = [];
           const today = new Date().toISOString().slice(0,10);
@@ -733,86 +598,97 @@ subscribeDeudas();
       }
     }
 
-   
     // ------------------------------------------------
-// recomputeBalances: recalcula todo desde cero (movimientos, ventas, gastos, deudas, metas)
-// ------------------------------------------------
+    // recomputeBalances: recalcula todo desde cero (movimientos, ventas, gastos, deudas, metas)
+    // ------------------------------------------------
 
-async function recomputeBalances() {
+
+    async function recomputeBalances() {
   try {
-    // base: iniciar todo en 0
+    // base
     const base = { cajaEmpresa: 0, cajaBrandon: 0, cajaSocia: 0, inversiones: 0, deudasTotales: 0 };
+    const num = v => Number(v || 0);
 
-    // helper: derive paidBy si no existe en documento (fallback)
-    function derivePaidBy(asig, cost) {
-      if (!asig) return { empresa: 0, brandon: 0, socia: 0 };
-      if (asig.paidBy) return {
-        empresa: Number(asig.paidBy.empresa || 0),
-        brandon: Number(asig.paidBy.brandon || 0),
-        socia: Number(asig.paidBy.socia || 0)
-      };
-      const fp = asig.financiadoPor || "empresa";
-      if (fp === "brandon") return { empresa: 0, brandon: Number(cost), socia: 0 };
-      if (fp === "socia") return { empresa: 0, brandon: 0, socia: Number(cost) };
-      return { empresa: Number(cost), brandon: 0, socia: 0 };
-    }
-   /*
-    // 1) Movements (aplican directamente)
+    // 1) Movements (ingreso / egreso / transferencia)
     const movSnap = await getDocs(collection(db, "companies", companyId, "movements"));
     movSnap.forEach(snap => {
       const m = snap.data();
-      const monto = Number(m.monto || 0);
-      const sign = (m.tipo === "ingreso") ? 1 : -1;
-      const delta = sign * monto;
-      if (m.cuenta === "cajaEmpresa") base.cajaEmpresa += delta;
-      if (m.cuenta === "cajaBrandon") base.cajaBrandon += delta;
-      if (m.cuenta === "cajaSocia") base.cajaSocia += delta;
-      if (m.cuenta === "inversiones") base.inversiones += delta;
-      if (m.cuenta === "deudasTotales") base.deudasTotales += delta;
-    }); 
-    */
+      const monto = num(m.monto);
 
-    // 2) Sales: distribuimos el reembolso del costo y la utilidad correctamente
+      if (m.tipo === "ingreso") {
+        if (m.cuenta === "cajaEmpresa") base.cajaEmpresa += monto;
+        if (m.cuenta === "cajaBrandon") base.cajaBrandon += monto;
+        if (m.cuenta === "cajaSocia") base.cajaSocia += monto;
+        if (m.cuenta === "inversiones") base.inversiones += monto;
+        if (m.cuenta === "deudasTotales") base.deudasTotales += monto;
+      } else if (m.tipo === "egreso") {
+        if (m.cuenta === "cajaEmpresa") base.cajaEmpresa -= monto;
+        if (m.cuenta === "cajaBrandon") base.cajaBrandon -= monto;
+        if (m.cuenta === "cajaSocia") base.cajaSocia -= monto;
+        if (m.cuenta === "inversiones") base.inversiones -= monto;
+        if (m.cuenta === "deudasTotales") base.deudasTotales -= monto;
+      } else if (m.tipo === "transferencia") {
+        // resta en origen, suma en destino
+        const origen = m.cuenta;
+        const destino = m.cuentaDestino;
+        if (origen === "cajaEmpresa") base.cajaEmpresa -= monto;
+        if (origen === "cajaBrandon") base.cajaBrandon -= monto;
+        if (origen === "cajaSocia") base.cajaSocia -= monto;
+        if (origen === "inversiones") base.inversiones -= monto;
+        if (origen === "deudasTotales") base.deudasTotales -= monto;
+
+        if (destino === "cajaEmpresa") base.cajaEmpresa += monto;
+        if (destino === "cajaBrandon") base.cajaBrandon += monto;
+        if (destino === "cajaSocia") base.cajaSocia += monto;
+        if (destino === "inversiones") base.inversiones += monto;
+        if (destino === "deudasTotales") base.deudasTotales += monto;
+      }
+    });
+
+    // 2) Sales: manejamos varios esquemas de documento (compatibilidad)
     const salesSnap = await getDocs(collection(db, "companies", companyId, "sales"));
     salesSnap.forEach(snap => {
       const s = snap.data();
-      const price = Number(s.precio || 0);
-      const cost = Number(s.costo || 0);
-      const utilidad = Number(s.utilidad || (price - cost) || 0);
-      const a = s.asignaciones || {};
 
-      // derivar quién pagó el costo (paidBy) o fallback
-      const pb = derivePaidBy(a, cost);
+      // soporta: precio/costo (antiguo) o monto/inversion (nuevo)
+      const price = num(s.precio ?? s.monto ?? s.price);
+      const cost = num(s.costo ?? s.inversion ?? s.cost);
+      const utilidad = num(s.utilidad ?? (price - cost));
+      const asign = s.asignaciones || {};
 
-      if (a.manualMode) {
-        // Modo manual: respetar lo que el usuario haya puesto
-        if (a.reinversion) base.inversiones += Number(a.reinversion || 0);
-        if (a.brandon) base.cajaBrandon += Number(a.brandon || 0);
-        if (a.socia) base.cajaSocia += Number(a.socia || 0);
-        if (a.pagoDeuda) base.deudasTotales -= Number(a.pagoDeuda || 0);
+      // derive paidBy: prefer asignaciones.paidBy, luego asignaciones.financiadoPor, luego root.financiadoPor
+      let pb = { empresa: 0, brandon: 0, socia: 0 };
+      if (asign && asign.paidBy) {
+        pb.empresa = num(asign.paidBy.empresa);
+        pb.brandon = num(asign.paidBy.brandon);
+        pb.socia = num(asign.paidBy.socia);
       } else {
-        // Modo automático:
-        // 1) Reembolsos: acreditar a quienes adelantaron el costo
-        if (pb.brandon && pb.brandon > 0) base.cajaBrandon += Number(pb.brandon);
-        if (pb.socia && pb.socia > 0) base.cajaSocia += Number(pb.socia);
-        // si empresa aportó parte del costo, esa porción se reparte 50/50 a socios
-        if (pb.empresa && pb.empresa > 0) {
-          const halfInv = Number((pb.empresa / 2).toFixed(2));
-          base.cajaBrandon += halfInv;
-          base.cajaSocia += halfInv;
-        }
-        // 2) Reparto de utilidad 50/50
+        const fp = asign.financiadoPor || s.financiadoPor || "empresa";
+        if (fp === "brandon") pb.brandon = cost;
+        else if (fp === "socia") pb.socia = cost;
+        else pb.empresa = cost;
+      }
+
+      // Si el usuario usó modo manual, respetamos los campos manuales (reinversion, brandon, socia, pagoDeuda)
+      if (asign.manualMode) {
+        if (asign.reinversion) base.inversiones += num(asign.reinversion);
+        if (asign.brandon) base.cajaBrandon += num(asign.brandon);
+        if (asign.socia) base.cajaSocia += num(asign.socia);
+        if (asign.pagoDeuda) base.deudasTotales -= num(asign.pagoDeuda);
+      } else {
+        // Reembolsos a quienes adelantaron el costo (solo a Brand./Socia)
+        if (pb.brandon && pb.brandon > 0) base.cajaBrandon += num(pb.brandon);
+        if (pb.socia && pb.socia > 0) base.cajaSocia += num(pb.socia);
+        // NOTA: si pb.empresa > 0, no "devolvemos" la inversión a la empresa (evita doble conteo).
+        // Reparto de utilidad 50/50
         if (utilidad > 0) {
           const halfU = Number((utilidad / 2).toFixed(2));
           base.cajaBrandon += halfU;
           base.cajaSocia += halfU;
         }
-      }
-
-      // reinversiones/pagoDeuda opcionales (también aplicables en automático si están presentes)
-      if (!a.manualMode) {
-        if (a.reinversion) { base.inversiones += Number(a.reinversion || 0); }
-        if (a.pagoDeuda) { base.deudasTotales -= Number(a.pagoDeuda || 0); }
+        // reinversion / pagoDeuda opcionales
+        if (asign.reinversion) base.inversiones += num(asign.reinversion);
+        if (asign.pagoDeuda) base.deudasTotales -= num(asign.pagoDeuda);
       }
     });
 
@@ -820,11 +696,11 @@ async function recomputeBalances() {
     const expSnap = await getDocs(collection(db, "companies", companyId, "expenses"));
     expSnap.forEach(snap => {
       const g = snap.data();
-      const monto = Number(g.monto || 0);
+      const monto = num(g.monto);
       if (g.paidDistribution) {
-        base.cajaEmpresa -= Number(g.paidDistribution.empresa || 0);
-        base.cajaBrandon -= Number(g.paidDistribution.brandon || 0);
-        base.cajaSocia -= Number(g.paidDistribution.socia || 0);
+        base.cajaEmpresa -= num(g.paidDistribution.empresa || 0);
+        base.cajaBrandon -= num(g.paidDistribution.brandon || 0);
+        base.cajaSocia -= num(g.paidDistribution.socia || 0);
       } else {
         if (g.pagadoPor === "empresa") base.cajaEmpresa -= monto;
         if (g.pagadoPor === "brandon") base.cajaBrandon -= monto;
@@ -832,11 +708,11 @@ async function recomputeBalances() {
       }
     });
 
-    // 4) Debts (sum saldos)
+    // 4) Debts
     const debtsSnap = await getDocs(collection(db, "companies", companyId, "debts"));
     debtsSnap.forEach(snap => {
       const d = snap.data();
-      const saldo = Number(d.saldo || d.montoInicial || 0);
+      const saldo = num(d.saldo ?? d.montoInicial);
       base.deudasTotales += saldo;
     });
 
@@ -844,7 +720,7 @@ async function recomputeBalances() {
     const goalsSnap = await getDocs(collection(db, "companies", companyId, "goals"));
     goalsSnap.forEach(snap => {
       const g = snap.data();
-      const acum = Number(g.acumulado || 0);
+      const acum = num(g.acumulado);
       if (g.tipo === "negocio") base.cajaEmpresa -= acum;
       if (g.tipo === "brandon") base.cajaBrandon -= acum;
       if (g.tipo === "socia") base.cajaSocia -= acum;
@@ -869,6 +745,7 @@ async function recomputeBalances() {
     console.error("recomputeBalances error:", err);
   }
 }
+
 
 
     // small helper: adjustBalances incremental (kept for rare direct ops)
@@ -928,6 +805,26 @@ async function recomputeBalances() {
       });
     }
 
+    // ---------------------------
+    // MOVIMIENTOS: UI toggle para transferencia
+    // ---------------------------
+    function setupMovTipoToggle() {
+      const movTipo = $("#movTipo");
+      const contDest = $("#containerCuentaDestino");
+      movTipo.addEventListener("change", () => {
+        if (movTipo.value === "transferencia") contDest.classList.remove("hidden");
+        else contDest.classList.add("hidden");
+      });
+      // inicial
+      if (movTipo.value === "transferencia") contDest.classList.remove("hidden");
+      else contDest.classList.add("hidden");
+    }
+
+    // ---------------------------
+    // FORM SUBMITS: VENTA / GASTO / DEUDA / META / MOVIMIENTO
+
+    
+    // ---------------------------
    $("#formVenta").addEventListener("submit", async (e) => {
   e.preventDefault();
   const editingId = $("#editingSaleId").value || "";
@@ -953,45 +850,48 @@ async function recomputeBalances() {
   if (precio <= 0) { alert("El precio debe ser mayor a 0"); return; }
   if (costo < 0) { alert("El costo no puede ser negativo"); return; }
 
-  // --- compute paidBy ---
+  // --- compute paidBy (crea movimientos si corresponde) ---
   const createMovs = !editingId;
   let paidBy = await computePaidBy(financiadoPor, costo, createMovs);
 
-  // 🔹 Corrección clave:
-  // si la inversión la hizo la EMPRESA, no se devuelve el costo.
-  // El costo ya se descuenta de la cajaEmpresa en recomputeBalances,
-  // por lo tanto anulamos esa devolución.
+  // Si la inversión la hizo la EMPRESA NO devolvemos el costo como reembolso a la empresa (evita duplicado)
   if (financiadoPor === "empresa") {
     paidBy = { empresa: 0, brandon: 0, socia: 0 };
   }
-
   asig.paidBy = paidBy;
 
+  // Estructura del documento: guardamos campos compatibles
+  const payload = {
+    date, producto,
+    costo, precio,
+    utilidad, margen,
+    notas,
+    asignaciones: asig,
+    // campos adicionales para compatibilidad con variantes que uses
+    monto: precio,
+    inversion: costo,
+    financiadoPor,
+    updatedAt: serverTimestamp()
+  };
+
   if (editingId) {
-    await updateDoc(doc(db, "companies", companyId, "sales", editingId), {
-      date, producto, costo, precio, utilidad, margen, notas,
-      asignaciones: asig, updatedAt: serverTimestamp()
-    });
+    await updateDoc(doc(db, "companies", companyId, "sales", editingId), payload);
+    $("#editingSaleId").value = "";
   } else {
-    await addDoc(collection(db, "companies", companyId, "sales"), {
-      date, producto, costo, precio, utilidad, margen, notas,
-      asignaciones: asig, createdAt: serverTimestamp()
-    });
+    payload.createdAt = serverTimestamp();
+    await addDoc(collection(db, "companies", companyId, "sales"), payload);
   }
 
   // recompute balances robustly after operation
   await recomputeBalances();
 
-  $("#editingSaleId").value = "";
   e.target.reset();
   $("#manualDistribFields").classList.add("hidden");
   $("#autoDistribNote").classList.remove("hidden");
 });
 
 
-    // ---------------------------
-    // GASTOS (submit)
-    // ---------------------------
+    // GASTOS
     $("#formGasto").addEventListener("submit", async (e) => {
       e.preventDefault();
       const editingId = $("#editingGastoId").value || "";
@@ -1001,7 +901,6 @@ async function recomputeBalances() {
       const descripcion = $("#gastoDesc").value.trim();
       const pagadoPor = $("#gastoPagadoPor").value;
 
-      // compute distribution and create movements if new
       const createMovs = !editingId;
       const paidDistribution = await computePaidBy(pagadoPor, monto, createMovs);
 
@@ -1019,8 +918,115 @@ async function recomputeBalances() {
       await recomputeBalances();
       e.target.reset();
     });
+
+    // DEUDAS (submit) - ahora con deudor y tipo acreedor
+    $("#formDeuda").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("#btnCrearDeuda");
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = "Guardando...";
+
+      try {
+        const editingId = $("#editingDeudaId").value || "";
+        const tipo = $("#deudaTipo").value;
+        const deudor = $("#deudaDeudor").value || "empresa";
+        const acreedorTipo = $("#deudaAcreedorTipo").value || "proveedor";
+        const acreedorTexto = $("#deudaAcreedor").value.trim();
+        const monto = Number($("#deudaMonto").value||0);
+        const notas = $("#deudaNotas").value.trim();
+
+        if (!acreedorTexto) throw new Error("Ingresa el acreedor/descripcion.");
+        if (isNaN(monto) || monto <= 0) throw new Error("El monto debe ser mayor a 0.");
+
+        const payload = {
+          tipo,
+          deudor,
+          acreedorTipo,
+          acreedor: acreedorTexto,
+          montoInicial: monto,
+          saldo: monto,
+          notas,
+          updatedAt: serverTimestamp(),
+        };
+
+        if (editingId) {
+          await updateDoc(doc(db, "companies", companyId, "debts", editingId), payload);
+          $("#editingDeudaId").value = "";
+        } else {
+          payload.createdAt = serverTimestamp();
+          await addDoc(collection(db, "companies", companyId, "debts"), payload);
+        }
+
+        await recomputeBalances();
+        $("#formDeuda").reset();
+        $("#deudaMsg").textContent = "Deuda guardada correctamente.";
+        setTimeout(() => ($("#deudaMsg").textContent = ""), 2500);
+      } catch (err) {
+        console.error("Guardar deuda:", err);
+        alert("No se pudo guardar la deuda: " + (err.message || err));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
+
+    // METAS
+    $("#formMeta").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const editingId = $("#editingMetaId").value || "";
+      const tipo = $("#metaTipo").value;
+      const nombre = $("#metaNombre").value.trim();
+      const objetivoMonto = Number($("#metaObjetivo").value||0);
+      const notas = $("#metaNotas").value.trim();
+
+      if (editingId) {
+        await updateDoc(doc(db, "companies", companyId, "goals", editingId), {
+          tipo, nombre, objetivoMonto, updatedAt: serverTimestamp()
+        });
+        $("#editingMetaId").value = "";
+      } else {
+        await addDoc(collection(db, "companies", companyId, "goals"), {
+          tipo, nombre, objetivoMonto, acumulado: 0, notas, createdAt: serverTimestamp()
+        });
+      }
+
+      await recomputeBalances();
+      e.target.reset();
+    });
+
+    // MOVIMIENTOS (submit) soportando transferencia con cuentaDestino
+    $("#formMovimiento").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const editingId = $("#editingMovId").value || "";
+      const tipo = $("#movTipo").value;
+      const cuenta = $("#movCuenta").value;
+      const cuentaDestino = $("#movCuentaDestino") ? $("#movCuentaDestino").value : "";
+      const fecha = $("#movFecha").value || new Date().toISOString().slice(0,10);
+      const monto = Number($("#movMonto").value||0);
+      const desc = $("#movDesc").value || "";
+
+      if (monto <= 0) { alert("Monto debe ser mayor que 0"); return; }
+
+      const payload = { tipo, cuenta, fecha, monto, desc, updatedAt: serverTimestamp() };
+      if (tipo === "transferencia") payload.cuentaDestino = cuentaDestino;
+
+      if (editingId) {
+        await updateDoc(doc(db, "companies", companyId, "movements", editingId), payload);
+        $("#editingMovId").value = "";
+      } else {
+        payload.createdAt = serverTimestamp();
+        await addDoc(collection(db, "companies", companyId, "movements"), payload);
+      }
+
+      await recomputeBalances();
+      e.target.reset();
+      // reset UI
+      setupMovTipoToggle();
+    });
+
     // ---------------------------
-    // SUBSCRIPTIONS: VENTAS / GASTOS (render + handlers)
+    // SUBSCRIPTIONS: VENTAS / GASTOS / DEUDAS / METAS / MOVIMIENTOS
     // ---------------------------
     function subscribeVentas() {
       const qSales = query(collection(db, "companies", companyId, "sales"), orderBy("createdAt","desc"));
@@ -1134,33 +1140,6 @@ async function recomputeBalances() {
       unsubscribers.push(unsub);
     }
 
-    // ------------------------------------------------
-    // DEUDAS / METAS / MOVIMIENTOS (handlers y subscribes)
-    // ------------------------------------------------
-    // --- DEUDAS (submit + subscribe)
-    $("#formDeuda").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const editingId = $("#editingDeudaId").value || "";
-      const tipo = $("#deudaTipo").value;
-      const acreedor = $("#deudaAcreedor").value.trim();
-      const monto = Number($("#deudaMonto").value||0);
-      const notas = $("#deudaNotas").value.trim();
-
-      if (editingId) {
-        await updateDoc(doc(db, "companies", companyId, "debts", editingId), {
-          tipo, acreedor, montoInicial: monto, saldo: monto, notas, updatedAt: serverTimestamp()
-        });
-        $("#editingDeudaId").value = "";
-      } else {
-        await addDoc(collection(db, "companies", companyId, "debts"), {
-          tipo, acreedor, montoInicial: monto, saldo: monto, notas, createdAt: serverTimestamp()
-        });
-      }
-
-      await recomputeBalances();
-      e.target.reset();
-    });
-
     function subscribeDeudas() {
       const qDeb = query(collection(db, "companies", companyId, "debts"), orderBy("createdAt","desc"));
       const unsub = onSnapshot(qDeb, (snap) => {
@@ -1169,7 +1148,7 @@ async function recomputeBalances() {
           const d = docu.data(); const id = docu.id;
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${d.acreedor}</td><td>${d.tipo}</td><td>${money(d.saldo)}</td>
+            <td>${d.acreedor} (${d.acreedorTipo || ''})</td><td>${d.tipo}</td><td>${money(d.saldo)}</td>
             <td>
               <input type="number" step="0.01" min="0" placeholder="Abono" class="border rounded p-1 w-28" id="abono-${id}">
               <button data-id="${id}" class="btn-abonar text-emerald-700 underline ml-1">Abonar</button>
@@ -1188,7 +1167,7 @@ async function recomputeBalances() {
             const ref = doc(db, "companies", companyId, "debts", id);
             const snap = await getDoc(ref);
             const saldo = (snap.data().saldo || 0) - ab;
-            await updateDoc(ref, { saldo: Math.max(0, saldo) });
+            await updateDoc(ref, { saldo: Math.max(0, saldo), updatedAt: serverTimestamp() });
             await recomputeBalances();
             $(`#abono-${id}`).value = "";
           };
@@ -1211,6 +1190,8 @@ async function recomputeBalances() {
             const d = snap.data();
             $("#editingDeudaId").value = id;
             $("#deudaTipo").value = d.tipo || "a_proveedor";
+            $("#deudaDeudor").value = d.deudor || "empresa";
+            $("#deudaAcreedorTipo").value = d.acreedorTipo || "proveedor";
             $("#deudaAcreedor").value = d.acreedor || "";
             $("#deudaMonto").value = d.montoInicial || "";
             $("#deudaNotas").value = d.notas || "";
@@ -1222,30 +1203,6 @@ async function recomputeBalances() {
       unsubscribers.push(unsub);
     }
 
-    // --- METAS
-    $("#formMeta").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const editingId = $("#editingMetaId").value || "";
-      const tipo = $("#metaTipo").value;
-      const nombre = $("#metaNombre").value.trim();
-      const objetivoMonto = Number($("#metaObjetivo").value||0);
-      const notas = $("#metaNotas").value.trim();
-
-      if (editingId) {
-        await updateDoc(doc(db, "companies", companyId, "goals", editingId), {
-          tipo, nombre, objetivoMonto, updatedAt: serverTimestamp()
-        });
-        $("#editingMetaId").value = "";
-      } else {
-        await addDoc(collection(db, "companies", companyId, "goals"), {
-          tipo, nombre, objetivoMonto, acumulado: 0, notas, createdAt: serverTimestamp()
-        });
-      }
-
-      await recomputeBalances();
-      e.target.reset();
-    });
-
     function subscribeMetas() {
       const qGoals = query(collection(db, "companies", companyId, "goals"), orderBy("createdAt","desc"));
       const unsub = onSnapshot(qGoals, (snap) => {
@@ -1253,6 +1210,7 @@ async function recomputeBalances() {
         snap.forEach(docu => {
           const g = docu.data(); const id = docu.id;
           const pct = g.objetivoMonto ? (g.acumulado/g.objetivoMonto)*100 : 0;
+          const faltante = Math.max(0, (g.objetivoMonto || 0) - (g.acumulado || 0));
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${g.nombre}</td><td>${g.tipo}</td><td>${money(g.objetivoMonto)}</td><td>${money(g.acumulado)}</td><td>${pct.toFixed(0)}%</td>
@@ -1274,7 +1232,7 @@ async function recomputeBalances() {
             const ref = doc(db, "companies", companyId, "goals", id);
             const snap = await getDoc(ref);
             const acum = (snap.data().acumulado || 0) + ab;
-            await updateDoc(ref, { acumulado: acum });
+            await updateDoc(ref, { acumulado: acum, updatedAt: serverTimestamp() });
             await recomputeBalances();
             $(`#abmeta-${id}`).value = "";
           };
@@ -1308,42 +1266,25 @@ async function recomputeBalances() {
       unsubscribers.push(unsub);
     }
 
-    // --- MOVIMIENTOS
-    $("#formMovimiento").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const editingId = $("#editingMovId").value || "";
-      const tipo = $("#movTipo").value;
-      const cuenta = $("#movCuenta").value;
-      const fecha = $("#movFecha").value || new Date().toISOString().slice(0,10);
-      const monto = Number($("#movMonto").value||0);
-      const desc = $("#movDesc").value || "";
-
-      if (monto <= 0) { alert("Monto debe ser mayor que 0"); return; }
-
-      if (editingId) {
-        await updateDoc(doc(db, "companies", companyId, "movements", editingId), {
-          tipo, cuenta, fecha, monto, desc, updatedAt: serverTimestamp()
-        });
-        $("#editingMovId").value = "";
-      } else {
-        await addDoc(collection(db, "companies", companyId, "movements"), {
-          tipo, cuenta, fecha, monto, desc, createdAt: serverTimestamp()
-        });
-      }
-
-      await recomputeBalances();
-      e.target.reset();
-    });
-
+    // Movimientos
     function subscribeMovimientos() {
       const q = query(collection(db, "companies", companyId, "movements"), orderBy("createdAt","desc"));
       const unsub = onSnapshot(q, snap => {
         const tbody = $("#tbMovimientos"); tbody.innerHTML = "";
         snap.forEach(docu => {
           const m = docu.data(); const id = docu.id;
+          let cuentasTxt = m.cuenta;
+          if (m.tipo === "transferencia" && m.cuentaDestino) {
+            cuentasTxt = `${m.cuenta} → ${m.cuentaDestino}`;
+          }
+
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${m.fecha}</td><td>${m.tipo}</td><td>${m.cuenta}</td><td>${money(m.monto)}</td><td>${m.desc||""}</td>
+            <td>${m.fecha}</td>
+            <td>${m.tipo}</td>
+            <td>${cuentasTxt}</td>
+            <td>${money(m.monto)}</td>
+            <td>${m.desc||""}</td>
             <td>
               <button data-id="${id}" class="edit-mov text-blue-600 underline mr-2">Editar</button>
               <button data-id="${id}" class="del-mov text-red-600 underline">Eliminar</button>
@@ -1370,19 +1311,24 @@ async function recomputeBalances() {
             $("#editingMovId").value = id;
             $("#movTipo").value = m.tipo || "ingreso";
             $("#movCuenta").value = m.cuenta || "cajaEmpresa";
+            if (m.tipo === "transferencia" && m.cuentaDestino) {
+              $("#movCuentaDestino").value = m.cuentaDestino;
+              $("#containerCuentaDestino").classList.remove("hidden");
+            } else {
+              $("#containerCuentaDestino").classList.add("hidden");
+            }
             $("#movFecha").value = m.fecha || "";
             $("#movMonto").value = m.monto || "";
             $("#movDesc").value = m.desc || "";
             document.querySelector('[data-tab="movimientos"]').click();
           };
         });
-
       });
       unsubscribers.push(unsub);
     }
 
     // ------------------------------------------------
-    // GRÁFICAS (Chart.js) - destrucción / recreación para evitar duplicación
+    // GRÁFICAS (Chart.js) y estadísticas adicionales
     // ------------------------------------------------
     let chartIG = null, chartUtilidad = null;
     function setupCharts() {
@@ -1427,7 +1373,7 @@ async function recomputeBalances() {
         });
         expSnap.forEach(g => {
           const d = g.data();
-          byDateOut[d.date] = (byDateOut[d.date]||0) + Number(d.monto||0);
+          byDateOut[d.date] = (byDateOut[d.date]||0) + Number(g.monto||0);
         });
 
         const labels = [];
@@ -1448,8 +1394,50 @@ async function recomputeBalances() {
         chartUtilidad.data.datasets[0].data = ult.map(v => v.utilidad || 0);
         chartUtilidad.data.datasets[1].data = ult.map(v => Number(((v.margen||0)*100).toFixed(1)));
         chartUtilidad.update();
+
+        // actualizar listas de metas y deudas para estadísticas
+        await renderStatsLists();
       } catch (err) {
         console.error("refreshCharts error:", err);
+      }
+    }
+
+    // render de listas en pestaña estadísticas
+    async function renderStatsLists() {
+      try {
+        const statsMetas = $("#statsMetasList");
+        const statsDeudas = $("#statsDeudasList");
+        statsMetas.innerHTML = "";
+        statsDeudas.innerHTML = "";
+
+        const goalsSnap = await getDocs(collection(db, "companies", companyId, "goals"));
+        goalsSnap.forEach(docu => {
+          const g = docu.data();
+          const objetivo = Number(g.objetivoMonto || 0);
+          const acum = Number(g.acumulado || 0);
+          const pct = objetivo ? Math.min(100, (acum/objetivo)*100) : 0;
+          const faltante = Math.max(0, objetivo - acum);
+          const div = document.createElement("div");
+          div.innerHTML = `<div class="flex justify-between"><div><strong>${g.nombre}</strong> (${g.tipo})</div><div>${pct.toFixed(1)}%</div></div>
+            <div class="text-xs text-slate-600">Objetivo: ${money(objetivo)} · Acum: ${money(acum)} · Falta: ${money(faltante)}</div>`;
+          statsMetas.appendChild(div);
+        });
+
+        const debtsSnap = await getDocs(collection(db, "companies", companyId, "debts"));
+        debtsSnap.forEach(docu => {
+          const d = docu.data();
+          const inicial = Number(d.montoInicial || 0);
+          const saldo = Number(d.saldo || 0);
+          const pagado = Math.max(0, inicial - saldo);
+          const pct = inicial ? Math.min(100, (pagado / inicial) * 100) : 0;
+          const div = document.createElement("div");
+          div.innerHTML = `<div class="flex justify-between"><div><strong>${d.acreedor}</strong> (${d.acreedorTipo||''})</div><div>${pct.toFixed(1)}%</div></div>
+            <div class="text-xs text-slate-600">Inicial: ${money(inicial)} · Pagado: ${money(pagado)} · Saldo: ${money(saldo)}</div>`;
+          statsDeudas.appendChild(div);
+        });
+
+      } catch (err) {
+        console.error("renderStatsLists error:", err);
       }
     }
 
@@ -1496,13 +1484,15 @@ async function recomputeBalances() {
       });
     }
 
-    // periodic refresh for charts
+    // periodic refresh for charts and stats
     setInterval(() => { try { refreshCharts(); } catch(e){} }, 30_000);
 
     // initial: click first tab
     document.addEventListener("DOMContentLoaded", () => {
       const first = document.querySelector('.tab-btn');
       if (first) first.click();
+      // hook UI toggles
+      setupMovTipoToggle();
     });
 
   </script>
