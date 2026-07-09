@@ -1,11 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
-import { SITE, GENEROS } from '../data/site-config';
+import { SITE, GENEROS, TIPOS } from '../data/site-config';
 
 const productos = await getCollection('productos');
-const generosConProductos = GENEROS.filter(g =>
-  productos.some(p => p.data.genero === g.slug)
-);
+const generosConProductos = GENEROS.map(g => ({
+  ...g,
+  tipos: TIPOS.filter(t => productos.some(p => p.data.genero === g.slug && p.data.tipo === t.slug)),
+})).filter(g => g.tipos.length > 0);
 ---
 
 <header class="main-header">
@@ -18,7 +19,14 @@ const generosConProductos = GENEROS.filter(g =>
       <ul class="nav-links" id="nav-links">
         <li><a href="/">Inicio</a></li>
         {generosConProductos.map(g => (
-          <li><a href={`/${g.slug}/`}>{g.nombre}</a></li>
+          <li class="nav-item-genero">
+            <a href={`/${g.slug}/`}>{g.nombre}</a>
+            <ul class="nav-submenu">
+              {g.tipos.map(t => (
+                <li><a href={`/${g.slug}/${t.slug}/`}>{t.nombre}</a></li>
+              ))}
+            </ul>
+          </li>
         ))}
         <li><a href="/#contacto">Contacto</a></li>
       </ul>

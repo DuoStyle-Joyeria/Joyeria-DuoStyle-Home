@@ -1,32 +1,39 @@
 ---
 import type { GetStaticPathsOptions } from 'astro';
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import ProductoCard from '../../components/ProductoCard.astro';
-import { TIPOS } from '../../data/site-config';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProductoCard from '../../../components/ProductoCard.astro';
+import { GENEROS, TIPOS } from '../../../data/site-config';
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const productos = await getCollection('productos', p => p.data.disponible);
-  const tipos = [...new Set(productos.map(p => p.data.tipo))];
+  const combinaciones = new Set(productos.map(p => `${p.data.genero}::${p.data.tipo}`));
 
-  return tipos.flatMap(tipo => {
+  return [...combinaciones].flatMap(clave => {
+    const [genero, tipo] = clave.split('::');
     const items = productos
-      .filter(p => p.data.tipo === tipo)
+      .filter(p => p.data.genero === genero && p.data.tipo === tipo)
       .sort((a, b) => a.data.nombre.localeCompare(b.data.nombre));
     const destacados = items.filter(p => p.data.secciones.includes('destacado')).slice(0, 10);
-    return paginate(items, { params: { tipo }, props: { destacados }, pageSize: 9 });
+    return paginate(items, { params: { genero, tipo }, props: { destacados }, pageSize: 9 });
   });
 }
 
-const { tipo } = Astro.params;
+const { genero, tipo } = Astro.params;
 const { page, destacados } = Astro.props as any;
+const nombreGenero = GENEROS.find(g => g.slug === genero)?.nombre ?? genero;
 const nombreTipo = TIPOS.find(t => t.slug === tipo)?.nombre ?? tipo;
+const titulo = `${nombreTipo} — ${nombreGenero}`;
 ---
 
-<BaseLayout title={nombreTipo} description={`Catálogo de ${nombreTipo} — Duo Style. Compra fácil y segura por WhatsApp.`}>
+<BaseLayout title={titulo} description={`${titulo} — Duo Style. Compra fácil y segura por WhatsApp.`}>
+  <nav class="breadcrumb">
+    <a href="/">Inicio</a> / <a href={`/${genero}/`}>{nombreGenero}</a> / {nombreTipo}
+  </nav>
+
   {page.currentPage === 1 && destacados.length > 0 && (
     <section class="destacados-section">
-      <h2>Destacados en {nombreTipo}</h2>
+      <h2>Destacados en {titulo}</h2>
       <div class="slider-track">
         {destacados.map((p: any) => (
           <ProductoCard
@@ -44,7 +51,7 @@ const nombreTipo = TIPOS.find(t => t.slug === tipo)?.nombre ?? tipo;
   )}
 
   <section class="catalogo-section">
-    <h2>{nombreTipo}</h2>
+    <h2>{titulo}</h2>
     <div class="grid-productos">
       {page.data.map((p: any) => (
         <ProductoCard
@@ -63,7 +70,7 @@ const nombreTipo = TIPOS.find(t => t.slug === tipo)?.nombre ?? tipo;
       <nav class="paginador">
         {Array.from({ length: page.lastPage }, (_, i) => i + 1).map(num => (
           <a
-            href={num === 1 ? `/${tipo}/` : `/${tipo}/${num}/`}
+            href={num === 1 ? `/${genero}/${tipo}/` : `/${genero}/${tipo}/${num}/`}
             class={num === page.currentPage ? 'activo' : ''}
           >
             {num}

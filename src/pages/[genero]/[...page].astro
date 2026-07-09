@@ -3,7 +3,7 @@ import type { GetStaticPathsOptions } from 'astro';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductoCard from '../../components/ProductoCard.astro';
-import { GENEROS } from '../../data/site-config';
+import { GENEROS, TIPOS } from '../../data/site-config';
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const productos = await getCollection('productos', p => p.data.disponible);
@@ -14,16 +14,29 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
       .filter(p => p.data.genero === genero)
       .sort((a, b) => a.data.nombre.localeCompare(b.data.nombre));
     const destacados = items.filter(p => p.data.secciones.includes('destacado')).slice(0, 10);
-    return paginate(items, { params: { genero }, props: { destacados }, pageSize: 9 });
+    const tiposDelGenero = [...new Set(items.map(p => p.data.tipo))];
+    return paginate(items, { params: { genero }, props: { destacados, tiposDelGenero }, pageSize: 9 });
   });
 }
 
 const { genero } = Astro.params;
-const { page, destacados } = Astro.props as any;
+const { page, destacados, tiposDelGenero } = Astro.props as any;
 const nombreGenero = GENEROS.find(g => g.slug === genero)?.nombre ?? genero;
+const tiposConNombre = TIPOS.filter(t => tiposDelGenero.includes(t.slug));
 ---
 
 <BaseLayout title={nombreGenero} description={`${nombreGenero} — Duo Style. Compra fácil y segura por WhatsApp.`}>
+  <section class="catalogo-section">
+    <h2>{nombreGenero}</h2>
+    {tiposConNombre.length > 0 && (
+      <div class="categorias categorias-tipo">
+        {tiposConNombre.map((t: any) => (
+          <a href={`/${genero}/${t.slug}/`} class="categoria categoria-tipo">{t.nombre}</a>
+        ))}
+      </div>
+    )}
+  </section>
+
   {page.currentPage === 1 && destacados.length > 0 && (
     <section class="destacados-section">
       <h2>Destacados en {nombreGenero}</h2>
@@ -44,7 +57,7 @@ const nombreGenero = GENEROS.find(g => g.slug === genero)?.nombre ?? genero;
   )}
 
   <section class="catalogo-section">
-    <h2>{nombreGenero}</h2>
+    <h2>Todo en {nombreGenero}</h2>
     <div class="grid-productos">
       {page.data.map((p: any) => (
         <ProductoCard

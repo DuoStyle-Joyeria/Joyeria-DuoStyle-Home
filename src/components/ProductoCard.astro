@@ -29,7 +29,14 @@ const precioAnteriorFmt = precioAnterior?.toLocaleString('es-CO');
         data-slug={slug}
         data-precio={precio}
         data-imagen={imagen}
-      >🛍️<span class="add-carrito-mas">+</span></button>
+      >
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="19" cy="21" r="1" />
+          <path d="M1 2h3l2.6 13.2a2 2 0 0 0 2 1.6h9.4a2 2 0 0 0 2-1.6L22 6H6.2" />
+        </svg>
+        <span class="add-carrito-mas">+</span>
+      </button>
     </div>
   )}
   <h3>{nombre}</h3>

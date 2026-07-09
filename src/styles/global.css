@@ -17,15 +17,32 @@ img { max-width: 100%; }
 .nav-links a:hover { color: #C1A14A; }
 .hamburguesa { display: none; font-size: 28px; cursor: pointer; padding: 10px; }
 
+.nav-item-genero { position: relative; }
+.nav-submenu { list-style: none; }
+
+@media (min-width: 769px) {
+  .nav-submenu {
+    display: none; position: absolute; top: 100%; left: 0;
+    background: #fff; border: 1px solid #eee; border-radius: 8px;
+    padding: 8px 0; min-width: 160px; box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  }
+  .nav-item-genero:hover .nav-submenu { display: block; }
+  .nav-submenu li a { display: block; padding: 8px 16px; font-weight: normal; white-space: nowrap; }
+}
+
 @media (max-width: 768px) {
   .hamburguesa { display: block; }
   .nav-links {
     position: absolute; top: 60px; right: 0;
     background: #fff; flex-direction: column; border: 1px solid #ccc;
-    padding: 10px; display: none; width: 200px;
+    padding: 10px; display: none; width: 220px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   }
   .nav-links.show { display: flex; }
+  .nav-submenu {
+    padding-left: 14px; margin-top: 6px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .nav-submenu a { font-weight: normal; font-size: 0.9rem; color: #666; }
 }
 
 /* ====================== */
@@ -216,8 +233,8 @@ img { max-width: 100%; }
 .producto-card .imagen-wrap { position: relative; }
 .btn-add-carrito {
   position: absolute; top: 8px; right: 8px; width: 32px; height: 32px;
-  border-radius: 50%; border: none; background: rgba(255,255,255,0.9);
-  display: grid; place-items: center; font-size: 15px; cursor: pointer;
+  border-radius: 50%; border: none; background: rgba(255,255,255,0.92); color: #C1A14A;
+  display: grid; place-items: center; cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform .15s ease;
 }
 .btn-add-carrito:hover { transform: scale(1.08); }
@@ -226,7 +243,8 @@ img { max-width: 100%; }
   border-radius: 50%; background: #C1A14A; color: #fff; font-size: 10px;
   line-height: 14px; font-weight: bold;
 }
-.btn-add-carrito.agregado { animation: pulso-carrito .5s ease; background: #C1A14A; }
+.btn-add-carrito.agregado { animation: pulso-carrito .5s ease; background: #C1A14A; color: #fff; }
+.btn-add-carrito.agregado .add-carrito-mas { opacity: 0; }
 @keyframes pulso-carrito {
   0% { transform: scale(1); }
   40% { transform: scale(1.25); }
