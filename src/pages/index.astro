@@ -9,10 +9,12 @@ const categoriasConProductos = CATEGORIAS.filter(cat =>
   productos.some(p => p.data.categoria === cat.slug)
 );
 
-let destacados = productos.filter(p => p.data.destacado);
+let destacados = productos.filter(p => p.data.secciones.includes('destacado'));
 if (destacados.length === 0) {
   destacados = productos.slice(0, 8);
 }
+
+const nuevos = productos.filter(p => p.data.secciones.includes('nuevo'));
 ---
 
 <BaseLayout title="Inicio">
@@ -43,6 +45,25 @@ if (destacados.length === 0) {
       <h2>Destacados</h2>
       <div class="slider-track">
         {destacados.map(p => (
+          <ProductoCard
+            nombre={p.data.nombre}
+            slug={p.data.slug}
+            categoria={p.data.categoria}
+            subtitulo={p.data.subtitulo}
+            precio={p.data.precio}
+            precioAnterior={p.data.precioAnterior}
+            imagen={p.data.imagenes[0]}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  {nuevos.length > 0 && (
+    <section class="destacados-section">
+      <h2>Nuevos</h2>
+      <div class="slider-track">
+        {nuevos.map(p => (
           <ProductoCard
             nombre={p.data.nombre}
             slug={p.data.slug}

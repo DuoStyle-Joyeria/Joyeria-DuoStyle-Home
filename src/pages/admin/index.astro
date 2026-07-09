@@ -1,0 +1,390 @@
+---
+import { CATEGORIAS } from '../../data/site-config';
+
+const SECCIONES = [
+  { valor: 'nuevo', etiqueta: 'Nuevo' },
+  { valor: 'destacado', etiqueta: 'Destacado' },
+  { valor: 'promocion', etiqueta: 'Promoción' },
+];
+---
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Panel de catálogo | Duo Style</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f4f2ee; color: #222; margin: 0; }
+    .hidden { display: none !important; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
+    h1 { font-size: 1.4rem; margin-bottom: 20px; }
+    h2 { font-size: 1.1rem; margin: 30px 0 12px; }
+    .card { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin: 12px 0 4px; }
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea {
+      width: 100%; padding: 9px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem;
+    }
+    textarea { min-height: 90px; }
+    .fila { display: flex; gap: 12px; flex-wrap: wrap; }
+    .fila > div { flex: 1; min-width: 140px; }
+    .checkboxes { display: flex; gap: 16px; margin-top: 6px; flex-wrap: wrap; }
+    .checkboxes label { display: flex; align-items: center; gap: 6px; font-weight: normal; margin: 0; }
+    button {
+      background: #C1A14A; color: #fff; border: none; padding: 10px 20px; border-radius: 20px;
+      font-weight: bold; cursor: pointer; margin-top: 16px;
+    }
+    button.secundario { background: #888; }
+    button.peligro { background: #b23b3b; padding: 6px 14px; font-size: 0.8rem; margin: 0; }
+    .previews { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .previews img { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; }
+    .producto-row {
+      display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid #eee;
+    }
+    .producto-row img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #f1ede4; }
+    .producto-row .info { flex: 1; }
+    .producto-row .info strong { display: block; font-size: 0.9rem; }
+    .producto-row .info span { font-size: 0.8rem; color: #777; }
+    .acciones { display: flex; gap: 8px; }
+    .acciones button.editar { background: #444; padding: 6px 14px; font-size: 0.8rem; margin: 0; }
+    #mensaje { margin-top: 10px; font-size: 0.9rem; }
+    #mensaje.error { color: #b23b3b; }
+    #mensaje.ok { color: #2a7a2a; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Panel de catálogo — Duo Style</h1>
+
+    <div id="authView" class="card">
+      <h2 style="margin-top:0">Iniciar sesión</h2>
+      <form id="loginForm">
+        <label for="loginEmail">Correo</label>
+        <input type="email" id="loginEmail" required />
+        <label for="loginPass">Contraseña</label>
+        <input type="password" id="loginPass" required />
+        <button type="submit">Entrar</button>
+      </form>
+      <p id="loginError" style="color:#b23b3b; margin-top:10px;"></p>
+    </div>
+
+    <div id="appView" class="hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="usuarioActual" style="font-size:0.85rem; color:#666;"></span>
+        <button id="btnLogout" class="secundario" style="margin:0;">Cerrar sesión</button>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0" id="formTitulo">Agregar producto</h2>
+        <form id="productoForm">
+          <div class="fila">
+            <div>
+              <label for="fCategoria">Categoría</label>
+              <select id="fCategoria" required>
+                {CATEGORIAS.map(c => <option value={c.slug}>{c.nombre}</option>)}
+              </select>
+            </div>
+            <div>
+              <label for="fNombre">Nombre</label>
+              <input type="text" id="fNombre" required />
+            </div>
+          </div>
+          <div class="fila">
+            <div>
+              <label for="fPrecio">Precio</label>
+              <input type="number" id="fPrecio" required min="0" />
+            </div>
+            <div>
+              <label for="fPrecioAnterior">Precio anterior (opcional)</label>
+              <input type="number" id="fPrecioAnterior" min="0" />
+            </div>
+          </div>
+          <label for="fSubtitulo">Material / detalle (ej. "Plata 925 • Tallas 4-9")</label>
+          <input type="text" id="fSubtitulo" />
+          <label for="fDescripcion">Descripción</label>
+          <textarea id="fDescripcion" required></textarea>
+
+          <label>Secciones</label>
+          <div class="checkboxes" id="fSecciones">
+            {SECCIONES.map(s => (
+              <label>
+                <input type="checkbox" value={s.valor} /> {s.etiqueta}
+              </label>
+            ))}
+          </div>
+
+          <label><input type="checkbox" id="fDisponible" checked style="width:auto; display:inline-block;" /> Disponible</label>
+
+          <label for="fImagenes">Fotos (se comprimen automáticamente)</label>
+          <input type="file" id="fImagenes" accept="image/*" multiple />
+          <div class="previews" id="previews"></div>
+
+          <button type="submit" id="btnGuardar">Guardar producto</button>
+          <button type="button" id="btnCancelarEdicion" class="secundario hidden">Cancelar edición</button>
+          <p id="mensaje"></p>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">Productos existentes</h2>
+        <div id="listaProductos">Cargando…</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { initializeApp } from 'firebase/app';
+    import {
+      getAuth, connectAuthEmulator, onAuthStateChanged, signInWithEmailAndPassword, signOut,
+    } from 'firebase/auth';
+    import {
+      getFirestore, connectFirestoreEmulator, collection, doc, setDoc, deleteDoc, getDocs, orderBy, query,
+    } from 'firebase/firestore';
+    import {
+      getStorage, connectStorageEmulator, ref, uploadBytes, getDownloadURL, deleteObject,
+    } from 'firebase/storage';
+    import { firebaseConfig } from '../../data/firebase-config';
+    import { slugify } from '../../lib/slugify';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // Solo para desarrollo/pruebas locales contra el emulador de Firebase.
+    // Nunca se activa en producción salvo que alguien defina esta variable a propósito.
+    if (import.meta.env.PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
+      connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+      connectFirestoreEmulator(db, '127.0.0.1', 8080);
+      connectStorageEmulator(storage, '127.0.0.1', 9199);
+    }
+
+    const DEPLOY_HOOK_URL = import.meta.env.PUBLIC_VERCEL_DEPLOY_HOOK_URL as string | undefined;
+
+    const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+
+    const authView = $('#authView');
+    const appView = $('#appView');
+    const loginForm = $<HTMLFormElement>('#loginForm');
+    const loginError = $('#loginError');
+    const btnLogout = $('#btnLogout');
+    const usuarioActual = $('#usuarioActual');
+    const productoForm = $<HTMLFormElement>('#productoForm');
+    const mensaje = $('#mensaje');
+    const listaProductos = $('#listaProductos');
+    const previewsDiv = $('#previews');
+    const inputImagenes = $<HTMLInputElement>('#fImagenes');
+    const formTitulo = $('#formTitulo');
+    const btnCancelarEdicion = $('#btnCancelarEdicion');
+
+    let editandoId: string | null = null;
+    let archivosSeleccionados: File[] = [];
+    let imagenesExistentes: string[] = [];
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginError.textContent = '';
+      try {
+        await signInWithEmailAndPassword(
+          auth,
+          $<HTMLInputElement>('#loginEmail').value.trim(),
+          $<HTMLInputElement>('#loginPass').value
+        );
+      } catch (err: any) {
+        loginError.textContent = 'No se pudo iniciar sesión: ' + (err.message || err);
+      }
+    });
+
+    btnLogout.addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        authView.classList.remove('hidden');
+        appView.classList.add('hidden');
+        return;
+      }
+      authView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      usuarioActual.textContent = user.email || '';
+      cargarProductos();
+    });
+
+    inputImagenes.addEventListener('change', () => {
+      archivosSeleccionados = Array.from(inputImagenes.files || []);
+      previewsDiv.innerHTML = '';
+      for (const archivo of archivosSeleccionados) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(archivo);
+        previewsDiv.appendChild(img);
+      }
+    });
+
+    async function comprimirImagen(archivo: File, maxAncho = 1400, calidad = 0.75): Promise<Blob> {
+      const bitmap = await createImageBitmap(archivo);
+      const escala = Math.min(1, maxAncho / bitmap.width);
+      const ancho = Math.round(bitmap.width * escala);
+      const alto = Math.round(bitmap.height * escala);
+      const canvas = document.createElement('canvas');
+      canvas.width = ancho;
+      canvas.height = alto;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(bitmap, 0, 0, ancho, alto);
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('No se pudo comprimir la imagen'))), 'image/jpeg', calidad);
+      });
+    }
+
+    function limpiarFormulario() {
+      productoForm.reset();
+      editandoId = null;
+      archivosSeleccionados = [];
+      imagenesExistentes = [];
+      previewsDiv.innerHTML = '';
+      formTitulo.textContent = 'Agregar producto';
+      btnCancelarEdicion.classList.add('hidden');
+    }
+
+    btnCancelarEdicion.addEventListener('click', limpiarFormulario);
+
+    productoForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      mensaje.className = '';
+      mensaje.textContent = 'Guardando…';
+
+      const categoria = $<HTMLSelectElement>('#fCategoria').value;
+      const nombre = $<HTMLInputElement>('#fNombre').value.trim();
+      const precio = Number($<HTMLInputElement>('#fPrecio').value);
+      const precioAnteriorRaw = $<HTMLInputElement>('#fPrecioAnterior').value;
+      const precioAnterior = precioAnteriorRaw ? Number(precioAnteriorRaw) : undefined;
+      const subtitulo = $<HTMLInputElement>('#fSubtitulo').value.trim();
+      const descripcion = $<HTMLTextAreaElement>('#fDescripcion').value.trim();
+      const disponible = $<HTMLInputElement>('#fDisponible').checked;
+      const secciones = Array.from(document.querySelectorAll<HTMLInputElement>('#fSecciones input:checked')).map(i => i.value);
+
+      if (!nombre || !descripcion || !precio) {
+        mensaje.className = 'error';
+        mensaje.textContent = 'Falta nombre, descripción o precio.';
+        return;
+      }
+
+      const slug = slugify(nombre);
+      const id = editandoId ?? `${categoria}-${slug}`;
+
+      try {
+        const imagenesSubidas: string[] = [];
+        for (let i = 0; i < archivosSeleccionados.length; i++) {
+          mensaje.textContent = `Subiendo imagen ${i + 1}/${archivosSeleccionados.length}…`;
+          const blob = await comprimirImagen(archivosSeleccionados[i]);
+          const destino = ref(storage, `productos/${categoria}/${slug}/${Date.now()}-${i + 1}.jpg`);
+          await uploadBytes(destino, blob, { contentType: 'image/jpeg' });
+          const url = await getDownloadURL(destino);
+          imagenesSubidas.push(url);
+        }
+
+        const imagenes = imagenesSubidas.length > 0 ? [...imagenesExistentes, ...imagenesSubidas] : imagenesExistentes;
+
+        await setDoc(doc(db, 'productos', id), {
+          nombre,
+          slug,
+          categoria,
+          subtitulo,
+          precio,
+          ...(precioAnterior ? { precioAnterior } : {}),
+          descripcion,
+          imagenes,
+          disponible,
+          secciones,
+        });
+
+        mensaje.className = 'ok';
+        mensaje.textContent = '✅ Guardado. Disparando actualización del sitio…';
+
+        if (DEPLOY_HOOK_URL) {
+          await fetch(DEPLOY_HOOK_URL, { method: 'POST' }).catch(() => {});
+          mensaje.textContent = '✅ Guardado. El sitio se está actualizando (puede tardar 1-2 minutos en verse).';
+        } else {
+          mensaje.textContent = '✅ Guardado en la base de datos, pero falta configurar el Deploy Hook para que el sitio se actualice solo.';
+        }
+
+        limpiarFormulario();
+        cargarProductos();
+      } catch (err: any) {
+        mensaje.className = 'error';
+        mensaje.textContent = 'Error: ' + (err.message || err);
+      }
+    });
+
+    async function cargarProductos() {
+      listaProductos.innerHTML = 'Cargando…';
+      const snap = await getDocs(query(collection(db, 'productos'), orderBy('nombre')));
+      if (snap.empty) {
+        listaProductos.innerHTML = '<p>No hay productos todavía.</p>';
+        return;
+      }
+      listaProductos.innerHTML = '';
+      snap.forEach((docSnap) => {
+        const p = docSnap.data() as any;
+        const row = document.createElement('div');
+        row.className = 'producto-row';
+        row.innerHTML = `
+          <img src="${p.imagenes?.[0] || ''}" alt="" />
+          <div class="info">
+            <strong>${p.nombre}</strong>
+            <span>${p.categoria} · $${Number(p.precio).toLocaleString('es-CO')}${p.secciones?.length ? ' · ' + p.secciones.join(', ') : ''}</span>
+          </div>
+          <div class="acciones">
+            <button class="editar">Editar</button>
+            <button class="peligro">Eliminar</button>
+          </div>
+        `;
+        row.querySelector('.editar')!.addEventListener('click', () => cargarEnFormulario(docSnap.id, p));
+        row.querySelector('.peligro')!.addEventListener('click', () => eliminarProducto(docSnap.id, p));
+        listaProductos.appendChild(row);
+      });
+    }
+
+    function cargarEnFormulario(id: string, p: any) {
+      editandoId = id;
+      imagenesExistentes = p.imagenes || [];
+      archivosSeleccionados = [];
+      $<HTMLSelectElement>('#fCategoria').value = p.categoria;
+      $<HTMLInputElement>('#fNombre').value = p.nombre;
+      $<HTMLInputElement>('#fPrecio').value = String(p.precio);
+      $<HTMLInputElement>('#fPrecioAnterior').value = p.precioAnterior ? String(p.precioAnterior) : '';
+      $<HTMLInputElement>('#fSubtitulo').value = p.subtitulo || '';
+      $<HTMLTextAreaElement>('#fDescripcion').value = p.descripcion || '';
+      $<HTMLInputElement>('#fDisponible').checked = p.disponible !== false;
+      document.querySelectorAll<HTMLInputElement>('#fSecciones input').forEach(i => {
+        i.checked = (p.secciones || []).includes(i.value);
+      });
+      previewsDiv.innerHTML = '';
+      for (const url of imagenesExistentes) {
+        const img = document.createElement('img');
+        img.src = url;
+        previewsDiv.appendChild(img);
+      }
+      formTitulo.textContent = `Editando: ${p.nombre}`;
+      btnCancelarEdicion.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function eliminarProducto(id: string, p: any) {
+      if (!confirm(`¿Eliminar "${p.nombre}"? Esto no se puede deshacer.`)) return;
+      await deleteDoc(doc(db, 'productos', id));
+      for (const url of p.imagenes || []) {
+        try {
+          await deleteObject(ref(storage, url));
+        } catch {
+          // Puede ser una imagen antigua servida como archivo estático (no vive en Storage); se ignora.
+        }
+      }
+      if (DEPLOY_HOOK_URL) {
+        await fetch(DEPLOY_HOOK_URL, { method: 'POST' }).catch(() => {});
+      }
+      cargarProductos();
+    }
+  </script>
+</body>
+</html>

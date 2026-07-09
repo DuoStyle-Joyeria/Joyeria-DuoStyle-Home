@@ -1,4 +1,5 @@
 User-agent: *
 Disallow: /finanzas/
+Disallow: /admin/
 
 Sitemap: https://joyeria-duo-style-home.vercel.app/sitemap-index.xml

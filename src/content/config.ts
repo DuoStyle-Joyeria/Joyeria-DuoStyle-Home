@@ -1,8 +1,8 @@
 import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { productosFirestoreLoader } from '../loaders/productos-firestore';
 
 const productos = defineCollection({
-  loader: glob({ pattern: '**/*.json', base: './src/content/productos' }),
+  loader: productosFirestoreLoader(),
   schema: z.object({
     nombre: z.string(),
     slug: z.string(),
@@ -13,7 +13,7 @@ const productos = defineCollection({
     descripcion: z.string(),
     imagenes: z.array(z.string()),
     disponible: z.boolean().default(true),
-    destacado: z.boolean().default(false),
+    secciones: z.array(z.string()).default([]),
   }),
 });
 
