@@ -2,19 +2,21 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductoCard from '../components/ProductoCard.astro';
 import { getCollection } from 'astro:content';
-import { SITE, CATEGORIAS, mensajeProducto, urlWhatsapp } from '../data/site-config';
+import { SITE, GENEROS, mensajeProducto, urlWhatsapp } from '../data/site-config';
 
 const productos = await getCollection('productos', p => p.data.disponible);
-const categoriasConProductos = CATEGORIAS.filter(cat =>
-  productos.some(p => p.data.categoria === cat.slug)
+const generosConProductos = GENEROS.filter(g =>
+  productos.some(p => p.data.genero === g.slug)
 );
 
 let destacados = productos.filter(p => p.data.secciones.includes('destacado'));
 if (destacados.length === 0) {
-  destacados = productos.slice(0, 8);
+  destacados = productos.slice(0, 10);
+} else {
+  destacados = destacados.slice(0, 10);
 }
 
-const nuevos = productos.filter(p => p.data.secciones.includes('nuevo'));
+const nuevos = productos.filter(p => p.data.secciones.includes('nuevo')).slice(0, 10);
 ---
 
 <BaseLayout title="Inicio">
@@ -34,8 +36,8 @@ const nuevos = productos.filter(p => p.data.secciones.includes('nuevo'));
   <section id="catalogo" class="catalogo-section">
     <h2>Catálogo</h2>
     <div class="categorias">
-      {categoriasConProductos.map(cat => (
-        <a href={`/${cat.slug}/`} class="categoria">{cat.nombre}</a>
+      {generosConProductos.map(g => (
+        <a href={`/${g.slug}/`} class="categoria">{g.nombre}</a>
       ))}
     </div>
   </section>
@@ -48,7 +50,7 @@ const nuevos = productos.filter(p => p.data.secciones.includes('nuevo'));
           <ProductoCard
             nombre={p.data.nombre}
             slug={p.data.slug}
-            categoria={p.data.categoria}
+            tipo={p.data.tipo}
             subtitulo={p.data.subtitulo}
             precio={p.data.precio}
             precioAnterior={p.data.precioAnterior}
@@ -67,7 +69,7 @@ const nuevos = productos.filter(p => p.data.secciones.includes('nuevo'));
           <ProductoCard
             nombre={p.data.nombre}
             slug={p.data.slug}
-            categoria={p.data.categoria}
+            tipo={p.data.tipo}
             subtitulo={p.data.subtitulo}
             precio={p.data.precio}
             precioAnterior={p.data.precioAnterior}

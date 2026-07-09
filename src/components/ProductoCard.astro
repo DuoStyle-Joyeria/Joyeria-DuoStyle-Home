@@ -4,19 +4,19 @@ import { mensajeProducto, urlWhatsapp } from '../data/site-config';
 interface Props {
   nombre: string;
   slug: string;
-  categoria: string;
+  tipo: string;
   subtitulo?: string;
   precio: number;
   precioAnterior?: number;
   imagen?: string;
 }
 
-const { nombre, slug, categoria, subtitulo, precio, precioAnterior, imagen } = Astro.props;
+const { nombre, slug, tipo, subtitulo, precio, precioAnterior, imagen } = Astro.props;
 const precioFmt = precio.toLocaleString('es-CO');
 const precioAnteriorFmt = precioAnterior?.toLocaleString('es-CO');
 ---
 
-<a class="producto-card" href={`/${categoria}/${slug}/`}>
+<a class="producto-card" href={`/${tipo}/${slug}/`}>
   {imagen && (
     <div class="imagen-wrap">
       <img src={imagen} alt={nombre} loading="lazy" />

@@ -1,10 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
-import { SITE, CATEGORIAS } from '../data/site-config';
+import { SITE, GENEROS } from '../data/site-config';
 
 const productos = await getCollection('productos');
-const categoriasConProductos = CATEGORIAS.filter(cat =>
-  productos.some(p => p.data.categoria === cat.slug)
+const generosConProductos = GENEROS.filter(g =>
+  productos.some(p => p.data.genero === g.slug)
 );
 ---
 
@@ -17,8 +17,8 @@ const categoriasConProductos = CATEGORIAS.filter(cat =>
       <div class="hamburguesa" id="hamburguesa">☰</div>
       <ul class="nav-links" id="nav-links">
         <li><a href="/">Inicio</a></li>
-        {categoriasConProductos.map(cat => (
-          <li><a href={`/${cat.slug}/`}>{cat.nombre}</a></li>
+        {generosConProductos.map(g => (
+          <li><a href={`/${g.slug}/`}>{g.nombre}</a></li>
         ))}
         <li><a href="/#contacto">Contacto</a></li>
       </ul>

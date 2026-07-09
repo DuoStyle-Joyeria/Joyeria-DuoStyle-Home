@@ -1,5 +1,5 @@
 ---
-import { CATEGORIAS } from '../../data/site-config';
+import { TIPOS, GENEROS } from '../../data/site-config';
 
 const SECCIONES = [
   { valor: 'nuevo', etiqueta: 'Nuevo' },
@@ -81,11 +81,19 @@ const SECCIONES = [
         <form id="productoForm">
           <div class="fila">
             <div>
-              <label for="fCategoria">Categoría</label>
-              <select id="fCategoria" required>
-                {CATEGORIAS.map(c => <option value={c.slug}>{c.nombre}</option>)}
+              <label for="fTipo">Tipo de producto</label>
+              <select id="fTipo" required>
+                {TIPOS.map(t => <option value={t.slug}>{t.nombre}</option>)}
               </select>
             </div>
+            <div>
+              <label for="fGenero">Género</label>
+              <select id="fGenero" required>
+                {GENEROS.map(g => <option value={g.slug}>{g.nombre}</option>)}
+              </select>
+            </div>
+          </div>
+          <div class="fila">
             <div>
               <label for="fNombre">Nombre</label>
               <input type="text" id="fNombre" required />
@@ -253,7 +261,8 @@ const SECCIONES = [
       mensaje.className = '';
       mensaje.textContent = 'Guardando…';
 
-      const categoria = $<HTMLSelectElement>('#fCategoria').value;
+      const tipo = $<HTMLSelectElement>('#fTipo').value;
+      const genero = $<HTMLSelectElement>('#fGenero').value;
       const nombre = $<HTMLInputElement>('#fNombre').value.trim();
       const precio = Number($<HTMLInputElement>('#fPrecio').value);
       const precioAnteriorRaw = $<HTMLInputElement>('#fPrecioAnterior').value;
@@ -270,14 +279,14 @@ const SECCIONES = [
       }
 
       const slug = slugify(nombre);
-      const id = editandoId ?? `${categoria}-${slug}`;
+      const id = editandoId ?? `${tipo}-${slug}`;
 
       try {
         const imagenesSubidas: string[] = [];
         for (let i = 0; i < archivosSeleccionados.length; i++) {
           mensaje.textContent = `Subiendo imagen ${i + 1}/${archivosSeleccionados.length}…`;
           const blob = await comprimirImagen(archivosSeleccionados[i]);
-          const destino = ref(storage, `productos/${categoria}/${slug}/${Date.now()}-${i + 1}.jpg`);
+          const destino = ref(storage, `productos/${tipo}/${slug}/${Date.now()}-${i + 1}.jpg`);
           await uploadBytes(destino, blob, { contentType: 'image/jpeg' });
           const url = await getDownloadURL(destino);
           imagenesSubidas.push(url);
@@ -288,7 +297,8 @@ const SECCIONES = [
         await setDoc(doc(db, 'productos', id), {
           nombre,
           slug,
-          categoria,
+          tipo,
+          genero,
           subtitulo,
           precio,
           ...(precioAnterior ? { precioAnterior } : {}),
@@ -332,7 +342,7 @@ const SECCIONES = [
           <img src="${p.imagenes?.[0] || ''}" alt="" />
           <div class="info">
             <strong>${p.nombre}</strong>
-            <span>${p.categoria} · $${Number(p.precio).toLocaleString('es-CO')}${p.secciones?.length ? ' · ' + p.secciones.join(', ') : ''}</span>
+            <span>${p.tipo} · ${p.genero} · $${Number(p.precio).toLocaleString('es-CO')}${p.secciones?.length ? ' · ' + p.secciones.join(', ') : ''}</span>
           </div>
           <div class="acciones">
             <button class="editar">Editar</button>
@@ -349,7 +359,8 @@ const SECCIONES = [
       editandoId = id;
       imagenesExistentes = p.imagenes || [];
       archivosSeleccionados = [];
-      $<HTMLSelectElement>('#fCategoria').value = p.categoria;
+      $<HTMLSelectElement>('#fTipo').value = p.tipo;
+      $<HTMLSelectElement>('#fGenero').value = p.genero;
       $<HTMLInputElement>('#fNombre').value = p.nombre;
       $<HTMLInputElement>('#fPrecio').value = String(p.precio);
       $<HTMLInputElement>('#fPrecioAnterior').value = p.precioAnterior ? String(p.precioAnterior) : '';

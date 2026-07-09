@@ -1,18 +1,18 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { CATEGORIAS, mensajeProducto, urlWhatsapp } from '../../data/site-config';
+import { TIPOS, mensajeProducto, urlWhatsapp } from '../../data/site-config';
 
 export async function getStaticPaths() {
   const productos = await getCollection('productos', p => p.data.disponible);
   return productos.map(p => ({
-    params: { categoria: p.data.categoria, slug: p.data.slug },
+    params: { tipo: p.data.tipo, slug: p.data.slug },
     props: { producto: p.data },
   }));
 }
 
 const { producto } = Astro.props as any;
-const nombreCategoria = CATEGORIAS.find(c => c.slug === producto.categoria)?.nombre ?? producto.categoria;
+const nombreTipo = TIPOS.find(t => t.slug === producto.tipo)?.nombre ?? producto.tipo;
 const precioFmt = producto.precio.toLocaleString('es-CO');
 const precioAnteriorFmt = producto.precioAnterior?.toLocaleString('es-CO');
 const mensajeWsp = mensajeProducto(producto.nombre, producto.precio);
@@ -20,7 +20,7 @@ const mensajeWsp = mensajeProducto(producto.nombre, producto.precio);
 
 <BaseLayout title={producto.nombre} description={producto.descripcion.slice(0, 160)} image={producto.imagenes[0]}>
   <nav class="breadcrumb">
-    <a href="/">Inicio</a> / <a href={`/${producto.categoria}/`}>{nombreCategoria}</a> / {producto.nombre}
+    <a href="/">Inicio</a> / <a href={`/${producto.tipo}/`}>{nombreTipo}</a> / {producto.nombre}
   </nav>
 
   <article class="producto-detalle">

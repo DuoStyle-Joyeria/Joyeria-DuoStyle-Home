@@ -9,9 +9,18 @@ export const SITE = {
   logo: '/img/site/logo.jpg',
 } as const;
 
-export const CATEGORIAS = [
+export const TIPOS = [
   { slug: 'anillos', nombre: 'Anillos' },
   { slug: 'manillas', nombre: 'Manillas' },
+  { slug: 'aretes', nombre: 'Aretes' },
+  { slug: 'dijes', nombre: 'Dijes' },
+  { slug: 'charms', nombre: 'Charms' },
+  { slug: 'collares', nombre: 'Collares' },
+  { slug: 'cadenas', nombre: 'Cadenas' },
+  { slug: 'juegos', nombre: 'Juegos' },
+] as const;
+
+export const GENEROS = [
   { slug: 'dama', nombre: 'Joyas para Dama' },
   { slug: 'caballero', nombre: 'Joyas para Caballero' },
 ] as const;
