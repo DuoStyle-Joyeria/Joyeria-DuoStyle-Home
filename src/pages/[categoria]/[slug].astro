@@ -1,0 +1,90 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { CATEGORIAS, mensajeProducto, urlWhatsapp } from '../../data/site-config';
+
+export async function getStaticPaths() {
+  const productos = await getCollection('productos', p => p.data.disponible);
+  return productos.map(p => ({
+    params: { categoria: p.data.categoria, slug: p.data.slug },
+    props: { producto: p.data },
+  }));
+}
+
+const { producto } = Astro.props as any;
+const nombreCategoria = CATEGORIAS.find(c => c.slug === producto.categoria)?.nombre ?? producto.categoria;
+const precioFmt = producto.precio.toLocaleString('es-CO');
+const precioAnteriorFmt = producto.precioAnterior?.toLocaleString('es-CO');
+const mensajeWsp = mensajeProducto(producto.nombre, producto.precio);
+---
+
+<BaseLayout title={producto.nombre} description={producto.descripcion.slice(0, 160)} image={producto.imagenes[0]}>
+  <nav class="breadcrumb">
+    <a href="/">Inicio</a> / <a href={`/${producto.categoria}/`}>{nombreCategoria}</a> / {producto.nombre}
+  </nav>
+
+  <article class="producto-detalle">
+    <div class="galeria-producto">
+      <div class="galeria-principal">
+        <img id="imagen-principal" src={producto.imagenes[0]} alt={producto.nombre} />
+      </div>
+      {producto.imagenes.length > 1 && (
+        <div class="galeria-miniaturas">
+          {producto.imagenes.map((img: string, i: number) => (
+            <img src={img} alt={`${producto.nombre} ${i + 1}`} class={i === 0 ? 'activa' : ''} data-src={img} />
+          ))}
+        </div>
+      )}
+    </div>
+
+    <div class="info-producto">
+      <h1>{producto.nombre}</h1>
+      {producto.subtitulo && <p class="subtitulo">{producto.subtitulo}</p>}
+      <div class="precio">
+        <span class="precio-actual">${precioFmt}</span>
+        {precioAnteriorFmt && <span class="precio-anterior">${precioAnteriorFmt}</span>}
+      </div>
+      <p class="descripcion">{producto.descripcion}</p>
+      <a class="btn-wsp-producto" href={urlWhatsapp(mensajeWsp)} target="_blank" rel="noopener">
+        Comprar por WhatsApp
+      </a>
+    </div>
+  </article>
+
+  <div class="modal" id="modal-imagen">
+    <button class="modal-close" id="modal-close" aria-label="Cerrar">&times;</button>
+    <img id="modal-imagen-grande" src={producto.imagenes[0]} alt={producto.nombre} />
+  </div>
+</BaseLayout>
+
+<script>
+  const principal = document.getElementById('imagen-principal') as HTMLImageElement;
+  const miniaturas = document.querySelectorAll<HTMLImageElement>('.galeria-miniaturas img');
+  const modal = document.getElementById('modal-imagen');
+  const modalImg = document.getElementById('modal-imagen-grande') as HTMLImageElement;
+  const modalClose = document.getElementById('modal-close');
+
+  miniaturas.forEach(mini => {
+    mini.addEventListener('click', () => {
+      const src = mini.dataset.src;
+      if (!src || !principal) return;
+      principal.src = src;
+      miniaturas.forEach(m => m.classList.remove('activa'));
+      mini.classList.add('activa');
+    });
+  });
+
+  principal?.addEventListener('click', () => {
+    if (!modal || !modalImg) return;
+    modalImg.src = principal.src;
+    modal.classList.add('abierto');
+  });
+
+  modalClose?.addEventListener('click', () => modal?.classList.remove('abierto'));
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('abierto');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') modal?.classList.remove('abierto');
+  });
+</script>

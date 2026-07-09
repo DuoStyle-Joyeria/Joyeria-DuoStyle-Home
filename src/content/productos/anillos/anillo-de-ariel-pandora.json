@@ -1,0 +1,15 @@
+{
+  "nombre": "Anillo De Ariel - Pandora",
+  "slug": "anillo-de-ariel-pandora",
+  "categoria": "anillos",
+  "subtitulo": "Plata 925 • Tallas 4-9",
+  "precio": 180000,
+  "precioAnterior": 732000,
+  "descripcion": "Completa tu colección con este anillo que se presenta con el motivo de una concha marina de filigrana que alberga en su interior una perla cultivada de agua dulce tratada. Este anillo, que se inspira en Ariel de Disney, es un brillante recordatorio del poder transformador de ser fiel a ti misma., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨",
+  "imagenes": [
+    "/img/anillos/anillo-de-ariel-pandora/1.jpg",
+    "/img/anillos/anillo-de-ariel-pandora/2.jpg"
+  ],
+  "disponible": true,
+  "destacado": false
+}

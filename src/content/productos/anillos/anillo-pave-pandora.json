@@ -1,0 +1,17 @@
+{
+  "nombre": "Anillo Pavé - Pandora",
+  "slug": "anillo-pave-pandora",
+  "categoria": "anillos",
+  "subtitulo": "Plata 925 • Tallas 4-9",
+  "precio": 250000,
+  "precioAnterior": 1091000,
+  "descripcion": "Da un toque sofisticado a cualquiera de tus outfits con este Anillo Pandora Signature Logo Pavé y Cuentas. Fabricado en plata de primera ley, este anillo presenta un look de varias texturas con bandas de contraste de esferas y pavé. El logo de Pandora se ha grabado en la banda central. está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨",
+  "imagenes": [
+    "/img/anillos/anillo-pave-pandora/1.jpg",
+    "/img/anillos/anillo-pave-pandora/2.jpg",
+    "/img/anillos/anillo-pave-pandora/3.jpg",
+    "/img/anillos/anillo-pave-pandora/4.jpg"
+  ],
+  "disponible": true,
+  "destacado": false
+}

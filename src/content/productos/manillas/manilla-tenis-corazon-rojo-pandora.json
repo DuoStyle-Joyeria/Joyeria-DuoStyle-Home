@@ -1,0 +1,17 @@
+{
+  "nombre": "Manilla Tenis- Corazon Rojo - Pandora",
+  "slug": "manilla-tenis-corazon-rojo-pandora",
+  "categoria": "manillas",
+  "subtitulo": "Plata 925 • Pandora",
+  "precio": 150000,
+  "precioAnterior": 1000000,
+  "descripcion": "Manilla tipo tenis con corazón rojo ❤️✨ Una joya que combina brillo y pasión. Su diseño tipo tenis está elaborado con circonias cúbicas engastadas que aportan destellos espectaculares, y al centro destaca un delicado corazón en tono rojo intenso, símbolo de amor y elegancia. Ajustable y ligera, es perfecta para lucir sola o acompañada de otras piezas, ideal para ocasiones especiales o para dar un toque romántico a tu look diario.",
+  "imagenes": [
+    "/img/manillas/manilla-tenis-corazon-rojo-pandora/1.jpg",
+    "/img/manillas/manilla-tenis-corazon-rojo-pandora/2.jpg",
+    "/img/manillas/manilla-tenis-corazon-rojo-pandora/3.jpg",
+    "/img/manillas/manilla-tenis-corazon-rojo-pandora/4.jpg"
+  ],
+  "disponible": true,
+  "destacado": false
+}

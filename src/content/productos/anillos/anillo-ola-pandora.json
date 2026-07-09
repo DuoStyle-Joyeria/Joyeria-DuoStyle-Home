@@ -1,0 +1,16 @@
+{
+  "nombre": "Anillo Ola - Pandora",
+  "slug": "anillo-ola-pandora",
+  "categoria": "anillos",
+  "subtitulo": "Plata 925 • Tallas 4-9",
+  "precio": 170000,
+  "precioAnterior": 525000,
+  "descripcion": "Acabado a mano en plata de primera ley, nuestro Anillo Ola Brillante presenta un diseño curvo que se asemeja al movimiento de una ola y una fila de circonitas cúbicas transparentes con talla brillante redonda en la parte delantera. Póntelo solo o combínalo con otros anillos para crear un look contemporáneo que amarás durante muchos años. está elaborado en plata ley 925 y vienen con garantía de por vida. Incluyen caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨",
+  "imagenes": [
+    "/img/anillos/anillo-ola-pandora/1.jpg",
+    "/img/anillos/anillo-ola-pandora/2.jpg",
+    "/img/anillos/anillo-ola-pandora/3.jpg"
+  ],
+  "disponible": true,
+  "destacado": false
+}

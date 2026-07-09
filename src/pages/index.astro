@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductoCard from '../components/ProductoCard.astro';
+import { getCollection } from 'astro:content';
+import { SITE, CATEGORIAS, mensajeProducto, urlWhatsapp } from '../data/site-config';
+
+const productos = await getCollection('productos', p => p.data.disponible);
+const categoriasConProductos = CATEGORIAS.filter(cat =>
+  productos.some(p => p.data.categoria === cat.slug)
+);
+
+let destacados = productos.filter(p => p.data.destacado);
+if (destacados.length === 0) {
+  destacados = productos.slice(0, 8);
+}
+---
+
+<BaseLayout title="Inicio">
+  <section id="inicio" class="hero-section">
+    <video autoplay muted loop playsinline class="hero-video">
+      <source src="/video/hero.mp4" type="video/mp4" />
+    </video>
+    <div class="hero-content">
+      <h1>Elegancia que trasciende</h1>
+      <p>{SITE.tagline}</p>
+      <a class="btn-wsp-producto" href={urlWhatsapp(mensajeProducto('Colección DUO STYLE', 0))} target="_blank" rel="noopener">
+        Comprar por WhatsApp
+      </a>
+    </div>
+  </section>
+
+  <section id="catalogo" class="catalogo-section">
+    <h2>Catálogo</h2>
+    <div class="categorias">
+      {categoriasConProductos.map(cat => (
+        <a href={`/${cat.slug}/`} class="categoria">{cat.nombre}</a>
+      ))}
+    </div>
+  </section>
+
+  {destacados.length > 0 && (
+    <section class="destacados-section">
+      <h2>Destacados</h2>
+      <div class="slider-track">
+        {destacados.map(p => (
+          <ProductoCard
+            nombre={p.data.nombre}
+            slug={p.data.slug}
+            categoria={p.data.categoria}
+            subtitulo={p.data.subtitulo}
+            precio={p.data.precio}
+            precioAnterior={p.data.precioAnterior}
+            imagen={p.data.imagenes[0]}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section id="contacto" class="contacto-section">
+    <h2>¿Tienes dudas?</h2>
+    <p>Escríbenos directamente, estamos para ayudarte.</p>
+    <a class="btn-contacto" href={urlWhatsapp('Hola, tengo una consulta general para DUO STYLE.')} target="_blank" rel="noopener">
+      Hablar por WhatsApp
+    </a>
+  </section>
+</BaseLayout>

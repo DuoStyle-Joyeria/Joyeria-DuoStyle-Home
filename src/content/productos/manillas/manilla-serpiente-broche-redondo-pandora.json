@@ -1,0 +1,16 @@
+{
+  "nombre": "Manilla Serpiente - Broche Redondo - Pandora",
+  "slug": "manilla-serpiente-broche-redondo-pandora",
+  "categoria": "manillas",
+  "subtitulo": "Plata 925 • Serpiente",
+  "precio": 190000,
+  "precioAnterior": 600000,
+  "descripcion": "Manilla Pandora de broche redondo. Un diseño elegante y minimalista, ideal para quienes buscan la esencia de Pandora en su forma más pura. Elaborada con broche redondo grabado con el nombre de la marca, esta pieza ofrece un acabado sofisticado que luce perfecto por sí sola, sin necesidad de charms. Su cierre seguro y su estructura cómoda la hacen perfecta para el uso diario, aportando un toque de distinción a cualquier look. Una joya versátil que combina sencillez y elegancia, pensada para acompañarte en cada momento especial.",
+  "imagenes": [
+    "/img/manillas/manilla-serpiente-broche-redondo-pandora/1.jpg",
+    "/img/manillas/manilla-serpiente-broche-redondo-pandora/2.jpg",
+    "/img/manillas/manilla-serpiente-broche-redondo-pandora/3.jpg"
+  ],
+  "disponible": true,
+  "destacado": false
+}

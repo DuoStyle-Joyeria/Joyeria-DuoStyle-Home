@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import { SITE, CATEGORIAS } from '../data/site-config';
+
+const productos = await getCollection('productos');
+const categoriasConProductos = CATEGORIAS.filter(cat =>
+  productos.some(p => p.data.categoria === cat.slug)
+);
+---
+
+<header class="main-header">
+  <div class="header-inner">
+    <a class="logo" href="/">
+      <img src={SITE.logo} alt={SITE.nombre} />
+    </a>
+    <nav class="nav-container">
+      <div class="hamburguesa" id="hamburguesa">☰</div>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="/">Inicio</a></li>
+        {categoriasConProductos.map(cat => (
+          <li><a href={`/${cat.slug}/`}>{cat.nombre}</a></li>
+        ))}
+        <li><a href="/#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const hamburguesa = document.getElementById('hamburguesa');
+  const navLinks = document.getElementById('nav-links');
+  hamburguesa?.addEventListener('click', () => {
+    navLinks?.classList.toggle('show');
+  });
+  navLinks?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => navLinks.classList.remove('show'));
+  });
+</script>

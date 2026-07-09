@@ -1,0 +1,17 @@
+{
+  "nombre": "Anillo Evangeline - Pandora",
+  "slug": "anillo-evangeline-pandora",
+  "categoria": "anillos",
+  "subtitulo": "Plata 925 • Tallas 4-9",
+  "precio": 180000,
+  "precioAnterior": 863000,
+  "descripcion": "Déjate guiar por la luz de Evangeline con esta joya inspirada en La Princesa y el Sapo. Con destellos que evocan el brillo de la luciérnaga más romántica del pantano, esta pieza captura la esperanza, el amor y la magia de los sueños que brillan en el cielo. Ideal para quienes creen en el poder de la luz interior., está elaborado en plata ley 925 y vienen con garantía de por vida. Incluye caja y bolsa estilo Pandora, certificado de autenticidad, limpia joyas y bolsa para guardarlos. Todo lo que necesitas para hacer una joya inolvidable.💍✨",
+  "imagenes": [
+    "/img/anillos/anillo-evangeline-pandora/1.jpg",
+    "/img/anillos/anillo-evangeline-pandora/2.jpg",
+    "/img/anillos/anillo-evangeline-pandora/3.jpg",
+    "/img/anillos/anillo-evangeline-pandora/4.jpg"
+  ],
+  "disponible": true,
+  "destacado": false
+}

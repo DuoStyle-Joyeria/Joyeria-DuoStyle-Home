@@ -1,0 +1,55 @@
+---
+import type { GetStaticPathsOptions } from 'astro';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductoCard from '../../components/ProductoCard.astro';
+import { CATEGORIAS } from '../../data/site-config';
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const productos = await getCollection('productos', p => p.data.disponible);
+  const categorias = [...new Set(productos.map(p => p.data.categoria))];
+
+  return categorias.flatMap(categoria => {
+    const items = productos
+      .filter(p => p.data.categoria === categoria)
+      .sort((a, b) => a.data.nombre.localeCompare(b.data.nombre));
+    return paginate(items, { params: { categoria }, pageSize: 9 });
+  });
+}
+
+const { categoria } = Astro.params;
+const { page } = Astro.props as any;
+const nombreCategoria = CATEGORIAS.find(c => c.slug === categoria)?.nombre ?? categoria;
+---
+
+<BaseLayout title={nombreCategoria} description={`Catálogo de ${nombreCategoria} — Duo Style. Compra fácil y segura por WhatsApp.`}>
+  <section class="catalogo-section">
+    <h2>{nombreCategoria}</h2>
+    <div class="grid-productos">
+      {page.data.map((p: any) => (
+        <ProductoCard
+          nombre={p.data.nombre}
+          slug={p.data.slug}
+          categoria={p.data.categoria}
+          subtitulo={p.data.subtitulo}
+          precio={p.data.precio}
+          precioAnterior={p.data.precioAnterior}
+          imagen={p.data.imagenes[0]}
+        />
+      ))}
+    </div>
+
+    {page.lastPage > 1 && (
+      <nav class="paginador">
+        {Array.from({ length: page.lastPage }, (_, i) => i + 1).map(num => (
+          <a
+            href={num === 1 ? `/${categoria}/` : `/${categoria}/${num}/`}
+            class={num === page.currentPage ? 'activo' : ''}
+          >
+            {num}
+          </a>
+        ))}
+      </nav>
+    )}
+  </section>
+</BaseLayout>

@@ -1,0 +1,46 @@
+---
+import { mensajeProducto, urlWhatsapp } from '../data/site-config';
+
+interface Props {
+  nombre: string;
+  slug: string;
+  categoria: string;
+  subtitulo?: string;
+  precio: number;
+  precioAnterior?: number;
+  imagen?: string;
+}
+
+const { nombre, slug, categoria, subtitulo, precio, precioAnterior, imagen } = Astro.props;
+const precioFmt = precio.toLocaleString('es-CO');
+const precioAnteriorFmt = precioAnterior?.toLocaleString('es-CO');
+---
+
+<a class="producto-card" href={`/${categoria}/${slug}/`}>
+  {imagen && <img src={imagen} alt={nombre} loading="lazy" />}
+  <h3>{nombre}</h3>
+  {subtitulo && <p>{subtitulo}</p>}
+  <div class="precio">
+    <span class="precio-actual">${precioFmt}</span>
+    {precioAnteriorFmt && <span class="precio-anterior">${precioAnteriorFmt}</span>}
+  </div>
+  <span
+    class="btn-wsp-producto btn-wsp-card"
+    data-mensaje={mensajeProducto(nombre, precio)}
+  >
+    Comprar por WhatsApp
+  </span>
+</a>
+
+<script>
+  import { urlWhatsapp } from '../data/site-config';
+
+  document.querySelectorAll<HTMLElement>('.btn-wsp-card').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const mensaje = btn.dataset.mensaje || '';
+      window.open(urlWhatsapp(mensaje), '_blank');
+    });
+  });
+</script>
