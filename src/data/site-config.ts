@@ -2,7 +2,7 @@ export const SITE = {
   nombre: 'Duo Style',
   tagline: 'Joyas únicas para quienes brillan con su estilo.',
   descripcion: 'Joyería Duo Style: anillos, manillas y joyas para dama y caballero. Compra fácil y segura por WhatsApp.',
-  whatsappNumero: '573209074830',
+  whatsappNumero: '573132683056',
   whatsappMensajeDefault: 'Hola, me interesa un producto de DUO STYLE.',
   instagram: 'https://www.instagram.com/duostyle.joyeria',
   tiktok: 'https://www.tiktok.com/@joyeria.duo.style',
