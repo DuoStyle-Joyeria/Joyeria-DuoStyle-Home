@@ -1,0 +1,126 @@
+---
+---
+
+<div class="carrito-overlay" id="carrito-overlay"></div>
+<aside class="carrito-drawer" id="carrito-drawer" aria-hidden="true">
+  <header class="carrito-drawer-header">
+    <h2>Tu pedido</h2>
+    <button type="button" class="carrito-cerrar" id="carrito-cerrar" aria-label="Cerrar carrito">&times;</button>
+  </header>
+
+  <div class="carrito-lista" id="carrito-lista"></div>
+
+  <footer class="carrito-drawer-footer">
+    <div class="carrito-total">
+      <span>Total</span>
+      <span id="carrito-total-monto">$0</span>
+    </div>
+    <a
+      href="#"
+      class="btn-wsp-carrito"
+      id="carrito-enviar"
+      target="_blank"
+      rel="noopener"
+    >
+      Enviar pedido por WhatsApp
+    </a>
+    <button type="button" class="carrito-vaciar" id="carrito-vaciar">Vaciar carrito</button>
+  </footer>
+</aside>
+
+<script>
+  import {
+    obtenerCarrito,
+    cambiarCantidad,
+    quitarDelCarrito,
+    vaciarCarrito,
+    totalCarrito,
+    urlWhatsappCarrito,
+    type ItemCarrito,
+  } from '../scripts/carrito';
+
+  const overlay = document.getElementById('carrito-overlay');
+  const drawer = document.getElementById('carrito-drawer');
+  const cerrar = document.getElementById('carrito-cerrar');
+  const lista = document.getElementById('carrito-lista') as HTMLElement;
+  const totalMonto = document.getElementById('carrito-total-monto') as HTMLElement;
+  const enviarBtn = document.getElementById('carrito-enviar') as HTMLAnchorElement;
+  const vaciarBtn = document.getElementById('carrito-vaciar');
+
+  function abrir() {
+    drawer?.classList.add('abierto');
+    overlay?.classList.add('abierto');
+    drawer?.setAttribute('aria-hidden', 'false');
+  }
+
+  function cerrarDrawer() {
+    drawer?.classList.remove('abierto');
+    overlay?.classList.remove('abierto');
+    drawer?.setAttribute('aria-hidden', 'true');
+  }
+
+  function renderItem(item: ItemCarrito): string {
+    const subtotalFmt = (item.precio * item.cantidad).toLocaleString('es-CO');
+    const precioFmt = item.precio.toLocaleString('es-CO');
+    return `
+      <div class="carrito-item" data-id="${item.id}">
+        ${item.imagen ? `<img src="${item.imagen}" alt="${item.nombre}" class="carrito-item-img" />` : ''}
+        <div class="carrito-item-info">
+          <p class="carrito-item-nombre">${item.nombre}</p>
+          <p class="carrito-item-precio">$${precioFmt}</p>
+          <div class="carrito-item-stepper">
+            <button type="button" class="carrito-restar" data-id="${item.id}" aria-label="Quitar uno">−</button>
+            <span>${item.cantidad}</span>
+            <button type="button" class="carrito-sumar" data-id="${item.id}" aria-label="Agregar uno">+</button>
+          </div>
+        </div>
+        <div class="carrito-item-derecha">
+          <span class="carrito-item-subtotal">$${subtotalFmt}</span>
+          <button type="button" class="carrito-quitar" data-id="${item.id}" aria-label="Eliminar producto">&times;</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function render() {
+    const items = obtenerCarrito();
+
+    if (items.length === 0) {
+      lista.innerHTML = '<p class="carrito-vacio">Tu carrito está vacío. Explora el catálogo y agrega tus joyas favoritas.</p>';
+      enviarBtn.classList.add('deshabilitado');
+      enviarBtn.removeAttribute('href');
+    } else {
+      lista.innerHTML = items.map(renderItem).join('');
+      enviarBtn.classList.remove('deshabilitado');
+      enviarBtn.href = urlWhatsappCarrito(items);
+    }
+
+    totalMonto.textContent = `$${totalCarrito(items).toLocaleString('es-CO')}`;
+  }
+
+  lista.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const id = target.dataset.id;
+    if (!id) return;
+    if (target.classList.contains('carrito-sumar')) cambiarCantidad(id, 1);
+    if (target.classList.contains('carrito-restar')) cambiarCantidad(id, -1);
+    if (target.classList.contains('carrito-quitar')) quitarDelCarrito(id);
+  });
+
+  vaciarBtn?.addEventListener('click', () => vaciarCarrito());
+
+  enviarBtn.addEventListener('click', (e) => {
+    if (enviarBtn.classList.contains('deshabilitado')) e.preventDefault();
+  });
+
+  document.addEventListener('carrito:abrir', abrir);
+  cerrar?.addEventListener('click', cerrarDrawer);
+  overlay?.addEventListener('click', cerrarDrawer);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarDrawer();
+  });
+
+  window.addEventListener('carrito:cambio', render);
+  document.addEventListener('DOMContentLoaded', render);
+  render();
+</script>

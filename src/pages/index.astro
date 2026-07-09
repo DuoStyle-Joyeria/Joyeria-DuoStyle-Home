@@ -2,11 +2,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductoCard from '../components/ProductoCard.astro';
 import { getCollection } from 'astro:content';
-import { SITE, GENEROS, mensajeProducto, urlWhatsapp } from '../data/site-config';
+import { SITE, GENEROS, TIPOS, mensajeProducto, urlWhatsapp } from '../data/site-config';
 
 const productos = await getCollection('productos', p => p.data.disponible);
 const generosConProductos = GENEROS.filter(g =>
   productos.some(p => p.data.genero === g.slug)
+);
+const tiposConProductos = TIPOS.filter(t =>
+  productos.some(p => p.data.tipo === t.slug)
 );
 
 let destacados = productos.filter(p => p.data.secciones.includes('destacado'));
@@ -38,6 +41,12 @@ const nuevos = productos.filter(p => p.data.secciones.includes('nuevo')).slice(0
     <div class="categorias">
       {generosConProductos.map(g => (
         <a href={`/${g.slug}/`} class="categoria">{g.nombre}</a>
+      ))}
+    </div>
+    <h3 class="subcategorias-titulo">Explora por tipo</h3>
+    <div class="categorias categorias-tipo">
+      {tiposConProductos.map(t => (
+        <a href={`/${t.slug}/`} class="categoria categoria-tipo">{t.nombre}</a>
       ))}
     </div>
   </section>

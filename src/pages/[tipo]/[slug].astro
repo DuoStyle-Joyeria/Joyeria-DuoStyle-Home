@@ -45,8 +45,29 @@ const mensajeWsp = mensajeProducto(producto.nombre, producto.precio);
         {precioAnteriorFmt && <span class="precio-anterior">${precioAnteriorFmt}</span>}
       </div>
       <p class="descripcion">{producto.descripcion}</p>
-      <a class="btn-wsp-producto" href={urlWhatsapp(mensajeWsp)} target="_blank" rel="noopener">
-        Comprar por WhatsApp
+
+      <div class="acciones-producto">
+        <div class="stepper-cantidad">
+          <button type="button" id="cantidad-restar" aria-label="Quitar una unidad">−</button>
+          <span id="cantidad-valor">1</span>
+          <button type="button" id="cantidad-sumar" aria-label="Agregar una unidad">+</button>
+        </div>
+        <button
+          type="button"
+          class="btn-wsp-producto btn-add-carrito-detalle"
+          id="btn-add-carrito-detalle"
+          data-nombre={producto.nombre}
+          data-tipo={producto.tipo}
+          data-slug={producto.slug}
+          data-precio={producto.precio}
+          data-imagen={producto.imagenes[0]}
+        >
+          Agregar al carrito
+        </button>
+      </div>
+
+      <a class="btn-wsp-directo" href={urlWhatsapp(mensajeWsp)} target="_blank" rel="noopener">
+        Comprar directo por WhatsApp
       </a>
     </div>
   </article>
@@ -58,6 +79,38 @@ const mensajeWsp = mensajeProducto(producto.nombre, producto.precio);
 </BaseLayout>
 
 <script>
+  import { agregarAlCarrito } from '../../scripts/carrito';
+
+  const cantidadValor = document.getElementById('cantidad-valor') as HTMLElement;
+  const restarBtn = document.getElementById('cantidad-restar');
+  const sumarBtn = document.getElementById('cantidad-sumar');
+  const addBtn = document.getElementById('btn-add-carrito-detalle') as HTMLButtonElement;
+  let cantidad = 1;
+
+  restarBtn?.addEventListener('click', () => {
+    cantidad = Math.max(1, cantidad - 1);
+    cantidadValor.textContent = String(cantidad);
+  });
+
+  sumarBtn?.addEventListener('click', () => {
+    cantidad += 1;
+    cantidadValor.textContent = String(cantidad);
+  });
+
+  addBtn?.addEventListener('click', () => {
+    agregarAlCarrito({
+      nombre: addBtn.dataset.nombre || '',
+      tipo: addBtn.dataset.tipo || '',
+      slug: addBtn.dataset.slug || '',
+      precio: Number(addBtn.dataset.precio) || 0,
+      imagen: addBtn.dataset.imagen,
+    }, cantidad);
+    cantidad = 1;
+    cantidadValor.textContent = '1';
+    addBtn.textContent = 'Agregado ✓';
+    setTimeout(() => { addBtn.textContent = 'Agregar al carrito'; }, 1200);
+  });
+
   const principal = document.getElementById('imagen-principal') as HTMLImageElement;
   const miniaturas = document.querySelectorAll<HTMLImageElement>('.galeria-miniaturas img');
   const modal = document.getElementById('modal-imagen');

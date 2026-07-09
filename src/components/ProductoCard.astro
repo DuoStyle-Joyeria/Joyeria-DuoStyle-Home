@@ -20,6 +20,16 @@ const precioAnteriorFmt = precioAnterior?.toLocaleString('es-CO');
   {imagen && (
     <div class="imagen-wrap">
       <img src={imagen} alt={nombre} loading="lazy" />
+      <button
+        type="button"
+        class="btn-add-carrito"
+        aria-label={`Agregar ${nombre} al carrito`}
+        data-nombre={nombre}
+        data-tipo={tipo}
+        data-slug={slug}
+        data-precio={precio}
+        data-imagen={imagen}
+      >🛍️<span class="add-carrito-mas">+</span></button>
     </div>
   )}
   <h3>{nombre}</h3>
@@ -38,6 +48,7 @@ const precioAnteriorFmt = precioAnterior?.toLocaleString('es-CO');
 
 <script>
   import { urlWhatsapp } from '../data/site-config';
+  import { agregarAlCarrito } from '../scripts/carrito';
 
   document.querySelectorAll<HTMLElement>('.btn-wsp-card').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -45,6 +56,22 @@ const precioAnteriorFmt = precioAnterior?.toLocaleString('es-CO');
       e.stopPropagation();
       const mensaje = btn.dataset.mensaje || '';
       window.open(urlWhatsapp(mensaje), '_blank');
+    });
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('.btn-add-carrito').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      agregarAlCarrito({
+        nombre: btn.dataset.nombre || '',
+        tipo: btn.dataset.tipo || '',
+        slug: btn.dataset.slug || '',
+        precio: Number(btn.dataset.precio) || 0,
+        imagen: btn.dataset.imagen,
+      });
+      btn.classList.add('agregado');
+      setTimeout(() => btn.classList.remove('agregado'), 700);
     });
   });
 </script>

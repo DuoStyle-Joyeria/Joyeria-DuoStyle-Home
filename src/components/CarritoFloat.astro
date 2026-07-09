@@ -1,0 +1,28 @@
+---
+---
+
+<button type="button" class="carrito-float" id="carrito-float" aria-label="Ver carrito">
+  🛍️
+  <span class="carrito-badge" id="carrito-badge" hidden>0</span>
+</button>
+
+<script>
+  import { obtenerCarrito, cantidadTotal } from '../scripts/carrito';
+
+  const boton = document.getElementById('carrito-float');
+  const badge = document.getElementById('carrito-badge') as HTMLElement;
+
+  function actualizarBadge() {
+    const total = cantidadTotal(obtenerCarrito());
+    badge.textContent = String(total);
+    badge.hidden = total === 0;
+  }
+
+  boton?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('carrito:abrir'));
+  });
+
+  window.addEventListener('carrito:cambio', actualizarBadge);
+  document.addEventListener('DOMContentLoaded', actualizarBadge);
+  actualizarBadge();
+</script>

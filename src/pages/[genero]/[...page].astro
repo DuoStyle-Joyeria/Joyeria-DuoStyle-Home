@@ -13,16 +13,36 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     const items = productos
       .filter(p => p.data.genero === genero)
       .sort((a, b) => a.data.nombre.localeCompare(b.data.nombre));
-    return paginate(items, { params: { genero }, pageSize: 9 });
+    const destacados = items.filter(p => p.data.secciones.includes('destacado')).slice(0, 10);
+    return paginate(items, { params: { genero }, props: { destacados }, pageSize: 9 });
   });
 }
 
 const { genero } = Astro.params;
-const { page } = Astro.props as any;
+const { page, destacados } = Astro.props as any;
 const nombreGenero = GENEROS.find(g => g.slug === genero)?.nombre ?? genero;
 ---
 
 <BaseLayout title={nombreGenero} description={`${nombreGenero} — Duo Style. Compra fácil y segura por WhatsApp.`}>
+  {page.currentPage === 1 && destacados.length > 0 && (
+    <section class="destacados-section">
+      <h2>Destacados en {nombreGenero}</h2>
+      <div class="slider-track">
+        {destacados.map((p: any) => (
+          <ProductoCard
+            nombre={p.data.nombre}
+            slug={p.data.slug}
+            tipo={p.data.tipo}
+            subtitulo={p.data.subtitulo}
+            precio={p.data.precio}
+            precioAnterior={p.data.precioAnterior}
+            imagen={p.data.imagenes[0]}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
   <section class="catalogo-section">
     <h2>{nombreGenero}</h2>
     <div class="grid-productos">
