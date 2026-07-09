@@ -17,7 +17,11 @@ const precioAnteriorFmt = precioAnterior?.toLocaleString('es-CO');
 ---
 
 <a class="producto-card" href={`/${categoria}/${slug}/`}>
-  {imagen && <img src={imagen} alt={nombre} loading="lazy" />}
+  {imagen && (
+    <div class="imagen-wrap">
+      <img src={imagen} alt={nombre} loading="lazy" />
+    </div>
+  )}
   <h3>{nombre}</h3>
   {subtitulo && <p>{subtitulo}</p>}
   <div class="precio">
