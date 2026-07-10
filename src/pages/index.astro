@@ -9,14 +9,17 @@ const generosConProductos = GENEROS.filter(g =>
   productos.some(p => p.data.genero === g.slug)
 );
 
-let destacados = productos.filter(p => p.data.secciones.includes('destacado'));
+const ordenar = (a: (typeof productos)[number], b: (typeof productos)[number]) =>
+  (a.data.orden - b.data.orden) || a.data.nombre.localeCompare(b.data.nombre);
+
+let destacados = productos.filter(p => p.data.secciones.includes('destacado')).sort(ordenar);
 if (destacados.length === 0) {
-  destacados = productos.slice(0, 10);
+  destacados = [...productos].sort(ordenar).slice(0, 10);
 } else {
   destacados = destacados.slice(0, 10);
 }
 
-const nuevos = productos.filter(p => p.data.secciones.includes('nuevo')).slice(0, 10);
+const nuevos = productos.filter(p => p.data.secciones.includes('nuevo')).sort(ordenar).slice(0, 10);
 ---
 
 <BaseLayout title="Inicio">

@@ -13,7 +13,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
     const [genero, tipo] = clave.split('::');
     const items = productos
       .filter(p => p.data.genero === genero && p.data.tipo === tipo)
-      .sort((a, b) => a.data.nombre.localeCompare(b.data.nombre));
+      .sort((a, b) => (a.data.orden - b.data.orden) || a.data.nombre.localeCompare(b.data.nombre));
     const destacados = items.filter(p => p.data.secciones.includes('destacado')).slice(0, 10);
     return paginate(items, { params: { genero, tipo }, props: { destacados }, pageSize: 9 });
   });

@@ -35,12 +35,22 @@ genero: 'dama'|'caballero',
 subtitulo?, precio, precioAnterior?, descripcion,
 imagenes: string[],  // URLs (Firebase Storage o /img/... estático)
 disponible: boolean,
-secciones: string[]  // 'nuevo' | 'destacado' | 'promocion'
+secciones: string[],  // 'nuevo' | 'destacado' | 'promocion'
+orden: number  // usado para el orden de despliegue, ver "Revolver catálogo"
 ```
 `tipo` y `genero` son **independientes**: tipo = qué es la pieza, género =
 para quién es. No mezclar esto con "categoria", que ya no existe (se
 reemplazó por estos dos campos — si ves `categoria` en código viejo o
 memoria antigua, está desactualizado).
+
+**Orden de despliegue (`orden`)**: todas las páginas que listan productos
+(home, `/{genero}/`, `/{genero}/{tipo}/`) ordenan por este campo numérico
+(con `nombre` como desempate si dos productos empatan, ej. ambos en 0 antes
+de revolver nunca). No es fecha de creación ni alfabético — es el valor que
+deja el botón "🔀 Revolver catálogo" del panel admin. Un producto nuevo
+recibe un `orden` aleatorio al crearse (no se queda pegado al final); al
+editar un producto existente se preserva su `orden` actual (editar precio o
+foto no debe reordenar el catálogo).
 
 ## Rutas
 
@@ -67,6 +77,14 @@ usuario se crea a mano en Firebase Console). Permite crear/editar/eliminar
 productos: sube fotos (se comprimen en el navegador con Canvas API antes de
 subirlas a Firebase Storage), guarda el documento en Firestore, y dispara un
 **Vercel Deploy Hook** para reconstruir el sitio estático (1-2 min).
+
+**Botón "🔀 Revolver catálogo"**: le asigna un `orden` aleatorio (`Math.random()`)
+a todos los productos con un `writeBatch` de Firestore, y dispara el mismo
+Deploy Hook. Como cada listado del sitio filtra primero por tipo/género/sección
+y recién después ordena por `orden`, un solo campo compartido logra que cada
+sección se revuelva dentro de sí misma (los anillos nunca se mezclan con las
+manillas) y que los carruseles generales del home también cambien, todo con
+una sola acción — no hay modos separados ni un segundo botón.
 
 Reglas de seguridad (`firestore.rules`, `storage.rules` en la raíz del repo,
 también hay que pegarlas manualmente en la consola de Firebase — el repo

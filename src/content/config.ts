@@ -15,6 +15,7 @@ const productos = defineCollection({
     imagenes: z.array(z.string()),
     disponible: z.boolean().default(true),
     secciones: z.array(z.string()).default([]),
+    orden: z.number().default(0),
   }),
 });
 

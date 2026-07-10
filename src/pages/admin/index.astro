@@ -52,6 +52,11 @@ const SECCIONES = [
     #mensaje { margin-top: 10px; font-size: 0.9rem; }
     #mensaje.error { color: #b23b3b; }
     #mensaje.ok { color: #2a7a2a; }
+    .cabecera-productos { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .revolver-wrap { text-align: right; }
+    #mensajeRevolver { margin: 6px 0 0; font-size: 0.8rem; max-width: 220px; }
+    #mensajeRevolver.error { color: #b23b3b; }
+    #mensajeRevolver.ok { color: #2a7a2a; }
   </style>
 </head>
 <body>
@@ -136,7 +141,13 @@ const SECCIONES = [
       </div>
 
       <div class="card">
-        <h2 style="margin-top:0">Productos existentes</h2>
+        <div class="cabecera-productos">
+          <h2 style="margin-top:0">Productos existentes</h2>
+          <div class="revolver-wrap">
+            <button type="button" id="btnRevolver" class="secundario" style="margin:0;">🔀 Revolver catálogo</button>
+            <p id="mensajeRevolver"></p>
+          </div>
+        </div>
         <div id="listaProductos">Cargando…</div>
       </div>
     </div>
@@ -148,7 +159,7 @@ const SECCIONES = [
       getAuth, connectAuthEmulator, onAuthStateChanged, signInWithEmailAndPassword, signOut,
     } from 'firebase/auth';
     import {
-      getFirestore, connectFirestoreEmulator, collection, doc, setDoc, deleteDoc, getDocs, orderBy, query,
+      getFirestore, connectFirestoreEmulator, collection, doc, setDoc, deleteDoc, getDocs, orderBy, query, writeBatch,
     } from 'firebase/firestore';
     import {
       getStorage, connectStorageEmulator, ref, uploadBytes, getDownloadURL, deleteObject,
@@ -186,10 +197,13 @@ const SECCIONES = [
     const inputImagenes = $<HTMLInputElement>('#fImagenes');
     const formTitulo = $('#formTitulo');
     const btnCancelarEdicion = $('#btnCancelarEdicion');
+    const btnRevolver = $<HTMLButtonElement>('#btnRevolver');
+    const mensajeRevolver = $('#mensajeRevolver');
 
     let editandoId: string | null = null;
     let archivosSeleccionados: File[] = [];
     let imagenesExistentes: string[] = [];
+    let ordenActual: number | null = null;
 
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -249,6 +263,7 @@ const SECCIONES = [
       editandoId = null;
       archivosSeleccionados = [];
       imagenesExistentes = [];
+      ordenActual = null;
       previewsDiv.innerHTML = '';
       formTitulo.textContent = 'Agregar producto';
       btnCancelarEdicion.classList.add('hidden');
@@ -306,6 +321,7 @@ const SECCIONES = [
           imagenes,
           disponible,
           secciones,
+          orden: ordenActual ?? Math.random(),
         });
 
         mensaje.className = 'ok';
@@ -359,6 +375,7 @@ const SECCIONES = [
       editandoId = id;
       imagenesExistentes = p.imagenes || [];
       archivosSeleccionados = [];
+      ordenActual = typeof p.orden === 'number' ? p.orden : Math.random();
       $<HTMLSelectElement>('#fTipo').value = p.tipo;
       $<HTMLSelectElement>('#fGenero').value = p.genero;
       $<HTMLInputElement>('#fNombre').value = p.nombre;
@@ -396,6 +413,41 @@ const SECCIONES = [
       }
       cargarProductos();
     }
+
+    btnRevolver.addEventListener('click', async () => {
+      if (!confirm('¿Revolver el orden de todos los productos? Cada tipo y cada sección se reordena al azar dentro de sí misma (los anillos no se mezclan con las manillas). Se verá reflejado en el sitio en 1-2 minutos.')) {
+        return;
+      }
+      btnRevolver.disabled = true;
+      mensajeRevolver.className = '';
+      mensajeRevolver.textContent = 'Revolviendo…';
+      try {
+        const snap = await getDocs(collection(db, 'productos'));
+        const refs = snap.docs.map(d => d.ref);
+        for (let i = 0; i < refs.length; i += 450) {
+          const lote = refs.slice(i, i + 450);
+          const batch = writeBatch(db);
+          for (const docRef of lote) {
+            batch.update(docRef, { orden: Math.random() });
+          }
+          await batch.commit();
+        }
+
+        mensajeRevolver.className = 'ok';
+        if (DEPLOY_HOOK_URL) {
+          mensajeRevolver.textContent = `✅ ${refs.length} productos revueltos. Actualizando sitio…`;
+          await fetch(DEPLOY_HOOK_URL, { method: 'POST' }).catch(() => {});
+          mensajeRevolver.textContent = `✅ Listo. El sitio se está actualizando (1-2 minutos).`;
+        } else {
+          mensajeRevolver.textContent = '✅ Revuelto en la base de datos, pero falta el Deploy Hook para actualizar el sitio solo.';
+        }
+      } catch (err: any) {
+        mensajeRevolver.className = 'error';
+        mensajeRevolver.textContent = 'Error: ' + (err.message || err);
+      } finally {
+        btnRevolver.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
