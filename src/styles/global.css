@@ -364,6 +364,9 @@ img { max-width: 100%; }
 .footer-social a:hover { background: #C1A14A; color: #1A1A1A; }
 .footer-social svg { width: 20px; height: 20px; fill: currentColor; }
 .site-footer .copy { font-size: 0.85rem; color: #999; margin-top: 20px; }
+.site-footer .footer-legal { font-size: 0.8rem; margin-top: 6px; }
+.site-footer .footer-legal a { color: #999; text-decoration: underline; }
+.site-footer .footer-legal a:hover { color: #C1A14A; }
 
 /* ====================== */
 /* RESPONSIVE GENERAL */

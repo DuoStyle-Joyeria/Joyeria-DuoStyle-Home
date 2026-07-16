@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, urlWhatsapp } from '../data/site-config';
+
+const ultimaActualizacion = '15 de julio de 2026';
+---
+
+<BaseLayout
+  title="Política de Privacidad"
+  description={`Política de privacidad de ${SITE.nombre}: qué datos recopilamos, cómo los usamos y con quién los compartimos.`}
+>
+  <section class="legal-section">
+    <h1>Política de Privacidad</h1>
+    <p class="ultima-actualizacion">Última actualización: {ultimaActualizacion}</p>
+
+    <p>
+      En {SITE.nombre} nos tomamos en serio la privacidad de nuestros clientes. Esta política
+      explica qué información recopilamos cuando compras o nos escribes, cómo la usamos, y con
+      quién la compartimos.
+    </p>
+
+    <h2>1. Quiénes somos</h2>
+    <p>
+      {SITE.nombre} es una joyería colombiana que vende a través de este sitio web y de WhatsApp.
+      Puedes contactarnos por <a href={urlWhatsapp('Hola, tengo una consulta sobre la política de privacidad.')} target="_blank" rel="noopener">WhatsApp</a> o por nuestro <a href={SITE.instagram} target="_blank" rel="noopener">Instagram</a>.
+    </p>
+
+    <h2>2. Qué información recopilamos</h2>
+    <ul>
+      <li>Datos que nos das directamente al hacer un pedido: nombre, número de teléfono, ciudad, dirección de envío y, cuando aplica, cédula (requerida por las transportadoras para el envío).</li>
+      <li>El historial de tu conversación con nuestra asesora virtual (Laura) por WhatsApp, para poder darte seguimiento y recordar tu pedido.</li>
+      <li>Si llegaste desde un anuncio de Instagram o Facebook, un identificador técnico de ese clic (no el contenido del anuncio ni tus datos de la red social).</li>
+      <li>Datos básicos de navegación del sitio (páginas vistas, productos consultados) para mejorar el catálogo.</li>
+    </ul>
+
+    <h2>3. Para qué usamos tu información</h2>
+    <ul>
+      <li>Procesar y dar seguimiento a tu pedido (confirmar disponibilidad, coordinar el envío, resolver dudas).</li>
+      <li>Brindarte atención al cliente por WhatsApp, incluida la atención automatizada de nuestra asesora virtual.</li>
+      <li>Mejorar nuestro catálogo y la experiencia de compra.</li>
+    </ul>
+
+    <h2>4. Datos que compartimos con Meta (Facebook/Instagram)</h2>
+    <p>
+      Cuando llegas a nuestro WhatsApp a través de un anuncio de Meta (Facebook o Instagram) y
+      completas una compra o agregas un producto a tu pedido, compartimos con Meta una señal de
+      esa actividad — asociada únicamente al identificador técnico del clic en el anuncio, nunca
+      al contenido de tu conversación ni a tus datos personales completos. Esto se hace a través
+      de la Conversions API de Meta para Business Messaging, y su único propósito es ayudarnos a
+      medir qué tan bien funcionan nuestros anuncios y mostrárselos a personas con intereses
+      similares a los de nuestros clientes reales. Nunca compartimos el contenido de tus mensajes.
+    </p>
+
+    <h2>5. Tus derechos</h2>
+    <p>
+      De acuerdo con la Ley 1581 de 2012 (Habeas Data) de Colombia, tienes derecho a conocer,
+      actualizar, rectificar y solicitar la eliminación de tus datos personales en cualquier
+      momento. Para ejercer estos derechos, escríbenos por
+      <a href={urlWhatsapp('Hola, quiero ejercer mis derechos sobre mis datos personales.')} target="_blank" rel="noopener">WhatsApp</a>.
+    </p>
+
+    <h2>6. Cambios a esta política</h2>
+    <p>
+      Podemos actualizar esta política ocasionalmente para reflejar cambios en cómo operamos o en
+      la normatividad aplicable. La fecha de la última actualización siempre aparece al inicio de
+      esta página.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal-section {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+  .legal-section h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    color: #C1A14A;
+    margin-bottom: 4px;
+  }
+  .ultima-actualizacion {
+    color: #777;
+    font-size: 0.85rem;
+    margin-bottom: 28px;
+  }
+  .legal-section h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    color: #1A1A1A;
+    margin: 32px 0 10px;
+  }
+  .legal-section p,
+  .legal-section li {
+    color: #333;
+    line-height: 1.7;
+  }
+  .legal-section ul {
+    padding-left: 20px;
+  }
+  .legal-section li {
+    margin-bottom: 6px;
+  }
+  .legal-section a {
+    color: #C1A14A;
+    text-decoration: underline;
+  }
+</style>
