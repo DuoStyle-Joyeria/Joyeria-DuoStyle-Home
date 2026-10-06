@@ -16,6 +16,8 @@ const productos = defineCollection({
     disponible: z.boolean().default(true),
     secciones: z.array(z.string()).default([]),
     orden: z.number().default(0),
+    tituloMeta: z.string().optional(),
+    coleccion: z.string().optional(),
   }),
 });
 

@@ -1,5 +1,5 @@
 ---
-import { TIPOS, GENEROS } from '../../data/site-config';
+import { TIPOS, GENEROS, COLECCIONES_WHATSAPP } from '../../data/site-config';
 
 const SECCIONES = [
   { valor: 'nuevo', etiqueta: 'Nuevo' },
@@ -118,6 +118,20 @@ const SECCIONES = [
           <input type="text" id="fSubtitulo" />
           <label for="fDescripcion">Descripción</label>
           <textarea id="fDescripcion" required></textarea>
+
+          <div class="fila">
+            <div>
+              <label for="fTituloMeta">Título para WhatsApp (opcional)</label>
+              <input type="text" id="fTituloMeta" placeholder="Si se deja vacío, se genera a partir del nombre" />
+            </div>
+            <div>
+              <label for="fColeccion">Colección WhatsApp (opcional)</label>
+              <select id="fColeccion">
+                <option value="">Automática</option>
+                {COLECCIONES_WHATSAPP.map(c => <option value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
 
           <label>Secciones</label>
           <div class="checkboxes" id="fSecciones">
@@ -284,6 +298,8 @@ const SECCIONES = [
       const precioAnterior = precioAnteriorRaw ? Number(precioAnteriorRaw) : undefined;
       const subtitulo = $<HTMLInputElement>('#fSubtitulo').value.trim();
       const descripcion = $<HTMLTextAreaElement>('#fDescripcion').value.trim();
+      const tituloMeta = $<HTMLInputElement>('#fTituloMeta').value.trim();
+      const coleccion = $<HTMLSelectElement>('#fColeccion').value;
       const disponible = $<HTMLInputElement>('#fDisponible').checked;
       const secciones = Array.from(document.querySelectorAll<HTMLInputElement>('#fSecciones input:checked')).map(i => i.value);
 
@@ -318,6 +334,8 @@ const SECCIONES = [
           precio,
           ...(precioAnterior ? { precioAnterior } : {}),
           descripcion,
+          ...(tituloMeta ? { tituloMeta } : {}),
+          ...(coleccion ? { coleccion } : {}),
           imagenes,
           disponible,
           secciones,
@@ -383,6 +401,8 @@ const SECCIONES = [
       $<HTMLInputElement>('#fPrecioAnterior').value = p.precioAnterior ? String(p.precioAnterior) : '';
       $<HTMLInputElement>('#fSubtitulo').value = p.subtitulo || '';
       $<HTMLTextAreaElement>('#fDescripcion').value = p.descripcion || '';
+      $<HTMLInputElement>('#fTituloMeta').value = p.tituloMeta || '';
+      $<HTMLSelectElement>('#fColeccion').value = p.coleccion || '';
       $<HTMLInputElement>('#fDisponible').checked = p.disponible !== false;
       document.querySelectorAll<HTMLInputElement>('#fSecciones input').forEach(i => {
         i.checked = (p.secciones || []).includes(i.value);

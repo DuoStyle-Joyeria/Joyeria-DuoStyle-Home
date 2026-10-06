@@ -25,6 +25,21 @@ export const GENEROS = [
   { slug: 'caballero', nombre: 'Joyas para Caballero' },
 ] as const;
 
+// Colecciones del catálogo de WhatsApp (Meta). Se envían en el feed como
+// custom_label_0; el producto puede tenerla fijada desde /admin/ o se asigna
+// por reglas en src/lib/feed-meta.ts.
+export const COLECCIONES_WHATSAPP = [
+  'Anillos de Promesa',
+  'Anillos de Princesas',
+  'Anillos en Plata 925',
+  'Anillos Oro Rosa y Dorados',
+  'Manillas y Brazaletes',
+  'Pulseras de Flor',
+  'Charms Zodiaco',
+  'Charms Letras y Especiales',
+  'Aretes y Juegos',
+] as const;
+
 export function urlWhatsapp(mensaje: string): string {
   return `https://wa.me/${SITE.whatsappNumero}?text=${encodeURIComponent(mensaje)}`;
 }
